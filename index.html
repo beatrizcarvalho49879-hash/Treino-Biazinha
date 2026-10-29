@@ -1065,6 +1065,7 @@ function vEvol(){
   const ck=[...S.checkins].sort((a,b)=>a.date<b.date?-1:1);
   return `<section>
     ${S.ui.exDetail?exDetail(S.ui.exDetail):""}
+    ${monthView()}
     <h2 class="label">Esta semana</h2>
     <div class="stats">
       <div class="stat"><b>${wp.sess.length}/${wp.goal}</b><span>treinos de musculação</span></div>
@@ -1107,6 +1108,76 @@ function vEvol(){
   </section>`;
 }
 const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+/* ---------- resumo do mês ---------- */
+const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const plusDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
+const shiftMonth=(ym,n)=>{const [y,m]=ym.split("-").map(Number);const d=new Date(y,m-1+n,1);return `${d.getFullYear()}-${pad(d.getMonth()+1)}`};
+function sessStats(list){let sets=0,vol=0;list.forEach(h=>Object.entries(h.sets||{}).forEach(([id,s])=>{sets+=s.length;if(!isTime(id))s.forEach(x=>vol+=(num(x.kg)||0)*(num(x.r)||0))}));return {sets,vol}}
+function monthReport(ym){
+  const [y,m]=ym.split("-").map(Number), first=`${ym}-01`, last=iso(new Date(y,m,0)), t=today(), end=last<t?last:t;
+  const inR=(d,a,b)=>d>=a&&d<=b;
+  const gym=S.history.filter(h=>inR(h.date,first,last)&&GYM.includes(h.day));
+  const acts=S.acts.filter(a=>inR(a.date,first,last));
+  const cardioOf=(hs,as)=>hs.reduce((a,h)=>a+(h.cardio?num(h.cardio.min)||0:0),0)+as.reduce((a,x)=>a+(num(x.min)||0),0);
+  const plannedIn=(a,b)=>{let n=0;for(let d=a;d<=b;d=plusDays(d,1)){if(d>t)break;if(["A","B","C"].includes(S.week[dowIdx(new Date(d+"T12:00"))]))n++}return n};
+  const weeks=[];let ws=plusDays(first,-dowIdx(new Date(first+"T12:00")));
+  while(ws<=last){const a=ws<first?first:ws,we=plusDays(ws,6),b=we>last?last:we;
+    if(a<=t){const hs=gym.filter(h=>inR(h.date,a,b)),as=acts.filter(x=>inR(x.date,a,b)),st=sessStats(hs),ck=S.checkins.filter(c=>inR(c.date,a,b));
+      weeks.push({a,b,done:hs.length,plan:plannedIn(a,b),sets:st.sets,vol:st.vol,cardio:cardioOf(hs,as),extras:as.length,dor:ck.length?avg(ck.map(c=>num(c.dor)||0)):null,irr:ck.filter(c=>c.irr).length})}
+    ws=plusDays(ws,7)}
+  const st=sessStats(gym), plan=plannedIn(first,end);
+  // cargas: primeiro x último treino do mês, e recorde contra tudo que veio antes
+  const ids=[...new Set(gym.flatMap(h=>Object.keys(h.sets||{})))].filter(id=>!isTime(id));
+  const loads=ids.map(id=>{const all=sessionsFor(id),inM=all.filter(h=>inR(h.date,first,last)),before=all.filter(h=>h.date<first);
+    const a=inM[0],b=inM[inM.length-1],ka=topKg(a.sets[id]),kb=topKg(b.sets[id]),ea=bestE1(a.sets[id]),eb=bestE1(b.sets[id]);
+    const prevBest=before.length?Math.max(...before.map(h=>topKg(h.sets[id])||0)):null,monthBest=Math.max(...inM.map(h=>topKg(h.sets[id])||0));
+    return {id,n:inM.length,ka,kb,ea,eb,pct:ea&&eb?(eb/ea-1)*100:null,pr:prevBest!=null&&monthBest>prevBest?monthBest:null}}).filter(x=>x.kb!=null).sort((a,b)=>(b.pct??-99)-(a.pct??-99));
+  // medidas: última antes/no começo x última do mês
+  const meas={};MEAS.forEach(([k,n,u])=>{const L=S.measures.filter(x=>num(x[k])!=null).sort((a,b)=>a.d<b.d?-1:1);
+    const s0=L.filter(x=>x.d<first).pop()||L.find(x=>inR(x.d,first,last)),s1=L.filter(x=>inR(x.d,first,last)).pop();
+    if(s0&&s1&&s0!==s1)meas[k]={n,u,a:num(s0[k]),b:num(s1[k]),da:s0.d,db:s1.d}});
+  const prev=shiftMonth(ym,-1),[py,pm]=prev.split("-").map(Number),pf=`${prev}-01`,pl=iso(new Date(py,pm,0));
+  const pg=S.history.filter(h=>inR(h.date,pf,pl)&&GYM.includes(h.day)),ps=sessStats(pg);
+  const ck=S.checkins.filter(c=>inR(c.date,first,last));
+  const syms=S.history.filter(h=>inR(h.date,first,last)&&h.sym).reduce((a,h)=>a+Object.keys(h.sym).length,0);
+  return {ym,first,last,weeks,done:gym.length,plan,sets:st.sets,vol:st.vol,cardio:cardioOf(gym,acts),extras:acts.length,loads,meas,
+    prev:{done:pg.length,sets:ps.sets,vol:ps.vol},dor:ck.length?avg(ck.map(c=>num(c.dor)||0)):null,ckN:ck.length,irr:ck.filter(c=>c.irr).length,syms,closed:last<t};
+}
+function monthText(r){
+  const [y,m]=r.ym.split("-").map(Number), L=[];
+  L.push(`TREINO — ${MESES[m-1]} de ${y}`);
+  L.push(`Musculação: ${r.done}/${r.plan} treinos · ${r.sets} séries · ${Math.round(r.vol).toLocaleString("pt-BR")} kg levantados`);
+  L.push(`Cardio + pilates/recuperação: ${Math.round(r.cardio)} min`);
+  r.weeks.forEach((w,i)=>L.push(`Semana ${i+1} (${dmy(w.a)}–${dmy(w.b)}): ${w.done}/${w.plan} treinos, ${w.sets} séries, ${Math.round(w.cardio)} min de cardio${w.dor!=null?`, dor média ${fmt(w.dor)}/10`:""}`));
+  if(r.loads.length){L.push("Cargas (1º → último treino do mês):");r.loads.forEach(l=>L.push(`- ${ex(l.id).n}: ${fmt(l.ka)} → ${fmt(l.kb)} kg${l.pct!=null?` (força ${l.pct>=0?"+":""}${fmt(l.pct)}%)`:""}${l.pr?" RECORDE":""}`))}
+  Object.values(r.meas).forEach(x=>L.push(`${x.n}: ${fmt(x.a)} → ${fmt(x.b)} ${x.u} (${x.b-x.a>0?"+":""}${fmt(x.b-x.a)})`));
+  if(r.ckN) L.push(`Lombar: dor média ${fmt(r.dor)}/10 em ${r.ckN} check-ins; ${r.irr} dia(s) com dor irradiada; ${r.syms} sintoma(s) em exercícios`);
+  return L.join("\n");
+}
+function monthView(){
+  const ym=S.ui.month||today().slice(0,7), r=monthReport(ym), [y,m]=ym.split("-").map(Number);
+  const pct=r.plan?Math.round(r.done/r.plan*100):0, dv=(a,b)=>b?`${a-b>=0?"+":""}${Math.round((a/b-1)*100)}% vs mês anterior`:"";
+  const maxS=Math.max(1,...r.weeks.map(w=>w.sets));
+  const ups=r.loads.filter(l=>l.pct!=null&&l.pct>1), prs=r.loads.filter(l=>l.pr);
+  return `<h2 class="label">Resumo do mês</h2>
+    <div class="sess"><button class="ghost" type="button" data-a="month" data-v="-1" aria-label="Mês anterior">‹</button><div style="text-align:center"><span class="st">${r.closed?"mês fechado":"mês em andamento"}</span><b style="font-family:var(--f-display);font-weight:400;font-size:24px;text-transform:uppercase">${MESES[m-1]} ${y}</b></div><button class="ghost" type="button" data-a="month" data-v="1" aria-label="Próximo mês" ${ym>=today().slice(0,7)?"disabled style='opacity:.3'":""}>›</button></div>
+    ${!r.done&&!r.extras?`<div class="empty">Nenhum treino registrado em ${MESES[m-1]}.</div>`:`
+    <div class="stats">
+      <div class="stat"><b>${r.done}/${r.plan}</b><span>treinos feitos / planejados (${pct}%)</span></div>
+      <div class="stat"><b>${r.sets}</b><span>séries ${r.prev.sets?"· "+dv(r.sets,r.prev.sets):""}</span></div>
+      <div class="stat"><b>${Math.round(r.vol/1000*10)/10} t</b><span>levantadas no mês ${r.prev.vol?"· "+dv(r.vol,r.prev.vol):""}</span></div>
+      <div class="stat"><b>${Math.round(r.cardio)} min</b><span>cardio, pilates e recuperação</span></div>
+    </div>
+    <div class="scroll"><table class="t"><tr><th>Semana</th><th>Treinos</th><th>Séries</th><th>Volume</th><th>Cardio</th><th>Dor</th></tr>
+      ${r.weeks.map((w,i)=>`<tr><td>${i+1} · ${dmy(w.a)}–${dmy(w.b)}<div class="progress" style="height:8px;margin-top:4px;border-width:1px"><i style="width:${w.sets/maxS*100}%"></i></div></td><td>${w.done}/${w.plan}</td><td>${w.sets}</td><td>${Math.round(w.vol).toLocaleString("pt-BR")} kg</td><td>${Math.round(w.cardio)} min</td><td>${w.dor!=null?fmt(w.dor)+(w.irr?" ⚡":""):"—"}</td></tr>`).join("")}</table></div>
+    <p class="sub">Barra = séries da semana. ⚡ = semana com dor irradiada no check-in.</p>
+    ${r.loads.length?`<div class="paper flat tip"><span class="tag ${ups.length?"ok":""}">cargas no mês</span><h3>${ups.length} de ${r.loads.length} exercícios ficaram mais fortes${prs.length?` · ${prs.length} recorde${prs.length>1?"s":""}`:""}</h3>
+      <ul>${r.loads.slice(0,10).map(l=>`<li><b>${esc(ex(l.id).n)}</b>: ${fmt(l.ka)} → ${fmt(l.kb)} kg${l.pct!=null&&l.n>1?` (força ${l.pct>=0?"+":""}${fmt(l.pct)}%)`:l.n===1?" (1 treino no mês)":""}${l.pr?" · recorde":""}</li>`).join("")}</ul>
+      <p class="sub">Força estimada pela carga e repetições do 1º e do último treino do mês.</p></div>`:""}
+    ${Object.keys(r.meas).length?`<div class="scroll"><table class="t"><tr><th>Medida</th><th>Início</th><th>Fim</th><th>Mudança</th></tr>${Object.values(r.meas).map(x=>`<tr><td>${x.n}</td><td>${fmt(x.a)} ${x.u}</td><td>${fmt(x.b)} ${x.u}</td><td>${x.b-x.a>0?"+":""}${fmt(x.b-x.a)}</td></tr>`).join("")}</table></div>`:`<p class="sub">Registre medidas no começo e no fim do mês para ver a mudança aqui.</p>`}
+    ${r.ckN?`<p class="sub">Lombar no mês: dor média ${fmt(r.dor)}/10 em ${r.ckN} check-ins · ${r.irr} dia(s) com dor irradiada · ${r.syms} sintoma(s) registrado(s) em exercícios.</p>`:""}
+    <div class="row"><button class="ghost" type="button" data-a="copyMonth">Copiar resumo</button><span class="sub" id="monthMsg">Para mandar ao seu treinador ou fisio.</span></div>`}`;
+}
 function mapDetail(g,v){
   const T=S.targets[g]||SUB[g], st=stateOf(g,v[g]);
   const hits=[];S.history.filter(h=>h.date>=weekStart()).forEach(h=>Object.entries(h.sets).forEach(([id,s])=>{const w=ex(id).w[g];if(w)hits.push(`${esc(ex(id).n)} ${s.length}×${w<1?" (indireto)":""}`)}));
@@ -1436,6 +1507,9 @@ $("#view").addEventListener("click",e=>{
     case "mapSel":S.ui.mapSel=S.ui.mapSel===b.dataset.g?null:b.dataset.g;break;
     case "exDetail":S.ui.exDetail=b.dataset.id||null;save();render();if(b.dataset.id)window.scrollTo(0,0);return;
     case "mchart":S.ui.mchart=b.dataset.k;break;
+    case "month":{const cur=S.ui.month||today().slice(0,7),n=shiftMonth(cur,+b.dataset.v);S.ui.month=n>=today().slice(0,7)?null:n;break}
+    case "copyMonth":{const txt=monthText(monthReport(S.ui.month||today().slice(0,7))),el=$("#monthMsg");
+      try{navigator.clipboard.writeText(txt).then(()=>{el.textContent="Resumo copiado."},()=>{el.textContent=txt})}catch(e){el.textContent=txt}return}
     case "addMeas":{const f=S.ui.mf||{};const rec={d:f.d||today()};let any=false;MEAS.forEach(([k])=>{if(num(f[k])!=null){rec[k]=String(num(f[k]));any=true}});if(!any)return;
       const old=S.measures.find(m=>m.d===rec.d);if(old)Object.assign(old,rec);else S.measures.push(rec);if(rec.peso&&rec.d>=today())S.profile.peso=rec.peso;S.ui.mf={d:today()};break}
     case "delMeas":conf("m"+b.dataset.d,()=>{S.measures=S.measures.filter(m=>m.d!==b.dataset.d)});break;
