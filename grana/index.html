@@ -5,11 +5,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Grana Bia">
+<meta name="apple-mobile-web-app-title" content="Bia$">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Grana Biazinha</title>
+<title>Bia$</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&display=swap">
@@ -42,13 +42,14 @@ body.hide .money{filter:blur(7px)}
 
 .top{padding-block:22px 10px;display:flex;flex-direction:column;gap:8px}
 .toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.ransom{font-size:clamp(30px,9.5vw,60px);line-height:1;display:flex;flex-wrap:wrap;gap:8px 14px}
+.ransom{font-size:clamp(46px,16vw,84px);line-height:1;display:flex;flex-wrap:wrap;gap:8px 14px}
 .ransom span{display:inline-block;padding:2px 5px 0;font-family:var(--f-display);text-transform:uppercase}
 .ransom .word{display:flex;gap:2px;padding:0;background:none;border:0;transform:none}
 .ransom .r0{background:var(--paper);color:var(--text-on-paper);transform:rotate(-3deg)}
 .ransom .r1{background:var(--pink);color:var(--ink);transform:rotate(2deg)}
 .ransom .r2{color:var(--fg);border:2px solid var(--fg);font-family:var(--f-type);transform:rotate(-1deg)}
 .ransom .r3{background:var(--tape);color:var(--ink);transform:rotate(1.5deg)}
+.ransom .cash{background:var(--green);color:var(--ink);transform:rotate(6deg) scale(1.15);margin-left:6px;box-shadow:4px 4px 0 var(--pink)}
 .ransom .r4{background:var(--green);color:var(--ink);transform:rotate(-2deg)}
 .eye{flex:0 0 auto;width:46px;height:46px;border:2px solid var(--fg);background:transparent;color:var(--fg);font-size:12px;font-weight:700;text-transform:uppercase}
 .eye[aria-pressed="true"]{background:var(--fg);color:var(--ink)}
@@ -185,7 +186,7 @@ details.fold>div{padding:0 12px 14px;display:flex;flex-direction:column;gap:12px
 
 <div class="wrap">
   <div class="top">
-    <div class="toprow"><h1 class="ransom" id="title" aria-label="Grana Biazinha"></h1><button class="eye" type="button" id="eye" aria-pressed="false" aria-label="Esconder valores">ocul-<br>tar</button></div>
+    <div class="toprow"><h1 class="ransom" id="title" aria-label="Bia$"></h1><button class="eye" type="button" id="eye" aria-pressed="false" aria-label="Esconder valores">ocul-<br>tar</button></div>
     <div class="dateline" id="dateline"></div>
     <div class="warn" id="storeWarn" hidden>Este navegador não está guardando dados. Use o backup (aba Mais) antes de fechar.</div>
   </div>
@@ -313,7 +314,7 @@ function future(n){const out=[];for(let i=0;i<n;i++){const ym=addMonths(thisMont
    ===================================================================== */
 function title(){
   const cls=["r0","r1","r3","r4","r2","r1","r3","r0","r4"];let i=0;
-  $("#title").innerHTML="GRANA BIAZINHA".split(" ").map(w=>`<span class="word" aria-hidden="true">${[...w].map(c=>`<span class="${cls[(i++*4)%cls.length]}">${c}</span>`).join("")}</span>`).join("");
+  $("#title").innerHTML=`<span class="word" aria-hidden="true"><span class="r0">B</span><span class="r2">I</span><span class="r1">A</span><span class="cash">$</span></span>`;
   const m=month(thisMonth()), next=m.bills.filter(b=>!b.done&&daysTo(b.date)>=0&&daysTo(b.date)<=7).length, late=m.bills.filter(b=>!b.done&&daysTo(b.date)<0).length;
   $("#dateline").innerHTML=`${dmy(today())} · ${late?`<b>${late} conta${late>1?"s":""} atrasada${late>1?"s":""}</b> · `:""}${next?`<b>${next}</b> vence${next>1?"m":""} em 7 dias`:"nada vencendo nos próximos 7 dias"}`;
   document.body.classList.toggle("hide",!!S.settings.hide);$("#eye").setAttribute("aria-pressed",String(!!S.settings.hide));
