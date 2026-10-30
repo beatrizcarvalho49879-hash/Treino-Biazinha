@@ -120,6 +120,7 @@ section{display:flex;flex-direction:column;gap:16px;padding-block:6px}
 .tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border:1.5px solid var(--line);color:var(--lilac)}
 .tag.casa{border-color:var(--pink);color:var(--pink)} .tag.trab{border-color:var(--cyan);color:var(--cyan)}
 .tag.late{background:var(--warn);color:var(--ink);border-color:var(--warn)}
+.tag.ol{border-color:var(--lilac);color:var(--lilac)}
 .tag.pr{background:var(--pink);color:var(--ink);border-color:var(--pink)}
 
 /* linha do tempo */
@@ -229,6 +230,89 @@ details.fold>div{padding:0 12px 14px;display:grid;gap:10px}
 ol.how{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
 .tog{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
 .tog input{width:22px;height:22px;flex:0 0 22px;accent-color:var(--pink);margin:0}
+
+/* escolha de visual */
+.skins{display:grid;gap:8px}
+.sk{display:grid;grid-template-columns:54px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;border:2px solid var(--line);background:var(--ink2);padding:10px;color:var(--fg)}
+.sk i{grid-row:1/3;width:54px;height:54px;border:2px solid #0b0a0f}
+.sk b{font-family:var(--f-display);font-weight:400;font-size:18px;letter-spacing:.04em;text-transform:uppercase}
+.sk small{font-family:var(--f-type);font-size:12px;color:var(--dim)}
+.sk[aria-pressed="true"]{border-color:var(--pink);box-shadow:0 0 0 2px var(--pink)}
+.sk-xadrez i{background:repeating-conic-gradient(#ff3ea5 0 25%,#0b0a0f 0 50%) 0 0/14px 14px}
+.sk-noite i{background:radial-gradient(circle at 25% 25%,rgba(255,62,165,.8),transparent 55%),radial-gradient(circle at 80% 85%,rgba(163,92,255,.9),transparent 55%),#0d0b12;border-radius:12px}
+.sk-diario i{background:repeating-linear-gradient(#f4efe6 0 9px,#9fb3d9 9px 10px);border-left:6px solid #e0157f}
+
+/* ===== VISUAL: NOITE — mesmo clima emo, sem ruído: fundo liso com brilho, cartões de vidro escuro, cantos suaves ===== */
+html[data-skin="noite"]{--ink:#0d0b12;--ink2:rgba(28,23,38,.78);--ink3:rgba(44,34,60,.85);--line:rgba(215,184,255,.16);--dim:#a59bba;--r:14px}
+html[data-skin="noite"],html[data-skin="noite"] body{background:#0d0b12}
+html[data-skin="noite"] body{background-image:none}
+html[data-skin="noite"] body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(90% 45% at 0% 0%,rgba(255,62,165,.16),transparent 70%),radial-gradient(80% 50% at 100% 100%,rgba(163,92,255,.18),transparent 70%),radial-gradient(60% 35% at 100% 20%,rgba(94,240,255,.05),transparent 70%)}
+html[data-skin="noite"] .logo{text-shadow:0 0 26px rgba(255,62,165,.45)}
+html[data-skin="noite"] .cap{background:linear-gradient(#0d0b12 70%,rgba(13,11,18,0))}
+html[data-skin="noite"] .cap input{border:1.5px solid rgba(255,62,165,.6);border-radius:var(--r);box-shadow:0 6px 24px -10px rgba(255,62,165,.6);background:rgba(28,23,38,.9)}
+html[data-skin="noite"] .cap button{border-radius:var(--r);background:linear-gradient(135deg,var(--pink),#d93df0);border:0}
+html[data-skin="noite"] .cap .mic{background:linear-gradient(135deg,var(--purple),#6d4bff)}
+html[data-skin="noite"] nav.tabs{background:rgba(13,11,18,.82);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid rgba(255,62,165,.35);gap:4px}
+html[data-skin="noite"] nav.tabs button{border-radius:12px}
+html[data-skin="noite"] nav.tabs button[aria-current="true"]{background:linear-gradient(135deg,var(--pink),#c443ff);color:#fff;box-shadow:0 6px 18px -6px rgba(255,62,165,.8)}
+html[data-skin="noite"] .label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 10px var(--pink)}
+html[data-skin="noite"] .label::after{height:1px;background:linear-gradient(90deg,rgba(255,62,165,.6),transparent);opacity:1}
+html[data-skin="noite"] .box{border:1px solid rgba(255,62,165,.35);border-radius:var(--r);box-shadow:0 14px 40px -18px rgba(255,62,165,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html[data-skin="noite"] .box.p{border-color:rgba(163,92,255,.45);box-shadow:0 14px 40px -18px rgba(163,92,255,.55)}
+html[data-skin="noite"] .box.c,html[data-skin="noite"] .nowc{border-color:rgba(94,240,255,.35);box-shadow:0 14px 40px -18px rgba(94,240,255,.35)}
+html[data-skin="noite"] .chk,html[data-skin="noite"] .box.p .chk{height:3px;margin:-16px -14px 14px;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(90deg,var(--pink),var(--purple),transparent)}
+html[data-skin="noite"] .box .pin{display:none}
+html[data-skin="noite"] .bigbtn{border:0;border-radius:var(--r);background:linear-gradient(135deg,var(--pink),#c443ff);color:#fff;box-shadow:0 12px 30px -12px rgba(255,62,165,.9)}
+html[data-skin="noite"] .bigbtn.alt{background:linear-gradient(135deg,#7d4dff,var(--purple));box-shadow:0 12px 30px -12px rgba(163,92,255,.9)}
+html[data-skin="noite"] .bigbtn.rec{background:var(--fg);color:var(--ink)}
+html[data-skin="noite"] .bigbtn:active{transform:scale(.98)}
+html[data-skin="noite"] :is(.ghost,.mini,.chip,.energy button,.slot,.task,.tli .card,.week button,.ritual,.proj,details.fold,.integ a,.integ div,.empty,.tri button,.curstep,.weekfoco,.dk,.form input,.form select,textarea,.sk,.win){border-radius:12px;border-width:1px}
+html[data-skin="noite"] .tag{border-radius:99px;border-width:1px}
+html[data-skin="noite"] .ck{border-radius:50%;border-width:1.5px;border-color:rgba(245,240,255,.6)}
+html[data-skin="noite"] .ck.on{background:linear-gradient(135deg,var(--pink),#c443ff);border-color:transparent}
+html[data-skin="noite"] .step .ck{border-radius:50%}
+html[data-skin="noite"] .task{background:var(--ink2);border-color:var(--line)}
+html[data-skin="noite"] .task.open{border-color:rgba(215,184,255,.3)}
+html[data-skin="noite"] .tl{border-left:2px solid var(--line)}
+html[data-skin="noite"] .tli .dot{border-radius:50%;transform:none;border-width:2px;left:-9px;width:14px;height:14px}
+html[data-skin="noite"] .tli.ev .card{border-color:rgba(94,240,255,.4);background:linear-gradient(90deg,rgba(94,240,255,.08),var(--ink2))}
+html[data-skin="noite"] .tli.tk .card{border-color:rgba(255,62,165,.4);background:linear-gradient(90deg,rgba(255,62,165,.08),var(--ink2))}
+html[data-skin="noite"] .now{border-top-width:2px;box-shadow:0 0 10px var(--pink)}
+html[data-skin="noite"] .xpbar,html[data-skin="noite"] .proj .pb{border-radius:99px;border-width:1px;overflow:hidden;background:rgba(255,255,255,.06)}
+html[data-skin="noite"] .toast{border-radius:12px;box-shadow:0 10px 30px -8px rgba(255,62,165,.7)}
+html[data-skin="noite"] .week button[aria-pressed="true"]{border-color:var(--pink);background:rgba(255,62,165,.12)}
+html[data-skin="noite"] .stk.s1{filter:drop-shadow(0 0 10px rgba(255,62,165,.6))}
+
+/* ===== VISUAL: DIÁRIO — caderno pautado claro, tinta preta, marca-texto rosa. Bom para ler de dia ===== */
+html[data-skin="diario"]{--ink:#f4efe6;--ink2:#fffdf8;--ink3:#fbe7f1;--line:#d6cdd8;--pink:#e0157f;--purple:#6b2fd6;--lilac:#6b2fd6;--cyan:#0b7d8f;--fg:#17131c;--dim:#6d6378;--ok:#11804a;--warn:#b86e00;color-scheme:light}
+html[data-skin="diario"],html[data-skin="diario"] body{background-color:#f4efe6}
+html[data-skin="diario"] body{background-image:linear-gradient(90deg,transparent 30px,rgba(224,21,127,.28) 30px 32px,transparent 32px),repeating-linear-gradient(transparent 0 29px,rgba(70,100,170,.16) 29px 30px);background-size:auto;background-attachment:local}
+html[data-skin="diario"] .logo{color:var(--fg);text-shadow:3px 3px 0 #ff9fd0}
+html[data-skin="diario"] .logo small{color:var(--pink)}
+html[data-skin="diario"] .box{border:2px solid var(--fg);box-shadow:4px 4px 0 var(--fg);background:var(--ink2)}
+html[data-skin="diario"] .box.p{border-color:var(--fg);box-shadow:4px 4px 0 var(--purple)}
+html[data-skin="diario"] .box.c,html[data-skin="diario"] .nowc{border-color:var(--fg);box-shadow:4px 4px 0 var(--cyan)}
+html[data-skin="diario"] .chk{background:repeating-linear-gradient(-45deg,#ff9fd0 0 8px,transparent 8px 16px);height:10px}
+html[data-skin="diario"] .box.p .chk{background:repeating-linear-gradient(-45deg,#c9b2ff 0 8px,transparent 8px 16px)}
+html[data-skin="diario"] .label::before{color:var(--pink)}
+html[data-skin="diario"] .label::after{height:2px;background:var(--fg);opacity:.8}
+html[data-skin="diario"] .label{background:linear-gradient(transparent 55%,#ffc2e2 55% 90%,transparent 90%);align-self:flex-start;padding-right:6px}
+html[data-skin="diario"] .label::after{display:none}
+html[data-skin="diario"] .cap input{border-color:var(--fg);box-shadow:3px 3px 0 var(--pink);background:#fff}
+html[data-skin="diario"] .cap button{border-color:var(--fg);color:#fff}
+html[data-skin="diario"] .cap .mic{background:var(--purple);border-color:var(--fg)}
+html[data-skin="diario"] nav.tabs{background:#fffdf8;border-top:2px solid var(--fg)}
+html[data-skin="diario"] nav.tabs button[aria-current="true"]{background:var(--fg);color:#fff;box-shadow:3px 3px 0 var(--pink)}
+html[data-skin="diario"] .bigbtn{border-color:var(--fg);color:#fff;box-shadow:4px 4px 0 var(--fg)}
+html[data-skin="diario"] .bigbtn.alt{box-shadow:4px 4px 0 var(--pink)}
+html[data-skin="diario"] .bigbtn.rec{background:var(--fg);color:#fff}
+html[data-skin="diario"] .ck.on,html[data-skin="diario"] .chip[aria-pressed="true"]{color:#fff}
+html[data-skin="diario"] .tag.pr,html[data-skin="diario"] .tag.late{color:#fff}
+html[data-skin="diario"] .slot.full{background:#fff4fa}
+html[data-skin="diario"] .tli .dot{border-color:var(--ink)}
+html[data-skin="diario"] .integ b{color:#fff}
+html[data-skin="diario"] .toast{background:var(--fg);color:#fff}
 </style>
 
 <div class="wrap">
@@ -343,6 +427,7 @@ function parseCap(raw){
   if((m=cut(/\s(\d{1,3})\s?(min|m)\b/i)))out.min=+m[1];
   else if((m=cut(/\s(\d)\s?(horas?|hrs?)\b/i)))out.min=+m[1]*60;
   if((m=cut(/\s(?:as|às)?\s?(\d{1,2})(?:h|:)(\d{2})?\b/i))){out.time=`${pad(+m[1])}:${m[2]||"00"}`}
+  else if((m=cut(/\s(?:as|às)\s(\d{1,2})(?:\s?horas?)?(?=\s|$)/i))&&+m[1]<=23){out.time=`${pad(+m[1])}:00`}
   if((m=cut(/\s(hoje)\b/i)))out.date=today();
   else if((m=cut(/\s(depois de amanh[ãa])(?=\s|$)/i)))out.date=addDays(today(),2);
   else if((m=cut(/\s(amanh[ãa])(?=\s|$)/i)))out.date=addDays(today(),1);
@@ -373,23 +458,49 @@ const LEAD=/^(e\s+)?(ah\s+(e\s+)?)?(tamb[eé]m\s+)?(eu\s+)?(preciso|tenho que|te
 const VERBISH=/^(e\s+)?(ah\s+)?(tamb[eé]m\s+)?(eu\s+)?(preciso|tenho que|tem que|lembrar|n[aã]o esquecer|quero|vou|devo|tenho|marcar|ligar|comprar|consertar|arrumar|limpar|lavar|pagar|mandar|enviar|responder|levar|buscar|pegar|fazer|terminar|come[cç]ar|organizar|agendar|cancelar|renovar|trocar|devolver|estudar|ler|escrever|revisar|separar|guardar|passar|ir|reuni[aã]o|consulta|dentista|m[eé]dic)|^\w+(ar|er|ir)\b/i;
 const HEAD=/^(e|ah|a[ií]|tamb[eé]m|ent[aã]o|hoje|amanh[ãa]|depois de amanh[ãa]|na|no|dia|(domingo|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado)(-feira)?|\d{1,2}\/\d{1,2})\s+/i;
 function stripHead(x){let y=x,prev;do{prev=y;y=y.replace(HEAD,"")}while(y!==prev);return y}
+/* Fala vem sem pontuação ("preciso ligar pro banco comprar lâmpada sexta tenho reunião").
+   Então separo onde começa uma ação: um verbo de tarefa, um "preciso/tenho que/lembrar de", ou um compromisso. */
+const ACTS=new Set(("ligar comprar consertar arrumar limpar lavar pagar mandar enviar responder levar buscar pegar fazer terminar comecar organizar agendar marcar remarcar desmarcar cancelar renovar trocar devolver estudar ler escrever revisar separar guardar passar ir resolver falar conversar avisar cobrar imprimir assinar preparar cozinhar regar tirar colocar botar montar instalar pintar varrer aspirar estender dobrar retirar sacar depositar transferir visitar atualizar conferir checar verificar entregar finalizar criar ajustar corrigir solicitar pedir encomendar tomar agradecer convidar reservar abastecer lembrar postar gravar editar apresentar planejar treinar correr malhar desmarcar acordar dormir encontrar procurar baixar subir jogar doar vender anunciar consultar levar chamar contratar orcar orçar renovar").split(" "));
+const EVN=new Set("reuniao reunião consulta dentista medico médica medica médico exame aula call entrevista aniversario aniversário voo jantar almoco almoço".split(" ").map(norm));
+const DATEW=new Set("hoje amanha amanhã domingo segunda terca terça quarta quinta sexta sabado sábado".split(" ").map(norm));
+const NOSPLIT=new Set("de do da que pra para pro a o um uma na no com e marcar agendar remarcar desmarcar cancelar tenho preciso vou quero devo lembrar ir".split(" "));
+function isLeadAt(w,i){const a=norm(w[i]||""),b=norm(w[i+1]||"");
+  if(a==="preciso"||a==="lembrar"||a==="lembra"||a==="devo"||a==="quero")return true;
+  if((a==="tenho"||a==="tem")&&(b==="que"||b==="de"||EVN.has(b)||b==="uma"||b==="um"))return true;
+  if(a==="nao"&&(b==="esquecer"||b==="posso"))return true;
+  if(a==="vou"&&ACTS.has(b))return true;
+  return false}
+function startsItem(w,i){const a=norm(w[i]),prev=norm(w[i-1]||"");
+  if(isLeadAt(w,i))return !["eu","que","de"].includes(prev)||prev==="e";
+  if(ACTS.has(a))return !NOSPLIT.has(prev)||prev==="e";
+  if(EVN.has(a))return !NOSPLIT.has(prev)||prev==="e";
+  return false}
+function splitRun(sent){
+  const w=sent.trim().split(/\s+/).filter(Boolean);if(!w.length)return [];
+  const cuts=[0];
+  for(let i=1;i<w.length;i++){
+    if(startsItem(w,i)){
+      // data logo antes ("sexta tenho reunião", "e amanhã preciso") vai junto com o item novo
+      let k=i;const last=cuts[cuts.length-1];
+      if(k-1>last&&DATEW.has(norm(w[k-1]))&&(isLeadAt(w,i)||EVN.has(norm(w[i]))))k=k-1;
+      // o pedaço anterior só tem data ou palavras de ligação ("amanhã", "e hoje"): não vira item sozinho
+      const before=w.slice(last,k).map(norm);
+      if(before.every(x=>DATEW.has(x)||["e","ah","ai","entao","tambem","depois","de","na","no"].includes(x)))continue;
+      if(k>last)cuts.push(k);
+    }
+  }
+  const out=[];for(let c=0;c<cuts.length;c++){let seg=w.slice(cuts[c],cuts[c+1]).join(" ");seg=seg.replace(/\s+(e|ah|a[ií]|tamb[eé]m)$/i,"");if(seg.trim())out.push(seg)}
+  return out;
+}
 function splitSpeech(text){
   const parts=[];
-  text.replace(/\s+/g," ").split(/[.!?;\n]+|,?\s*(?:outra coisa|al[eé]m disso|e depois|depois|ah,? e|ah)\s*,?\s/i).forEach(sent=>{
-    // separa por vírgula ou " e " só quando o pedaço seguinte começa com uma ação
-    let cur="";
-    sent.split(/(,\s*|\s+e\s+|\s+e tamb[eé]m\s+|\s+tamb[eé]m\s+)/i).forEach(tok=>{
-      if(/^(,\s*|\s+e\s+|\s+e tamb[eé]m\s+|\s+tamb[eé]m\s+)$/i.test(tok)){cur+="\u0001"+tok;return}
-      if(cur.includes("\u0001")){const [before,sep]=cur.split("\u0001");if(VERBISH.test(stripHead(tok.trim()))){parts.push(before);cur=tok}else cur=before+sep+tok}
-      else cur+=tok});
-    if(cur.trim())parts.push(cur.replace("\u0001",""));
-  });
+  text.replace(/\s+/g," ").split(/[.!?;\n]+|,|\s(?:outra coisa|al[eé]m disso|e depois|depois disso)\s/i).forEach(sent=>{splitRun(sent).forEach(x=>parts.push(x))});
   let lastDate=null;
   return parts.map(x=>x.trim().replace(/^[,\s]+|[,\s]+$/g,"")).filter(x=>x.replace(/[^a-zà-ú]/gi,"").length>2).map((x,i)=>{
     const p=parseCap(x.replace(/^(e|ah|a[ií]|tamb[eé]m|ent[aã]o)\s+/i,""));
     let t2=p.t,prev;do{prev=t2;t2=t2.replace(/^(e|ah|a[ií]|tamb[eé]m|ent[aã]o)\s+/i,"").replace(LEAD,"").replace(/^(eu\s+)?tenho\s+(?=(uma\s+|um\s+)?(reuni|consulta|dentista|m[eé]dic|aula|exame|call|entrevista))/i,"")}while(t2!==prev);
     p.t=(t2||p.t).replace(/[,\s]+$/,"");p.t=p.t.charAt(0).toUpperCase()+p.t.slice(1);
-    if(p.date)lastDate=p.date;else if(lastDate&&i>0&&!p.time&&!p.due)p.date=lastDate; // "amanhã preciso X e Y": Y também é amanhã
+    if(p.date){if(!p.event)lastDate=p.date}else if(lastDate&&i>0&&!p.time&&!p.due)p.date=lastDate; // "amanhã preciso X e Y": Y também é amanhã
     return {...p,on:true,raw:x};
   });
 }
@@ -631,6 +742,120 @@ function sendToCalendar(items){
 }
 
 /* =====================================================================
+   AGENDA DO OUTLOOK (arquivo .ics, link publicado ou texto colado)
+   Os compromissos importados ficam com src:"outlook" e são trocados a cada importação.
+   ===================================================================== */
+const WINTZ={"E. South America Standard Time":"America/Sao_Paulo","SA Eastern Standard Time":"America/Fortaleza","Tocantins Standard Time":"America/Araguaina","Bahia Standard Time":"America/Bahia",
+  "Central Brazilian Standard Time":"America/Cuiaba","SA Western Standard Time":"America/Manaus","UTC":"UTC","GMT Standard Time":"Europe/London","Eastern Standard Time":"America/New_York",
+  "Pacific Standard Time":"America/Los_Angeles","Central Standard Time":"America/Chicago","W. Europe Standard Time":"Europe/Berlin","Romance Standard Time":"Europe/Paris","GTB Standard Time":"Europe/Lisbon"};
+function tzOff(tz,ms){try{const p={};new Intl.DateTimeFormat("en-US",{timeZone:tz,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).formatToParts(new Date(ms)).forEach(x=>p[x.type]=x.value);
+  return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour%24,+p.minute,+p.second)-ms}catch(e){return null}}
+function icsTime(v,par){
+  const m=/^(\d{4})(\d\d)(\d\d)(?:T(\d\d)(\d\d)(\d\d)?(Z)?)?/.exec(v||"");if(!m)return null;
+  const [y,mo,d,h,mi,s]=[+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0)];
+  if(!m[4]||/VALUE=DATE(?!-)/.test(par||""))return {all:true,d:new Date(y,mo,d,12)};
+  if(m[7])return {d:new Date(Date.UTC(y,mo,d,h,mi,s))};
+  const tzm=/TZID="?([^";:]+)"?/.exec(par||""),tz=tzm&&(WINTZ[tzm[1]]||tzm[1]);
+  if(tz){const g=Date.UTC(y,mo,d,h,mi,s),o=tzOff(tz,g);if(o!=null){const o2=tzOff(tz,g-o);return {d:new Date(g-(o2!=null?o2:o))}}}
+  return {d:new Date(y,mo,d,h,mi,s)};
+}
+const icsTxt=v=>String(v||"").replace(/\\n/gi," ").replace(/\\([,;\\])/g,"$1").replace(/\s+/g," ").trim();
+function parseICS(text,from,to){
+  const lines=String(text||"").replace(/\r?\n[ \t]/g,"").split(/\r?\n/);
+  const raw=[];let cur=null,depth=0;
+  for(const ln of lines){
+    if(/^BEGIN:VEVENT/i.test(ln)){cur={ex:[]};depth=0;continue}
+    if(!cur)continue;
+    if(/^BEGIN:/i.test(ln)){depth++;continue}
+    if(/^END:VEVENT/i.test(ln)){raw.push(cur);cur=null;continue}
+    if(/^END:/i.test(ln)){depth--;continue}
+    if(depth>0)continue;
+    const i=ln.indexOf(":");if(i<0)continue;
+    const head=ln.slice(0,i),val=ln.slice(i+1),k=head.split(";")[0].toUpperCase(),par=head.slice(k.length);
+    if(k==="EXDATE")val.split(",").forEach(x=>{const t=icsTime(x,par);if(t)cur.ex.push(iso(t.d))});
+    else cur[k]={v:val,p:par};
+  }
+  const F=new Date(from+"T00:00").getTime(),T=new Date(to+"T23:59").getTime(),out=[],over={};
+  const mk=(r,st,en,all)=>{
+    const t=icsTxt(r.SUMMARY&&r.SUMMARY.v)||"(sem título)",loc=icsTxt(r.LOCATION&&r.LOCATION.v).slice(0,80);
+    const id="ol-"+(icsTxt(r.UID&&r.UID.v)||t).replace(/[^\w]/g,"").slice(-24)+"-"+st.getTime().toString(36);
+    if(all){let d=new Date(st);const last=new Date(Math.max(st.getTime(),en.getTime()-864e5));for(let n=0;d<=last&&n<31;n++,d.setDate(d.getDate()+1)){const ds=iso(d);if(ds>=from&&ds<=to)out.push({id:id+n,t,date:ds,start:null,end:null,area:"trab",remind:0,src:"outlook",loc})}return}
+    if(en.getTime()<F||st.getTime()>T)return;
+    const s=`${pad(st.getHours())}:${pad(st.getMinutes())}`,sameDay=iso(st)===iso(en);
+    out.push({id,t,date:iso(st),start:s,end:sameDay||en-st<864e5?`${pad(en.getHours())}:${pad(en.getMinutes())}`:null,area:"trab",remind:15,src:"outlook",loc});
+  };
+  const dead=r=>/CANCELLED/i.test(r.STATUS&&r.STATUS.v||"")||/^(cancelad[oa]|canceled|cancelled)\s*:/i.test(icsTxt(r.SUMMARY&&r.SUMMARY.v));
+  raw.forEach(r=>{if(r["RECURRENCE-ID"]){const t=icsTime(r["RECURRENCE-ID"].v,r["RECURRENCE-ID"].p);if(t)over[icsTxt(r.UID&&r.UID.v)+"|"+iso(t.d)]=r}});
+  raw.forEach(r=>{
+    if(r["RECURRENCE-ID"]||!r.DTSTART)return;
+    const s=icsTime(r.DTSTART.v,r.DTSTART.p);if(!s)return;
+    let e=r.DTEND?icsTime(r.DTEND.v,r.DTEND.p):null;
+    const dur=e?e.d-s.d:(s.all?864e5:0);
+    const uidv=icsTxt(r.UID&&r.UID.v);
+    const emit=st=>{const key=uidv+"|"+iso(st),o=over[key];if(o){delete over[key];if(dead(o))return;const os=icsTime(o.DTSTART.v,o.DTSTART.p),oe=o.DTEND?icsTime(o.DTEND.v,o.DTEND.p):null;if(os)mk(o,os.d,oe?oe.d:new Date(os.d.getTime()+dur),os.all);return}if(!dead(r))mk(r,st,new Date(st.getTime()+dur),s.all)};
+    if(!r.RRULE){emit(s.d);return}
+    const R={};r.RRULE.v.split(";").forEach(kv=>{const [a,b]=kv.split("=");R[a.toUpperCase()]=b});
+    const iv=Math.max(1,+R.INTERVAL||1),cnt=+R.COUNT||0,until=R.UNTIL?icsTime(R.UNTIL,"").d.getTime():Infinity;
+    const DAYS=["SU","MO","TU","WE","TH","FR","SA"],byday=(R.BYDAY||"").split(",").filter(Boolean).map(x=>{const m=/^([+-]?\d+)?(\w\w)$/.exec(x);return m?{n:m[1]?+m[1]:0,d:DAYS.indexOf(m[2])}:null}).filter(Boolean);
+    const bymd=(R.BYMONTHDAY||"").split(",").filter(Boolean).map(Number),f=(R.FREQ||"").toUpperCase();
+    const s0=s.d,wk0=(()=>{const x=new Date(s0);x.setHours(12,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x})();
+    let n=0;const d=new Date(s0);
+    for(let i=0;i<4000;i++,d.setDate(d.getDate()+1)){
+      const st=new Date(d.getFullYear(),d.getMonth(),d.getDate(),s0.getHours(),s0.getMinutes());
+      if(st.getTime()>T||st.getTime()>until)break;
+      const dd=Math.round((new Date(d).setHours(12,0,0,0)-new Date(s0).setHours(12,0,0,0))/864e5),months=(d.getFullYear()-s0.getFullYear())*12+d.getMonth()-s0.getMonth();
+      let ok=false;
+      if(f==="DAILY")ok=dd%iv===0&&(!byday.length||byday.some(b=>b.d===d.getDay()));
+      else if(f==="WEEKLY"){const w=Math.floor(Math.round((new Date(d).setHours(12,0,0,0)-wk0)/864e5)/7);ok=w%iv===0&&(byday.length?byday.some(b=>b.d===d.getDay()):d.getDay()===s0.getDay())}
+      else if(f==="MONTHLY"){if(months%iv===0){if(bymd.length)ok=bymd.some(x=>x===d.getDate()||(x<0&&new Date(d.getFullYear(),d.getMonth()+1,0).getDate()+x+1===d.getDate()));
+        else if(byday.length){const nth=Math.ceil(d.getDate()/7),last=d.getDate()+7>new Date(d.getFullYear(),d.getMonth()+1,0).getDate();ok=byday.some(b=>b.d===d.getDay()&&(!b.n||b.n===nth||(b.n===-1&&last)))}
+        else ok=d.getDate()===s0.getDate()}}
+      else if(f==="YEARLY")ok=(d.getFullYear()-s0.getFullYear())%iv===0&&d.getMonth()===s0.getMonth()&&d.getDate()===s0.getDate();
+      if(!ok)continue;
+      n++;if(cnt&&n>cnt)break;
+      if(st.getTime()+dur<F)continue;
+      if(r.ex.includes(iso(st)))continue;
+      emit(st);
+    }
+  });
+  Object.values(over).forEach(o=>{if(dead(o)||!o.DTSTART)return;const os=icsTime(o.DTSTART.v,o.DTSTART.p),oe=o.DTEND?icsTime(o.DTEND.v,o.DTEND.p):null;if(os)mk(o,os.d,oe?oe.d:os.d,os.all)});
+  return out.sort((a,b)=>(a.date+(a.start||""))<(b.date+(b.start||""))?-1:1);
+}
+function importOutlook(text,how){
+  if(!/BEGIN:VCALENDAR|BEGIN:VEVENT/i.test(text||""))return {err:"Isso não parece uma agenda (.ics)."};
+  const evs=parseICS(text,addDays(today(),-30),addDays(today(),180));
+  const kept=S.events.filter(e=>e.src!=="outlook");
+  S.events=kept.concat(evs);S.settings.olAt=Date.now();S.settings.olHow=how||"";save(true);
+  return {n:evs.length,next:evs.filter(e=>e.date>=today()).length};
+}
+async function fetchOutlook(quiet){
+  const url=(S.settings.olUrl||"").trim().replace(/^webcals?:\/\//i,"https://");
+  if(!url){if(!quiet)toast("Cole o link .ics primeiro.");return}
+  try{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error("http "+r.status);const res=importOutlook(await r.text(),"link");
+    if(res.err)throw new Error(res.err);if(!quiet)toast(`Agenda atualizada: ${res.next} compromissos daqui pra frente.`);rerender()}
+  catch(e){S.ui.olErr="O Outlook não deixou o app ler o link direto (bloqueio do navegador ou da empresa). Use o arquivo .ics ou o atalho abaixo.";if(!quiet){toast("Não consegui ler o link.");rerender()}}
+}
+function olBox(){
+  const n=S.events.filter(e=>e.src==="outlook"&&e.date>=today()).length,at=S.settings.olAt?new Date(S.settings.olAt):null;
+  return `<details class="fold" data-fold="ol" ${S.ui.folds&&S.ui.folds.ol?"open":""}><summary>Agenda do Outlook${n?` · ${n}`:""}</summary><div>
+    <p class="sub">${at?`${n} compromissos do trabalho daqui pra frente · atualizado ${dmy(iso(at))} às ${pad(at.getHours())}:${pad(at.getMinutes())}`:"Traga as reuniões da APSV para cá. Elas aparecem na linha do tempo, no Agora e no encaixe das tarefas."}</p>
+    ${S.ui.olMsg?`<p class="sub" style="color:var(--ok)">${esc(S.ui.olMsg)}</p>`:""}
+    <div class="row"><label class="ghost pk" style="cursor:pointer">Abrir arquivo .ics<input type="file" id="olFile" accept=".ics,text/calendar" hidden></label><button class="ghost" type="button" data-a="olPaste">Colar agenda</button></div>
+    <label class="sub">Link do calendário publicado (.ics)<input class="dk" data-set="olUrl" value="${esc(S.settings.olUrl||"")}" placeholder="https://outlook.office365.com/owa/calendar/…/calendar.ics" inputmode="url" autocomplete="off"></label>
+    <div class="row"><button class="ghost" type="button" data-a="olFetch">Atualizar pelo link</button>${n||at?`<button class="mini" type="button" data-a="olClear" style="color:var(--warn)">${S.ui.confirm==="ol"?"Confirmar":"Tirar agenda do Outlook"}</button>`:""}</div>
+    ${S.ui.olErr?`<p class="sub" style="color:var(--warn)">${esc(S.ui.olErr)}</p>`:""}
+    <textarea id="olTxt" placeholder="Ou cole aqui o texto do .ics e toque em Importar" aria-label="Texto da agenda"></textarea>
+    <div class="row"><button class="mini" type="button" data-a="olTxt">Importar texto</button></div>
+    <details class="fold"><summary>Como pegar o link</summary><div><ol class="how">
+      <li>No computador, abra o Outlook na web (outlook.office.com) → engrenagem ⚙ → Calendário → Calendários compartilhados.</li>
+      <li>Em <b>Publicar um calendário</b>, escolha Calendário e “Pode ver todos os detalhes” → Publicar.</li>
+      <li>Copie o link <b>ICS</b> e cole no campo acima.</li>
+      <li>Se a opção não aparecer, a empresa bloqueou. Aí use o arquivo .ics (a Claude pode gerar um para você com as suas reuniões).</li></ol>
+      <p class="sub">Atalho que atualiza sozinho (app Atalhos): “Obter conteúdo do URL” com o link → “Copiar para a área de transferência” → “Abrir URL” <b>${esc(location.origin+location.pathname)}#agenda-outlook</b>. Ao abrir, toque em Colar agenda.</p></div></details>
+  </div></details>`;
+}
+
+/* =====================================================================
    TOPO
    ===================================================================== */
 function hello(){
@@ -688,7 +913,7 @@ function pick3Box(){
 function timeline(date){
   const isToday=date===today(), n=nowMin();
   const it=[];
-  S.events.filter(e=>e.date===date).forEach(e=>{const s0=toMin(e.start)??-1;let e0=toMin(e.end);if(e0!=null&&s0>=0&&e0<=s0)e0=Math.min(1440,e0+1440);it.push({k:"ev",s:s0,e:e0,t:e.t,sub:`${e.start||"dia todo"}${e.end?"–"+e.end:""} · ${e.area==="trab"?"trabalho":"pessoal"}`,id:e.id})});
+  S.events.filter(e=>e.date===date).forEach(e=>{const s0=toMin(e.start)??-1;let e0=toMin(e.end);if(e0!=null&&s0>=0&&e0<=s0)e0=Math.min(1440,e0+1440);it.push({k:"ev",s:s0,e:e0,t:e.t,sub:`${e.start||"dia todo"}${e.end?"–"+e.end:""} · ${e.src==="outlook"?"outlook":e.area==="trab"?"trabalho":"pessoal"}${e.loc?" · "+e.loc:""}`,id:e.id})});
   S.tasks.filter(x=>x.when===date&&x.time&&!x.someday).forEach(x=>it.push({k:"tk",s:toMin(x.time),e:toMin(x.time)+x.min,t:x.t,sub:`${x.time} · ${durTxt(x.min)}`,id:x.id,done:x.done}));
   it.sort((a,b)=>a.s-b.s);
   const out=[];let cur=Math.max(toMin(S.settings.wakeH),isToday?Math.ceil(n/15)*15:0);const endDay=toMin(S.settings.sleepH);
@@ -723,9 +948,10 @@ function vAgenda(){
     <p class="sub">Azul = compromisso, rosa = tarefa marcada para o dia.</p>
     <div class="row"><button class="bigbtn alt" type="button" data-a="newEv" style="font-size:20px;padding:10px">+ Compromisso</button></div>
     ${ev?evForm(evObj,sel):""}
+    ${olBox()}
     <h2 class="label">${esc(dayLabel(sel))}</h2>
     ${timeline(sel)}
-    ${dayEv.length?`<div class="tasks">${dayEv.map(e=>`<div class="task"><span class="tag ${e.area}" style="justify-self:start">${e.start||"dia"}</span><div><div class="tt">${esc(e.t)}</div><div class="meta"><span class="tag">${e.start||""}${e.end?"–"+e.end:""}</span><span class="tag ${e.area}">${e.area==="trab"?"trabalho":"pessoal"}</span>${e.remind?`<span class="tag">aviso ${e.remind} min antes</span>`:""}</div>
+    ${dayEv.length?`<div class="tasks">${dayEv.map(e=>`<div class="task"><span class="tag ${e.area}" style="justify-self:start">${e.start||"dia"}</span><div><div class="tt">${esc(e.t)}</div><div class="meta"><span class="tag">${e.start||""}${e.end?"–"+e.end:""}</span><span class="tag ${e.area}">${e.area==="trab"?"trabalho":"pessoal"}</span>${e.src==="outlook"?`<span class="tag ol">outlook</span>`:""}${e.loc?`<span class="tag">${esc(e.loc)}</span>`:""}${e.remind?`<span class="tag">aviso ${e.remind} min antes</span>`:""}</div>
       <div class="row" style="margin-top:8px"><button class="mini" type="button" data-a="cal" data-id="${e.id}">Avisar no iPhone</button><button class="mini" type="button" data-a="editEv" data-id="${e.id}">Editar</button></div></div></div>`).join("")}</div>`:""}
     ${dayT.length?`<p class="sub">Tarefas para ${esc(dayLabel(sel))}:</p><div class="tasks">${dayT.map(taskRow).join("")}</div>`:""}
     ${weekItems.length?`<button class="ghost pk" type="button" data-a="calWeek">Mandar os ${weekItems.length} compromissos da semana para o Calendário</button>`:""}
@@ -878,7 +1104,8 @@ function vMais(){
       <div class="stats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px"><div class="box c" style="padding:10px"><b style="font-family:var(--f-display);font-size:30px;color:var(--pink);font-weight:400">${streak}</b><p class="sub">dias com pelo menos 1 vitória (pular 1 dia não zera)</p></div><div class="box c" style="padding:10px"><b style="font-family:var(--f-display);font-size:30px;color:var(--pink);font-weight:400">${S.tasks.filter(t=>t.done).length}</b><p class="sub">coisas destravadas no total</p></div></div>
       <h2 class="label">Últimos 7 dias</h2>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:120px">${wk.map(d=>{const n=(S.log[d]||[]).length;return `<div style="display:grid;gap:4px;justify-items:center;height:100%;align-content:end"><span class="sub">${n||""}</span><div style="width:100%;height:${n/mx*80}px;background:linear-gradient(var(--pink),var(--purple));min-height:${n?4:0}px"></div><span class="sub">${DOWN[dow(d)]}</span></div>`}).join("")}</div>`}
-  if(sec==="ajustes") b=`<div class="form"><label class="full">Seu nome<input data-set="name" value="${esc(S.settings.name)}"></label><label>Acordo por volta de<input type="time" data-set="wakeH" value="${esc(S.settings.wakeH)}"></label><label>Durmo por volta de<input type="time" data-set="sleepH" value="${esc(S.settings.sleepH)}"></label></div>
+  if(sec==="ajustes") b=`<h2 class="label">Visual</h2><div class="skins">${SKINS.map(([k,l,d])=>`<button type="button" class="sk sk-${k}" data-a="skin" data-k="${k}" aria-pressed="${(S.settings.skin||"xadrez")===k}"><i></i><b>${l}</b><small>${d}</small></button>`).join("")}</div>
+    <div class="form"><label class="full">Seu nome<input data-set="name" value="${esc(S.settings.name)}"></label><label>Acordo por volta de<input type="time" data-set="wakeH" value="${esc(S.settings.wakeH)}"></label><label>Durmo por volta de<input type="time" data-set="sleepH" value="${esc(S.settings.sleepH)}"></label></div>
     <p class="sub">Os horários servem para mostrar o tempo livre do dia e encaixar as tarefas.</p>
     <article class="box c"><h3>Calibrador de tempo</h3><p style="margin-top:6px">${S.tasks.filter(t=>t.done&&t.spent>60).length>=3?`Pelos seus focos, você leva em média <b>${fmtF(factor())}×</b> o tempo que estima. O encaixe automático já usa essa folga.`:`Ainda aprendendo. Faça pelo menos 3 tarefas pelo modo Foco e eu descubro quanto você realmente leva. Até lá uso folga de 1,25×.`}</p></article>
     <h2 class="label">Backup</h2><p class="sub">Tudo fica só neste celular. Copie o backup de vez em quando e guarde nas Notas.</p>
@@ -892,6 +1119,8 @@ function vMais(){
 /* =====================================================================
    RENDER E EVENTOS
    ===================================================================== */
+const SKINS=[["noite","Noite","fundo escuro limpo, brilho rosa e roxo, cantos suaves"],["xadrez","Xadrez","o original: xadrez, bordas duras, sombra de adesivo"],["diario","Diário","papel pautado claro, caneta preta e marca-texto rosa"]];
+function skin(){const k=S.settings.skin||"xadrez";document.documentElement.dataset.skin=k;const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=k==="diario"?"#f4efe6":k==="noite"?"#0d0b12":"#0b0a0f"}
 function render(){
   hello();
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===S.ui.tab)));
@@ -928,6 +1157,8 @@ $("#view").addEventListener("change",e=>{const t=e.target;
   if(t.dataset.wait){const x=task(t.dataset.wait);x.wait=t.checked?{who:"",until:addDays(today(),3)}:null;if(t.checked)x.inbox=false;save(true);rerender();return}
   if(t.dataset.waitf){const [id,k]=t.dataset.waitf.split(".");task(id).wait[k]=t.value;save(true);return}
 });
+$("#view").addEventListener("change",e=>{const t=e.target;if(t.id!=="olFile"||!t.files||!t.files[0])return;const f=t.files[0];
+  f.text().then(txt=>{const r=importOutlook(txt,"arquivo");if(r.err){toast(r.err);return}S.ui.olMsg=`Pronto: ${r.next} compromissos importados de ${f.name}.`;S.ui.olErr="";(S.ui.folds=S.ui.folds||{}).ol=true;rerender()})});
 $("#view").addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.fold){(S.ui.folds=S.ui.folds||{})[d.dataset.fold]=d.open;save()}},true);
 $("#view").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("input[id^=ns-],#fs-new,input[id^=nr-],input[id^=nl-],input[id^=pt-],#np-n,#nd-t")){e.preventDefault();const b=e.target.parentElement.querySelector("button");if(b)b.click()}});
 $("#view").addEventListener("click",e=>{
@@ -1010,6 +1241,11 @@ $("#view").addEventListener("click",e=>{
       const data={t:v,date:$("#ev-d").value||S.ui.day||td,start:$("#ev-s").value||null,end:$("#ev-e").value||null,area:$("#ev-a").value,remind:+$("#ev-r").value};
       let ev=id?S.events.find(x=>x.id===id):null;if(ev)Object.assign(ev,data);else{ev={id:uid(),...data};S.events.push(ev)}S.ui.evForm=null;S.ui.day=data.date;save(true);
       if(b.dataset.cal){if(!ev.start){toast("Coloque o horário para o iPhone avisar.");rerender();return}sendToCalendar([ev])}break}
+    case "olFetch":fetchOutlook(false);return;
+    case "olPaste":{if(!navigator.clipboard||!navigator.clipboard.readText){toast("Cole o texto no campo abaixo.");return}
+      navigator.clipboard.readText().then(t=>{const r=importOutlook(t,"colar");if(r.err){toast(r.err);return}S.ui.olMsg=`Pronto: ${r.next} compromissos importados.`;S.ui.olErr="";rerender()},()=>toast("O iPhone não liberou. Cole no campo abaixo."));return}
+    case "olTxt":{const r=importOutlook($("#olTxt").value,"texto");if(r.err){toast(r.err);return}S.ui.olMsg=`Pronto: ${r.next} compromissos importados.`;S.ui.olErr="";break}
+    case "olClear":conf("ol",()=>{S.events=S.events.filter(e=>e.src!=="outlook");S.settings.olAt=null;S.ui.olMsg=""});break;
     case "delEv":conf("ev"+id,()=>{S.events=S.events.filter(x=>x.id!==id);S.ui.evForm=null});break;
     case "cal":{const ev=S.events.find(x=>x.id===id);if(!ev.start){toast("Coloque o horário para o iPhone avisar.");return}sendToCalendar([ev]);return}
     case "calWeek":{const sel=S.ui.day||td,st=addDays(sel,-((dow(sel)+6)%7)),en=addDays(st,6);sendToCalendar(S.events.filter(e=>e.date>=st&&e.date<=en&&e.start));return}
@@ -1019,6 +1255,7 @@ $("#view").addEventListener("click",e=>{
     case "fStop":ftAccum();clearInterval(FT.int);FT={end:0,total:0,int:null,paused:0};break;
     case "fLeave":ftAccum();S.ui.focus=null;FT={end:0,total:0,int:null,paused:0};break;
     case "mais":S.ui.mais=b.dataset.k;break;
+    case "skin":S.settings.skin=b.dataset.k;skin();break;
     case "addRot":{const v=$("#nr-"+b.dataset.k).value.trim();if(!v)return;S.rot[b.dataset.k].push(v);break}
     case "rmRot":S.rot[b.dataset.k].splice(+b.dataset.i,1);break;
     case "addLz":{const v=$("#nl-"+b.dataset.d).value.trim();if(!v)return;S.limpeza[b.dataset.d].l.push(v);break}
@@ -1031,7 +1268,9 @@ $("#view").addEventListener("click",e=>{
 function startFocus(m){ftAccum();FT={end:Date.now()+m*60000,total:m*60,paused:0,int:null,task:S.ui.focus,run:Date.now()};award(3,"");S.log[today()].pop();save(true);rerender()}
 
 try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude/.test(location.hostname))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
-save(true);render();
+if(/agenda-outlook/.test(location.hash)){S.ui.tab="agenda";(S.ui.folds=S.ui.folds||{}).ol=true;S.ui.olMsg="Toque em Colar agenda para trazer a agenda que o atalho copiou.";try{history.replaceState(null,"",location.pathname)}catch(e){}}
+if(S.settings.olUrl&&navigator.onLine&&Date.now()-(S.settings.olAt||0)>3*3600e3)setTimeout(()=>fetchOutlook(true),1500);
+skin();save(true);render();
 </script>
 
 </body></html>
