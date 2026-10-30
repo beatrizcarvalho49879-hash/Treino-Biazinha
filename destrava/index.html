@@ -127,9 +127,9 @@ section{display:flex;flex-direction:column;gap:16px;padding-block:6px}
 .tli{position:relative;padding:6px 0 6px 14px;min-height:34px}
 .tli .h{position:absolute;left:-56px;top:7px;width:46px;text-align:right;font-family:var(--f-type);font-size:12px;color:var(--dim)}
 .tli .dot{position:absolute;left:-9px;top:12px;width:15px;height:15px;border:3px solid var(--ink);background:var(--purple);transform:rotate(45deg)}
-.tli.ev .dot{background:var(--cyan)} .tli.task .dot{background:var(--pink)} .tli.ext .dot{background:var(--lilac)}
+.tli.ev .dot{background:var(--cyan)} .tli.tk .dot{background:var(--pink)} .tli.ext .dot{background:var(--lilac)}
 .tli .card{border:2px solid var(--line);background:var(--ink2);padding:8px 10px;display:grid;gap:2px}
-.tli.ev .card{border-color:var(--cyan)} .tli.task .card{border-color:var(--pink)}
+.tli.ev .card{border-color:var(--cyan)} .tli.tk .card{border-color:var(--pink)}
 .tli .card b{font-size:14.5px}
 .tli .card small{font-family:var(--f-type);font-size:12px;color:var(--dim)}
 .tli.gap .card{border-style:dashed;background:transparent}
@@ -203,6 +203,22 @@ textarea{font-family:var(--f-type);font-size:12px;min-height:100px}
 .burst i{position:absolute;width:22px;height:22px;animation:fly 1.1s ease-out forwards}
 @keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
 @media (prefers-reduced-motion:reduce){.burst{display:none}}
+.tri{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.tri button{border:2px solid var(--line);background:var(--ink);color:var(--fg);padding:12px 8px;text-align:left;display:grid;gap:2px;min-height:64px}
+.tri button b{font-family:var(--f-display);font-weight:400;font-size:18px;letter-spacing:.03em;text-transform:uppercase}
+.tri button small{font-family:var(--f-type);font-size:11.5px;color:var(--dim)}
+.tri button:first-child{border-color:var(--ok)} .tri button:nth-child(2){border-color:var(--pink)} .tri button:last-child{border-color:var(--warn)}
+.dots{display:flex;gap:6px;margin:6px 0 10px}.dots i{flex:1;height:6px;background:var(--line)}.dots i.on{background:var(--pink)}
+.wk{display:grid;grid-template-columns:24px 1fr;gap:8px;padding:8px 0;border-bottom:2px dashed var(--line)}.wk>span{color:var(--dim);font-size:18px}.wk.ok>span{color:var(--ok)}.wk b{display:block;margin-bottom:4px}
+.nowc{border-color:var(--cyan);box-shadow:5px 5px 0 var(--pink)}
+.ritual{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:2px solid var(--cyan);background:var(--ink3);padding:12px;color:var(--fg);text-align:left;width:100%}
+.ritual b{font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.04em;text-transform:uppercase;display:block}
+.ritual small{font-family:var(--f-type);font-size:12px;color:var(--dim)}
+.ritual span.go{font-family:var(--f-display);font-size:26px;color:var(--cyan)}
+.ctxrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.ctxrow>span{font-family:var(--f-type);font-size:12.5px;color:var(--dim)}
+.proj{border:2px solid var(--line);background:var(--ink2);padding:10px;display:grid;gap:6px}
+.proj .pb{height:10px;border:2px solid var(--fg);position:relative}.proj .pb i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--purple),var(--pink))}
+.weekfoco{border:2px dashed var(--purple);padding:8px 10px;font-family:var(--f-type);font-size:13px;color:var(--lilac)}
 details.fold{border:2px solid var(--line)}
 details.fold>summary{cursor:pointer;padding:12px;font-family:var(--f-display);font-size:18px;letter-spacing:.05em;text-transform:uppercase;list-style:none;display:flex;justify-content:space-between}
 details.fold>summary::after{content:"✦";color:var(--pink)}
@@ -247,6 +263,15 @@ const STEP_TPL={
 };
 const DOWN=["DOM","SEG","TER","QUA","QUI","SEX","SÁB"];
 const DOWL=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+const CTX={casa:"em casa",rua:"na rua",pc:"no computador",cel:"no celular"};
+const DOPA_DEF=[["5 min","Uma música bem alta"],["5 min","Café ou um docinho"],["5 min","Celular sem culpa"],["5 min","Alongar e beber água"],["30 min","Um episódio de série"],["30 min","Banho demorado"],["30 min","Jogar ou ler algo leve"],["especial","Comprar algo pequeno (lança no Bia$)"],["especial","Sair com alguém"]];
+const TPL_DEF=[
+  {n:"Sair de casa",tipo:"outro",area:"casa",min:5,ctx:"casa",steps:["Chave","Carteira e documento","Celular carregado","Fone","Garrafa de água","Remédio"]},
+  {n:"Arrumar mala",tipo:"arrumar",area:"casa",min:45,ctx:"casa",steps:["Roupas: uma por dia + 1","Calcinhas e meias","Pijama","Tênis/chinelo","Necessaire","Carregadores","Remédios","Documentos"]},
+  {n:"Faxina geral",tipo:"limpar",area:"casa",min:120,ctx:"casa",steps:["Recolher lixo da casa toda","Roupa na máquina","Banheiro","Cozinha","Quartos","Sala","Chão da casa toda","Estender roupa"]},
+  {n:"Fechar o mês (Bia$)",tipo:"resolver",area:"casa",min:30,ctx:"cel",steps:["Conferir faturas dos cartões","Marcar contas pagas","Lançar gastos que faltam","Ver quanto sobrou","Guardar na meta"]},
+  {n:"Consulta médica",tipo:"resolver",area:"casa",min:20,ctx:"cel",steps:["Marcar horário","Anotar sintomas e dúvidas","Separar exames antigos","Levar documento e carteirinha"]},
+  {n:"Entregar trabalho",tipo:"trabalho",area:"trab",min:90,ctx:"pc",steps:["Abrir o arquivo","Listar o que falta","Rascunho feio de 15 min","Completar","Revisar uma vez","Enviar e avisar"]}];
 const PEP=["Começar é a parte mais difícil. Já foi.","Feito é melhor que perfeito.","Só esse passo. O resto espera.","Pode ser mal feito. Ainda conta.","Ninguém está olhando. Só faz.","Se travar, quebra em um passo menor.","Você já fez coisa mais difícil que isso."];
 const LIMPEZA_DEF={1:{z:"Banheiro",l:["Vaso e pia","Espelho","Chão","Trocar toalhas"]},2:{z:"Cozinha",l:["Fogão","Bancada","Lixo","Pano de prato"]},3:{z:"Quarto",l:["Trocar lençol","Tirar pó","Roupas no lugar","Chão"]},4:{z:"Sala",l:["Tirar pó","Almofadas e manta","Chão","Superfícies livres"]},5:{z:"Área de serviço",l:["Lavar roupa","Estender ou secar","Guardar roupa"]},6:{z:"Geladeira e plantas",l:["Jogar fora o vencido","Limpar uma prateleira","Regar plantas"]},0:{z:"Descanso",l:[]}};
 const ROT_DEF={manha:["Beber um copo de água","Remédios e suplementos","Arrumar a cama","Ver as 3 de hoje"],noite:["Lavar a louça do dia","Separar roupa de amanhã","Escolher as 3 de amanhã","Celular carregando longe da cama"]};
@@ -273,8 +298,8 @@ const today=()=>iso(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
 const dow=s=>new Date(s+"T12:00").getDay();
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-function fresh(){return {v:1,tasks:[],events:[],three:{},rot:clone(ROT_DEF),rotLog:{},limpeza:clone(LIMPEZA_DEF),limpLog:{},energy:2,xp:0,log:{},
-  settings:{wakeH:"07:00",sleepH:"23:00",name:"Bia"},ui:{tab:"hoje",day:null,filter:"tudo"}}}
+function fresh(){return {v:1,tasks:[],events:[],three:{},days:{},weekly:{},projects:[],dopa:clone(DOPA_DEF),templates:clone(TPL_DEF),ctx:"",rot:clone(ROT_DEF),rotLog:{},limpeza:clone(LIMPEZA_DEF),limpLog:{},energy:2,xp:0,log:{},
+  settings:{wakeH:"07:00",sleepH:"23:00",name:"Bia",planH:"08:00",closeH:"21:00"},ui:{tab:"hoje",day:null,filter:"tudo"}}}
 function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);const n=Object.assign(fresh(),s);n.ui=Object.assign(fresh().ui,s.ui||{});n.settings=Object.assign(fresh().settings,s.settings||{});return n}}catch(e){storeOk=false}return fresh()}
 let S=load();
 let saveT=null;
@@ -328,12 +353,13 @@ function parseCap(raw){
   if(out.time&&EVENTY.test(tn))out.event=true;
   out.t=s.replace(/\s{2,}/g," ").trim()||raw.trim();
   out.t=out.t.charAt(0).toUpperCase()+out.t.slice(1);
+  out.ctx=ctxOf(out);
   return out;
 }
 function addFromCap(raw){
   const p=parseCap(raw); if(!p.t) return null;
   if(p.event){const e={id:uid(),t:p.t,date:p.date||today(),start:p.time,end:toH(toMin(p.time)+Math.max(30,p.min)),area:p.area,remind:15};S.events.push(e);return {kind:"event",obj:e,p}}
-  const t={id:uid(),t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:today(),done:null,someday:false};
+  const t={id:uid(),ctx:p.ctx,inbox:!p.date&&!p.due,t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:today(),done:null,someday:false};
   S.tasks.push(t);return {kind:"task",obj:t,p};
 }
 
@@ -398,9 +424,122 @@ function vTalk(){
 function saveTalk(){
   let n=0;(S.ui.talk.items||[]).filter(p=>p.on&&p.t.trim()).forEach(p=>{
     if(p.event&&p.time){S.events.push({id:uid(),t:p.t,date:p.date||today(),start:p.time,end:toH(Math.min(1439,toMin(p.time)+Math.max(30,p.min))),area:p.area,remind:15})}
-    else S.tasks.push({id:uid(),t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:today(),done:null,someday:false});
+    else S.tasks.push({id:uid(),ctx:ctxOf(p),inbox:!p.date&&!p.due,t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:today(),done:null,someday:false});
     n++});
   return n;
+}
+
+/* =====================================================================
+   MÁQUINA: contexto, projetos, esperando, calibrador, encaixe, rituais
+   ===================================================================== */
+const ctxOf=p=>{const t=norm(p.t);if(p.tipo==="comprar")return "rua";if(/liga|whats|mensagem|marcar|agendar/.test(t))return "cel";if(p.area==="trab"||/e-?mail|planilha|relatorio|site|pesquisar|imprimir|pagar|boleto/.test(t))return "pc";if(/banco|cartorio|farmacia|correio|mercado|buscar|levar|devolver/.test(t))return "rua";return "casa"};
+function factor(){const L=S.tasks.filter(t=>t.done&&t.spent>60&&t.min);if(L.length<3)return 1.25;const f=L.reduce((a,t)=>a+t.spent,0)/L.reduce((a,t)=>a+t.min*60,0);return Math.min(2.5,Math.max(1,Math.round(f*20)/20))}
+const fmtF=f=>String(f).replace(".",",");
+function dayState(d){return (S.days=S.days||{})[d]||(S.days[d]={})}
+/* encaixe automático: põe as tarefas nos buracos livres, com folga e pausa de 10 min */
+function busy(date,except){const B=[];S.events.filter(e=>e.date===date&&e.start).forEach(e=>{const s=toMin(e.start);let en=e.end?toMin(e.end):s+30;if(en<=s)en=1440;B.push([s,en])});
+  S.tasks.filter(t=>t.when===date&&t.time&&!t.done&&!except.includes(t.id)).forEach(t=>B.push([toMin(t.time),toMin(t.time)+Math.ceil(t.min*factor())]));return B.sort((a,b)=>a[0]-b[0])}
+function autoSchedule(date,ids){
+  const f=factor(), B=busy(date,ids), placed=[], left=[];
+  let cur=toMin(S.settings.wakeH); if(date===today())cur=Math.max(cur,Math.ceil((nowMin()+5)/15)*15); const end=toMin(S.settings.sleepH);
+  const order=ids.map(task).filter(t=>t&&!t.done).sort((a,b)=>(b.frog===date)-(a.frog===date)||(b.prio-a.prio)||(b.energy-a.energy));
+  order.forEach(t=>{const dur=Math.ceil(t.min*f/5)*5;let s=cur,ok=false;
+    for(let guard=0;guard<50&&s+dur<=end;guard++){const hit=B.find(([a,b])=>s<b&&s+dur>a);if(!hit){ok=true;break}s=hit[1]+5}
+    if(ok){t.when=date;t.time=toH(s);B.push([s,s+dur]);B.sort((a,b)=>a[0]-b[0]);placed.push({t,s,e:s+dur});cur=s+dur+10}else left.push(t)});
+  return {placed,left,f};
+}
+function nowCard(){
+  const td=today(),n=nowMin(),f=factor();
+  const L=S.tasks.filter(t=>t.when===td&&t.time&&!t.done).map(t=>({t,s:toMin(t.time),e:toMin(t.time)+Math.ceil(t.min*f)})).sort((a,b)=>a.s-b.s);
+  const evNow=S.events.find(e=>e.date===td&&e.start&&toMin(e.start)<=n&&(e.end?toMin(e.end):toMin(e.start)+30)>n);
+  if(evNow)return `<article class="box c"><span class="tag trab">agora</span><h3 style="margin-top:6px">${esc(evNow.t)}</h3><p class="sub">até ${evNow.end||"—"}</p></article>`;
+  const cur=L.find(x=>x.s<=n&&x.e>n)||L.find(x=>x.s>n);
+  const three=(S.three[td]||[]).map(task).filter(t=>t&&!t.done);
+  const pick=cur?cur.t:three[0];
+  if(!pick)return "";
+  const when=cur?(cur.s<=n?`agora · até ${toH(cur.e)}`:`próximo · ${toH(cur.s)} (em ${durTxt(cur.s-n)})`):"sem horário · a próxima das 3";
+  const st=pick.steps.find(s=>!s.ok);
+  return `<article class="box nowc"><span class="tag pr">${when}</span><h3 style="margin-top:6px">${pick.frog===td?"🐸 ":""}${esc(pick.t)}</h3>${st?`<p class="sub">próximo passo: ${esc(st.t)}</p>`:""}<div class="row" style="margin-top:8px"><button class="ghost pk" type="button" data-a="focus" data-id="${pick.id}">Foco agora</button><button class="mini" type="button" data-a="done" data-id="${pick.id}">Já fiz</button></div></article>`;
+}
+function reward(){const L=S.dopa||DOPA_DEF;return L[Math.floor(Math.random()*L.length)]}
+
+/* ---------- triagem da caixa de entrada ---------- */
+const inbox=()=>S.tasks.filter(t=>t.inbox&&!t.done&&!t.someday);
+function vTriage(){
+  const L=inbox(), t=L[0];
+  if(!t)return `<section><article class="box c"><h3>Caixa de entrada zerada ✦</h3><p class="sub" style="margin-top:6px">Tudo decidido. Sua cabeça agradece.</p><button class="bigbtn" type="button" data-a="triClose" style="margin-top:10px">Voltar</button></article></section>`;
+  const mon=addDays(today(),(8-dow(today()))%7||7);
+  return `<section><p class="sub">Triagem · faltam <b style="color:var(--pink)">${L.length}</b>. Decide rápido, sem pensar muito.</p>
+    <article class="box"><div class="chk"></div><h3 style="font-size:28px">${esc(t.t)}</h3><div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><span class="tag ${t.area}">${t.area==="trab"?"trabalho":"casa"}</span><span class="tag">${TIPOS[t.tipo]}</span><span class="tag">${CTX[t.ctx]||""}</span><span class="tag">${durTxt(t.min)}</span></div>
+      <div class="tri">
+        <button type="button" data-a="tri" data-v="now" data-id="${t.id}"><b>Faço agora</b><small>leva menos de 2 min</small></button>
+        <button type="button" data-a="tri" data-v="today" data-id="${t.id}"><b>Hoje</b><small>entra no dia</small></button>
+        <button type="button" data-a="tri" data-v="tomorrow" data-id="${t.id}"><b>Amanhã</b></button>
+        <button type="button" data-a="tri" data-v="week" data-id="${t.id}"><b>Semana que vem</b><small>${dmy(mon)}</small></button>
+        <button type="button" data-a="tri" data-v="steps" data-id="${t.id}"><b>Quebrar</b><small>em passos</small></button>
+        <button type="button" data-a="tri" data-v="wait" data-id="${t.id}"><b>Esperando</b><small>depende de alguém</small></button>
+        <button type="button" data-a="tri" data-v="someday" data-id="${t.id}"><b>Algum dia</b><small>sem culpa</small></button>
+        <button type="button" data-a="tri" data-v="del" data-id="${t.id}"><b>Apagar</b><small>não importa mais</small></button>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="mini" type="button" data-a="triArea" data-id="${t.id}">${t.area==="trab"?"é de casa":"é de trabalho"}</button>${Object.entries(CTX).map(([k,v])=>`<button class="mini ${t.ctx===k?"on":""}" type="button" data-a="triCtx" data-id="${t.id}" data-k="${k}">${v}</button>`).join("")}</div>
+    </article><button class="ghost" type="button" data-a="triClose">Parar por agora</button></section>`;
+}
+
+/* ---------- rituais guiados ---------- */
+function vRitual(){
+  const R=S.ui.ritual, td=today(), tm=addDays(td,1);
+  const head=(title,i,n)=>`<p class="sub">${title} · passo ${i+1} de ${n}</p><div class="dots">${Array.from({length:n},(_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div>`;
+  const nav=(last,label)=>`<div class="row" style="margin-top:12px">${R.step>0?`<button class="ghost" type="button" data-a="rStep" data-v="-1">Voltar</button>`:""}<button class="bigbtn" type="button" data-a="${last?"rDone":"rStep"}" data-v="1" style="flex:1;font-size:22px;padding:10px">${label||"Próximo"}</button></div><button class="mini" type="button" data-a="rClose" style="margin-top:8px">Sair</button>`;
+  if(R.k==="plan"){
+    const N=4, three=S.three[td]||[];
+    if(R.step===0){const ev=S.events.filter(e=>e.date===td).sort((a,b)=>(a.start||"")<(b.start||"")?-1:1),integ=integrations(td);
+      return `<section>${head("Planejar o dia",0,N)}<article class="box"><div class="chk"></div><h3>Como você está?</h3>
+        <div class="energy" style="margin-top:10px"><span>bateria</span>${[1,2,3].map(e=>`<button type="button" data-a="energy" data-v="${e}" aria-pressed="${S.energy===e}"><span class="batt">${[1,2,3].map(i=>`<i class="${i<=e?"on":""}"></i>`).join("")}</span>${["baixa","média","alta"][e-1]}</button>`).join("")}</div>
+        <h3 style="margin-top:14px;font-size:18px">O que já está marcado hoje</h3>${ev.length?`<div class="integ" style="margin-top:6px">${ev.map(e=>`<div><b style="background:var(--cyan)">${e.start||"dia"}</b><span>${esc(e.t)}</span></div>`).join("")}</div>`:`<p class="sub">Nenhum compromisso.</p>`}
+        ${integ.length?`<div class="integ" style="margin-top:6px">${integ.map(x=>`<div><b style="background:${x.c}">${x.k}</b><span>${esc(x.t)}</span></div>`).join("")}</div>`:""}
+        ${nav(false)}</article></section>`}
+    if(R.step===1){const late=S.tasks.filter(x=>open(x)&&x.when&&x.when<td),wait=S.tasks.filter(x=>!x.done&&x.wait&&x.wait.until&&x.wait.until<=td);
+      return `<section>${head("Planejar o dia",1,N)}<article class="box p"><div class="chk"></div><h3>Pendências</h3>
+        ${late.length?`<p class="sub" style="margin-top:6px">${late.length} ficaram para trás. Decide cada uma:</p><div class="tasks" style="margin-top:6px">${late.map(x=>`<div class="task"><span></span><div><div class="tt">${esc(x.t)}</div><div class="row" style="margin-top:6px"><button class="mini" type="button" data-a="lateOne" data-id="${x.id}" data-v="today">hoje</button><button class="mini" type="button" data-a="lateOne" data-id="${x.id}" data-v="tomorrow">amanhã</button><button class="mini" type="button" data-a="lateOne" data-id="${x.id}" data-v="someday">algum dia</button></div></div></div>`).join("")}</div>`:`<p class="sub" style="margin-top:6px">Nada atrasado.</p>`}
+        ${wait.length?`<h3 style="margin-top:12px;font-size:18px">Cobrar hoje</h3>${wait.map(x=>`<p style="margin:4px 0">${esc(x.wait.who||"alguém")}: ${esc(x.t)}</p>`).join("")}`:""}
+        ${inbox().length?`<p class="sub" style="margin-top:10px">${inbox().length} na caixa de entrada. Dá para triar depois.</p>`:""}
+        ${nav(false)}</article></section>`}
+    if(R.step===2){const cand=S.tasks.filter(x=>open(x)&&(!x.when||x.when<=td)).map(x=>({x,s:(x.prio?50:0)+(x.due?Math.max(0,30-dDays(x.due)*5):0)+(x.when===td?20:0)+(x.energy<=S.energy?10:0)})).sort((a,b)=>b.s-a.s).slice(0,10).map(o=>o.x);
+      return `<section>${head("Planejar o dia",2,N)}<article class="box"><div class="chk"></div><h3>Escolha as 3</h3><p class="sub" style="margin-block:4px 8px">Ordenadas por prazo, importância e energia. Toque para escolher. Depois marque o <b>sapo</b>: a mais chata, para fazer primeiro.</p>
+        <div class="tasks">${cand.map(x=>{const on=three.includes(x.id);return `<div class="task ${on?"open":""}"><button class="ck ${on?"on":""}" type="button" data-a="r3" data-id="${x.id}" aria-label="Escolher ${esc(x.t)}">${on?CHECK:""}</button><div><div class="tt">${esc(x.t)}</div><div class="meta"><span class="tag">${durTxt(x.min)}</span><span class="tag">${["","energia baixa","energia média","energia alta"][x.energy]}</span>${x.due?`<span class="tag late">prazo ${dayLabel(x.due)}</span>`:""}${on?`<button class="mini ${x.frog===td?"on":""}" type="button" data-a="frog" data-id="${x.id}">🐸 sapo</button>`:""}</div></div></div>`}).join("")||`<div class="empty">Lista vazia. Despeja coisas no campo do topo.</div>`}</div>
+        <p class="sub" style="margin-top:8px">${three.length}/3 escolhidas</p>${nav(false)}</article></section>`}
+    if(R.step===3){const prev=R.prev;const f=factor();
+      return `<section>${head("Planejar o dia",3,N)}<article class="box c"><h3>Encaixar no dia</h3><p class="sub" style="margin-block:4px 8px">Coloco suas 3 nos horários livres, com folga de ${fmtF(f)}× o tempo estimado${S.tasks.some(t=>t.spent)?" (aprendi com seus focos)":" (folga padrão para TDAH)"} e 10 min de pausa entre elas.</p>
+        ${prev?`<div class="integ">${prev.placed.map(p=>`<div><b style="background:var(--pink)">${toH(p.s)}</b><span>${esc(p.t.t)} · até ${toH(p.e)}</span></div>`).join("")}${prev.left.map(t=>`<div><b style="background:var(--warn)">sem vaga</b><span>${esc(t.t)}</span></div>`).join("")}</div>`:""}
+        <div class="row" style="margin-top:10px"><button class="ghost pk" type="button" data-a="rFit">${prev?"Encaixar de novo":"Encaixar"}</button>${prev&&prev.placed.length?`<button class="ghost" type="button" data-a="rCal">Mandar pro Calendário</button>`:""}</div>
+        ${nav(true,"Pronto, bora!")}</article></section>`}
+  }
+  if(R.k==="close"){
+    const N=3, wins=S.log[td]||[], left=S.tasks.filter(x=>open(x)&&x.when===td);
+    if(R.step===0)return `<section>${head("Fechar o dia",0,N)}<article class="box c"><h3>O que você fez hoje</h3>${wins.filter(Boolean).length?`<div class="wins" style="margin-top:8px">${wins.filter(Boolean).map(w=>`<span class="win">✦ ${esc(w)}</span>`).join("")}</div>`:`<p class="sub" style="margin-top:6px">Dia difícil? Acontece. Amanhã é outro.</p>`}
+      <label class="sub" style="display:block;margin-top:12px">Uma coisa boa de hoje (qualquer coisa)<input class="dk" id="good" data-good="1" value="${esc(dayState(td).good||"")}"></label>${nav(false)}</article></section>`;
+    if(R.step===1)return `<section>${head("Fechar o dia",1,N)}<article class="box p"><div class="chk"></div><h3>O que sobrou</h3>${left.length?`<div class="tasks" style="margin-top:6px">${left.map(x=>`<div class="task"><span></span><div><div class="tt">${esc(x.t)}</div><div class="row" style="margin-top:6px"><button class="mini" type="button" data-a="lateOne" data-id="${x.id}" data-v="tomorrow">amanhã</button><button class="mini" type="button" data-a="lateOne" data-id="${x.id}" data-v="someday">algum dia</button><button class="mini" type="button" data-a="lateOne" data-id="${x.id}" data-v="del">apagar</button></div></div></div>`).join("")}</div>`:`<p class="sub" style="margin-top:6px">Nada sobrando. Dia fechado!</p>`}${nav(false)}</article></section>`;
+    if(R.step===2){const t3=S.three[tm]||[],cand=S.tasks.filter(x=>open(x)&&(!x.when||x.when<=tm)).sort((a,b)=>(b.prio-a.prio)||((a.due||"9")<(b.due||"9")?-1:1)).slice(0,10);
+      return `<section>${head("Fechar o dia",2,N)}<article class="box"><div class="chk"></div><h3>As 3 de amanhã</h3><p class="sub" style="margin-block:4px 8px">Acordar já sabendo o que fazer economiza a manhã inteira.</p>
+        <div class="tasks">${cand.map(x=>{const on=t3.includes(x.id);return `<div class="task ${on?"open":""}"><button class="ck ${on?"on":""}" type="button" data-a="r3t" data-id="${x.id}" aria-label="Escolher ${esc(x.t)}">${on?CHECK:""}</button><div><div class="tt">${esc(x.t)}</div><div class="meta"><span class="tag">${durTxt(x.min)}</span></div></div></div>`}).join("")||`<div class="empty">Lista vazia.</div>`}</div>${nav(true,"Boa noite ✦")}</article></section>`}
+  }
+  if(R.k==="week"){
+    const ws=addDays(td,-((dow(td)+6)%7)), W=(S.weekly=S.weekly||{})[ws]||(S.weekly[ws]={}), late=S.tasks.filter(x=>open(x)&&x.when&&x.when<td);
+    const dues=S.tasks.filter(x=>open(x)&&x.due&&dDays(x.due)<=14).sort((a,b)=>a.due<b.due?-1:1);
+    const projNo=(S.projects||[]).filter(p=>!p.done&&!S.tasks.some(t=>t.proj===p.id&&open(t)));
+    const waits=S.tasks.filter(x=>!x.done&&x.wait);
+    const item=(ok,t,body)=>`<div class="wk ${ok?"ok":""}"><span>${ok?"✦":"○"}</span><div><b>${t}</b>${body||""}</div></div>`;
+    return `<section><article class="box p"><div class="chk"></div><h3>Revisão da semana</h3><p class="sub" style="margin-block:4px 10px">15 minutos que deixam a semana inteira mais leve.</p>
+      ${item(!inbox().length,"Caixa de entrada vazia",inbox().length?`<button class="mini" type="button" data-a="triOpen">Triar ${inbox().length}</button>`:"")}
+      ${item(!late.length,"Nada atrasado",late.length?`<button class="mini" type="button" data-a="lateAll" data-v="spread">Espalhar ${late.length} na semana</button>`:"")}
+      ${item(true,"Prazos das próximas 2 semanas",dues.length?dues.map(x=>`<p class="sub" style="margin:2px 0">${dayLabel(x.due)}: ${esc(x.t)}</p>`).join(""):`<p class="sub">Nenhum.</p>`)}
+      ${item(!projNo.length,"Todo projeto tem uma próxima ação",projNo.map(p=>`<p class="sub" style="margin:2px 0">${esc(p.n)}: sem próxima ação</p>`).join(""))}
+      ${item(!waits.length,"Esperando alguém",waits.map(x=>`<p class="sub" style="margin:2px 0">${esc(x.wait.who||"?")}: ${esc(x.t)}</p>`).join(""))}
+      <label class="sub" style="display:block;margin-top:10px">Foco da semana (uma frase)<input class="dk" id="wfoco" data-wfoco="${ws}" value="${esc(W.foco||"")}" placeholder="ex.: entregar o projeto X e arrumar o quarto"></label>
+      <div class="row" style="margin-top:10px"><button class="ghost" type="button" data-a="calWeek">Compromissos da semana → Calendário</button></div>
+      <button class="bigbtn" type="button" data-a="weekDone" style="margin-top:12px">Concluir revisão</button><button class="mini" type="button" data-a="rClose" style="margin-top:8px">Sair</button></article></section>`;
+  }
+  return "";
 }
 
 /* =====================================================================
@@ -427,10 +566,10 @@ function integrations(date){
    ===================================================================== */
 function freeNow(){const n=nowMin(),evs=S.events.filter(e=>e.date===today()&&e.start).map(e=>toMin(e.start)).filter(x=>x>n).sort((a,b)=>a-b);return evs.length?evs[0]-n:toMin(S.settings.sleepH)-n}
 function pickOne(maxMin){
-  const t0=today(), E=S.energy, L=S.tasks.filter(t=>open(t)&&(!t.when||t.when<=t0)&&t.energy<=E+0&&t.min<=(maxMin||999));
-  const pool=L.length?L:S.tasks.filter(t=>open(t)&&(!t.when||t.when<=t0));
+  const t0=today(), E=S.energy, cx=t=>!S.ctx||!t.ctx||t.ctx===S.ctx, L=S.tasks.filter(t=>open(t)&&cx(t)&&(!t.when||t.when<=t0)&&t.energy<=E+0&&t.min<=(maxMin||999));
+  const pool=L.length?L:S.tasks.filter(t=>open(t)&&cx(t)&&(!t.when||t.when<=t0));
   if(!pool.length) return null;
-  const score=t=>(t.prio?50:0)+(S.three[t0]||[]).includes(t.id)*40+(t.due?Math.max(0,30-dDays(t.due)*5):0)+(t.when&&t.when<t0?15:0)+(t.when===t0?20:0)+Math.min(20,dDays(t.created,true))+(t.min<=15?8:0);
+  const score=t=>(t.prio?50:0)+(S.three[t0]||[]).includes(t.id)*40+(t.due?Math.max(0,30-dDays(t.due)*5):0)+(t.when&&t.when<t0?15:0)+(t.when===t0?20:0)+Math.min(20,dDays(t.created,true))+(t.min<=15?8:0)+(t.frog===t0?30:0);
   const top=pool.map(t=>({t,s:score(t)})).sort((a,b)=>b.s-a.s).slice(0,3);
   return top[Math.floor(Math.random()*top.length)].t;
 }
@@ -445,9 +584,13 @@ function burst(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)retur
   document.body.appendChild(b);setTimeout(()=>b.remove(),1300)}
 let toastT=null;
 function toast(m){let el=$(".toast");if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),2600)}
-function completeTask(t){t.done=new Date().toISOString();t.steps.forEach(s=>s.ok=true);award(10+Math.round(t.min/5),t.t);burst();
+function completeTask(t){ftAccum(t.id);if(FT.task===t.id){clearInterval(FT.int);FT={end:0,total:0,int:null,paused:0}}t.inbox=false;t.done=new Date().toISOString();t.steps.forEach(s=>s.ok=true);award(10+Math.round(t.min/5),t.t);burst();
   if(t.recur){const n={...clone(t),id:uid(),done:null,when:addDays(today(),t.recur),created:today()};n.steps.forEach(s=>s.ok=false);S.tasks.push(n)}
-  toast(PEP[Math.floor(Math.random()*PEP.length)].startsWith("Começar")?"Feito! Mais uma fora da cabeça.":"Feito! "+["Destravou.","Uma a menos.","Isso aí.","Arrasou."][Math.floor(Math.random()*4)])}
+  const td=today(),th=(S.three[td]||[]).map(task).filter(Boolean);
+  if(th.length===3&&th.every(x=>x.done)&&th.includes(t)){award(15,"As 3 de hoje!");const r=reward();setTimeout(()=>{burst();toast(`AS 3 DE HOJE! Recompensa: ${r[1]}`)},400);return}
+  if(t.frog===td){const r=reward();toast(`Engoliu o sapo! Recompensa: ${r[1]}`);return}
+  toast("Feito! "+["Destravou.","Uma a menos.","Isso aí.","Arrasou.","Mais uma fora da cabeça."][Math.floor(Math.random()*5)])}
+function ftAccum(id){if(FT.task&&(!id||FT.task===id)&&FT.run){const x=task(FT.task);if(x)x.spent=(x.spent||0)+Math.round((Date.now()-FT.run)/1000);FT.run=0}}
 
 /* =====================================================================
    CALENDÁRIO DO IPHONE (.ics com alarme): é assim que o iPhone avisa
@@ -455,7 +598,7 @@ function completeTask(t){t.done=new Date().toISOString();t.steps.forEach(s=>s.ok
 function icsDate(d,h){return d.replace(/-/g,"")+"T"+(h||"09:00").replace(":","")+"00"}
 function ics(items){
   const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Destrava//PT-BR","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
-  items.forEach(it=>{L.push("BEGIN:VEVENT",`UID:${it.id}@destrava`,`DTSTAMP:${icsDate(today(),"00:00")}`,`DTSTART:${icsDate(it.date,it.start)}`,`DTEND:${icsDate(it.date,it.end||toH(toMin(it.start||"09:00")+30))}`,`SUMMARY:${String(it.t).replace(/[,;\\]/g," ")}`,`DESCRIPTION:Destrava`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${String(it.t).replace(/[,;\\]/g," ")}`,`TRIGGER:-PT${it.remind||0}M`,"END:VALARM","END:VEVENT")});
+  items.forEach(it=>{L.push("BEGIN:VEVENT",`UID:${it.id}@destrava`,`DTSTAMP:${icsDate(today(),"00:00")}`,`DTSTART:${icsDate(it.date,it.start)}`,`DTEND:${icsDate(it.date,it.end||toH(toMin(it.start||"09:00")+30))}`,`SUMMARY:${String(it.t).replace(/[,;\\]/g," ")}`,`DESCRIPTION:${it.url?"Abrir: "+it.url:"Destrava"}`);if(it.rrule)L.push("RRULE:"+it.rrule);if(it.url)L.push("URL:"+it.url);L.push("BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${String(it.t).replace(/[,;\\]/g," ")}`,`TRIGGER:-PT${it.remind||0}M`,"END:VALARM","END:VEVENT")});
   L.push("END:VCALENDAR");return L.join("\r\n");
 }
 function sendToCalendar(items){
@@ -484,12 +627,24 @@ function vHoje(){
   const rot=k=>{const L=S.rot[k],dn=((S.rotLog[t]||{})[k]||[]);return `<div class="steps">${L.map((x,i)=>`<div class="step ${dn.includes(i)?"ok":""}"><button class="ck ${dn.includes(i)?"on":""}" type="button" data-a="rot" data-k="${k}" data-i="${i}" aria-label="${esc(x)}">${dn.includes(i)?CHECK:""}</button><span>${esc(x)}</span><span></span></div>`).join("")}</div>`};
   const h=new Date().getHours(), wins=S.log[t]||[];
   let html="";
+  const ds=dayState(t), hr=new Date().getHours(), ws=addDays(t,-((dow(t)+6)%7)), wk=(S.weekly||{})[ws]||{};
+  if(wk.foco)html+=`<div class="weekfoco">foco da semana: ${esc(wk.foco)}</div>`;
+  if(!ds.planned&&hr<17)html+=`<button class="ritual" type="button" data-a="rOpen" data-k="plan"><span><b>Planejar o dia</b><small>2 minutos: energia, pendências, as 3 e encaixe nos horários</small></span><span class="go">→</span></button>`;
+  if(hr>=18&&!ds.closed)html+=`<button class="ritual" type="button" data-a="rOpen" data-k="close" style="border-color:var(--purple)"><span><b>Fechar o dia</b><small>vitórias, o que sobrou e as 3 de amanhã</small></span><span class="go" style="color:var(--purple)">→</span></button>`;
+  if((dow(t)===0||dow(t)===1)&&!wk.done)html+=`<button class="ritual" type="button" data-a="rOpen" data-k="week" style="border-color:var(--pink)"><span><b>Revisão da semana</b><small>15 min para a semana ficar leve</small></span><span class="go" style="color:var(--pink)">→</span></button>`;
+  if(inbox().length)html+=`<button class="ritual" type="button" data-a="triOpen" style="border-color:var(--warn)"><span><b>${inbox().length} na caixa de entrada</b><small>decidir uma por uma, rapidinho</small></span><span class="go" style="color:var(--warn)">→</span></button>`;
+  html+=nowCard();
+  const cob=S.tasks.filter(x=>!x.done&&x.wait&&x.wait.until&&x.wait.until<=t);
+  if(cob.length)html+=`<article class="box p"><div class="chk"></div><h3>Cobrar hoje</h3>${cob.map(x=>`<div class="row" style="justify-content:space-between;margin-top:6px"><span>${esc(x.wait.who||"alguém")}: ${esc(x.t)}</span><span class="row"><button class="mini" type="button" data-a="waitLater" data-id="${x.id}">+3 dias</button><button class="mini" type="button" data-a="waitDone" data-id="${x.id}">respondeu</button></span></div>`).join("")}</article>`;
   html+=`<div class="energy" role="group" aria-label="Sua energia agora"><span>bateria<br>agora</span>${[1,2,3].map(e=>`<button type="button" data-a="energy" data-v="${e}" aria-pressed="${S.energy===e}"><span class="batt">${[1,2,3].map(i=>`<i class="${i<=e?"on":""}"></i>`).join("")}</span>${["baixa","média","alta"][e-1]}</button>`).join("")}</div>`;
+  html+=`<div class="ctxrow"><span>onde estou:</span><button class="chip" type="button" data-a="ctxSet" data-k="" aria-pressed="${!S.ctx}">tanto faz</button>${Object.entries(CTX).map(([k,v])=>`<button class="chip" type="button" data-a="ctxSet" data-k="${k}" aria-pressed="${S.ctx===k}">${v}</button>`).join("")}</div>`;
   html+=`<button class="bigbtn" type="button" data-a="pick">Me dá uma<small>escolho uma coisa que cabe na sua energia e no tempo livre (${durTxt(Math.max(0,Math.min(freeNow(),180)))})</small></button>`;
   html+=`<article class="box"><div class="chk"></div><h3>As 3 de hoje</h3><p class="sub" style="margin-block:4px 10px">Só três. Se fizer as três, o dia está ganho.</p><div class="three">
-    ${[0,1,2].map(i=>{const x=three[i];return x?`<div class="slot full ${x.done?"done":""}"><span class="n">${i+1}</span><span class="t">${esc(x.t)}<small>${durTxt(x.min)} · ${TIPOS[x.tipo]}${x.steps.length?` · ${x.steps.filter(s=>s.ok).length}/${x.steps.length} passos`:""}</small></span><span class="row">${x.done?"":`<button class="mini" type="button" data-a="focus" data-id="${x.id}">Foco</button>`}<button class="ck ${x.done?"on":""}" type="button" data-a="done" data-id="${x.id}" aria-label="Concluir ${esc(x.t)}">${x.done?CHECK:""}</button></span></div>`
+    ${[0,1,2].map(i=>{const x=three[i];return x?`<div class="slot full ${x.done?"done":""}"><span class="n">${i+1}</span><span class="t">${x.frog===t?"🐸 ":""}${esc(x.t)}<small>${x.time?x.time+" · ":""}${durTxt(x.min)} · ${TIPOS[x.tipo]}${x.steps.length?` · ${x.steps.filter(s=>s.ok).length}/${x.steps.length} passos`:""}</small></span><span class="row">${x.done?"":`<button class="mini" type="button" data-a="focus" data-id="${x.id}">Foco</button>`}<button class="ck ${x.done?"on":""}" type="button" data-a="done" data-id="${x.id}" aria-label="Concluir ${esc(x.t)}">${x.done?CHECK:""}</button></span></div>`
       :`<button class="slot" type="button" data-a="pick3" data-i="${i}" style="color:var(--dim);text-align:left;background:transparent"><span class="n" style="color:var(--line)">${i+1}</span><span class="t" style="font-weight:400">escolher…</span><span></span></button>`}).join("")}</div>
-    ${S.ui.pick3!=null?pick3Box():""}</article>`;
+    ${S.ui.pick3!=null?pick3Box():""}
+    ${three.length&&three.some(x=>!x.done&&!x.time)?`<div class="row" style="margin-top:10px"><button class="mini" type="button" data-a="fitToday">Encaixar nos horários livres</button></div>`:""}
+    ${three.some(x=>x.time&&!x.done)?`<div class="row" style="margin-top:6px"><button class="mini" type="button" data-a="calDay">Mandar meu dia pro Calendário</button></div>`:""}</article>`;
   if(late.length) html+=`<article class="box p"><div class="chk"></div><h3>${late.length} ficaram para trás</h3><p class="sub" style="margin-block:4px 10px">Tudo bem, acontece. Decide rápido e segue:</p>
     <div class="row"><button class="ghost" type="button" data-a="lateAll" data-v="today">Tudo para hoje</button><button class="ghost" type="button" data-a="lateAll" data-v="spread">Espalhar na semana</button><button class="ghost" type="button" data-a="lateAll" data-v="someday">Algum dia</button></div></article>`;
   html+=`<h2 class="label">Linha do dia</h2>${timeline(t)}`;
@@ -511,7 +666,7 @@ function timeline(date){
   const isToday=date===today(), n=nowMin();
   const it=[];
   S.events.filter(e=>e.date===date).forEach(e=>{const s0=toMin(e.start)??-1;let e0=toMin(e.end);if(e0!=null&&s0>=0&&e0<=s0)e0=Math.min(1440,e0+1440);it.push({k:"ev",s:s0,e:e0,t:e.t,sub:`${e.start||"dia todo"}${e.end?"–"+e.end:""} · ${e.area==="trab"?"trabalho":"pessoal"}`,id:e.id})});
-  S.tasks.filter(x=>x.when===date&&x.time&&!x.someday).forEach(x=>it.push({k:"task",s:toMin(x.time),e:toMin(x.time)+x.min,t:x.t,sub:`${x.time} · ${durTxt(x.min)}`,id:x.id,done:x.done}));
+  S.tasks.filter(x=>x.when===date&&x.time&&!x.someday).forEach(x=>it.push({k:"tk",s:toMin(x.time),e:toMin(x.time)+x.min,t:x.t,sub:`${x.time} · ${durTxt(x.min)}`,id:x.id,done:x.done}));
   it.sort((a,b)=>a.s-b.s);
   const out=[];let cur=Math.max(toMin(S.settings.wakeH),isToday?Math.ceil(n/15)*15:0);const endDay=toMin(S.settings.sleepH);
   if(!isToday)cur=toMin(S.settings.wakeH);
@@ -573,7 +728,7 @@ function taskRow(t){
   return `<div class="task ${isOpen?"open":""} ${t.done?"done":""}" id="t-${t.id}">
     <button class="ck ${t.done?"on":""}" type="button" data-a="done" data-id="${t.id}" aria-label="${t.done?"Desfazer":"Concluir"} ${esc(t.t)}">${t.done?CHECK:""}</button>
     <div><button type="button" data-a="openT" data-id="${t.id}" style="all:unset;cursor:pointer;display:block"><div class="tt">${esc(t.t)}</div></button>
-      <div class="meta"><span class="tag ${t.area}">${t.area==="trab"?"trabalho":"casa"}</span><span class="tag">${TIPOS[t.tipo]}</span><span class="tag">${durTxt(t.min)}</span>${t.when?`<span class="tag ${late?"late":""}">${late?"atrasada · ":""}${dayLabel(t.when)}${t.time?" "+t.time:""}</span>`:""}${t.due?`<span class="tag ${dueSoon?"late":""}">prazo ${dayLabel(t.due)}</span>`:""}${t.prio?`<span class="tag pr">importante</span>`:""}${t.steps.length?`<span class="tag">${t.steps.filter(s=>s.ok).length}/${t.steps.length} passos</span>`:""}${t.recur?`<span class="tag">a cada ${t.recur} dias</span>`:""}${t.someday?`<span class="tag">algum dia</span>`:""}</div></div>
+      <div class="meta"><span class="tag ${t.area}">${t.area==="trab"?"trabalho":"casa"}</span><span class="tag">${TIPOS[t.tipo]}</span><span class="tag">${durTxt(t.min)}</span>${t.ctx?`<span class="tag">${CTX[t.ctx]}</span>`:""}${t.proj&&proj(t.proj)?`<span class="tag" style="border-color:var(--purple);color:var(--lilac)">◆ ${esc(proj(t.proj).n)}</span>`:""}${t.wait?`<span class="tag" style="border-color:var(--warn);color:var(--warn)">esperando ${esc(t.wait.who||"")}${t.wait.until?" · cobrar "+dayLabel(t.wait.until):""}</span>`:""}${t.inbox?`<span class="tag" style="border-color:var(--warn);color:var(--warn)">entrada</span>`:""}${t.spent?`<span class="tag">levou ${durTxt(Math.round(t.spent/60))}</span>`:""}${t.when?`<span class="tag ${late?"late":""}">${late?"atrasada · ":""}${dayLabel(t.when)}${t.time?" "+t.time:""}</span>`:""}${t.due?`<span class="tag ${dueSoon?"late":""}">prazo ${dayLabel(t.due)}</span>`:""}${t.prio?`<span class="tag pr">importante</span>`:""}${t.steps.length?`<span class="tag">${t.steps.filter(s=>s.ok).length}/${t.steps.length} passos</span>`:""}${t.recur?`<span class="tag">a cada ${t.recur} dias</span>`:""}${t.someday?`<span class="tag">algum dia</span>`:""}</div></div>
     ${isOpen?taskEdit(t):""}</div>`;
 }
 function taskEdit(t){
@@ -589,21 +744,49 @@ function taskEdit(t){
       <label>Fazer em<input type="date" data-te="${t.id}.when" id="te-w-${t.id}" value="${esc(t.when||"")}"></label>
       <label>Hora<input type="time" data-te="${t.id}.time" id="te-h-${t.id}" value="${esc(t.time||"")}"></label>
       <label>Prazo final<input type="date" data-te="${t.id}.due" id="te-d-${t.id}" value="${esc(t.due||"")}"></label>
+      <label>Onde<select data-te="${t.id}.ctx" id="te-c-${t.id}"><option value="">qualquer lugar</option>${Object.entries(CTX).map(([k,v])=>`<option value="${k}" ${t.ctx===k?"selected":""}>${v}</option>`).join("")}</select></label>
+      <label>Projeto<select data-te="${t.id}.proj" id="te-pj-${t.id}"><option value="">nenhum</option>${(S.projects||[]).filter(p=>!p.done).map(p=>`<option value="${p.id}" ${t.proj===p.id?"selected":""}>${esc(p.n)}</option>`).join("")}</select></label>
       <label>Repetir<select data-te="${t.id}.recur" id="te-r-${t.id}">${[["","não"],[1,"todo dia"],[7,"toda semana"],[14,"a cada 2 semanas"],[30,"todo mês"]].map(([v,l])=>`<option value="${v}" ${String(t.recur||"")===String(v)?"selected":""}>${l}</option>`).join("")}</select></label>
     </div>
     <label class="tog"><input type="checkbox" data-te="${t.id}.prio" id="te-p-${t.id}" ${t.prio?"checked":""}> Importante</label>
-    <div class="row"><button class="ghost pk" type="button" data-a="focus" data-id="${t.id}">Foco agora</button>${t.when&&t.time?`<button class="mini" type="button" data-a="calT" data-id="${t.id}">Avisar no iPhone</button>`:""}<button class="mini" type="button" data-a="someday" data-id="${t.id}">${t.someday?"Tirar de algum dia":"Algum dia"}</button><button class="mini" type="button" data-a="delT" data-id="${t.id}" style="color:var(--warn)">${S.ui.confirm==="t"+t.id?"Confirmar":"Apagar"}</button></div>
+    <label class="tog"><input type="checkbox" data-wait="${t.id}" id="te-wt-${t.id}" ${t.wait?"checked":""}> Esperando alguém</label>
+    ${t.wait?`<div class="form"><label>Quem<input data-waitf="${t.id}.who" id="te-ww-${t.id}" value="${esc(t.wait.who||"")}"></label><label>Cobrar em<input type="date" data-waitf="${t.id}.until" id="te-wu-${t.id}" value="${esc(t.wait.until||"")}"></label></div>`:""}
+    <div class="row"><button class="ghost pk" type="button" data-a="focus" data-id="${t.id}">Foco agora</button>${t.when&&t.time?`<button class="mini" type="button" data-a="calT" data-id="${t.id}">Avisar no iPhone</button>`:""}<button class="mini" type="button" data-a="someday" data-id="${t.id}">${t.someday?"Tirar de algum dia":"Algum dia"}</button>${t.steps.length>1?`<button class="mini" type="button" data-a="tplSave" data-id="${t.id}">Salvar como modelo</button>`:""}<button class="mini" type="button" data-a="delT" data-id="${t.id}" style="color:var(--warn)">${S.ui.confirm==="t"+t.id?"Confirmar":"Apagar"}</button></div>
     ${t.tipo==="comprar"?`<a class="sub" href="../grana/" style="color:var(--lilac)">Comprou? Lance o gasto no Bia$ →</a>`:""}
   </div>`;
 }
+const proj=id=>(S.projects||[]).find(p=>p.id===id);
+function tudoChips(f,cnt){return `<div class="chips">${[["entrada","Entrada"],["tudo","Tudo"],["casa","Casa"],["trab","Trabalho"],["rapido","≤ 15 min"],["comprar","Comprar"],["esperando","Esperando"],["algum","Algum dia"],["feito","Feitas"]].map(([k,l])=>`<button class="chip" type="button" data-a="filter" data-k="${k}" aria-pressed="${f===k}">${l} ${cnt?cnt(k):""}</button>`).join("")}<button class="chip" type="button" data-a="filter" data-k="projetos" aria-pressed="${f==="projetos"}">◆ Projetos</button><button class="chip" type="button" data-a="filter" data-k="modelos" aria-pressed="${f==="modelos"}">Modelos</button></div>`}
+function vProjects(){
+  const P=(S.projects||[]);
+  return `<section>${tudoChips("projetos")}
+    <p class="sub">Coisa grande que tem várias tarefas (um projeto do trabalho, a reforma do quarto, a viagem). Cada projeto precisa sempre de uma próxima ação.</p>
+    ${P.filter(p=>!p.done).map(p=>{const L=S.tasks.filter(t=>t.proj===p.id),d=L.filter(t=>t.done).length,nx=L.find(t=>open(t));return `<div class="proj"><div class="row" style="justify-content:space-between"><b style="font-family:var(--f-display);font-weight:400;font-size:20px;text-transform:uppercase">◆ ${esc(p.n)}</b><span class="tag ${p.area}">${p.area==="trab"?"trabalho":"casa"}</span></div>
+      <div class="pb"><i style="width:${L.length?d/L.length*100:0}%"></i></div><span class="sub">${d}/${L.length} feitas</span>
+      ${nx?`<span>próxima ação: <b>${esc(nx.t)}</b> <button class="mini" type="button" data-a="focus" data-id="${nx.id}">foco</button></span>`:`<span style="color:var(--warn)">sem próxima ação</span>`}
+      <div class="inline"><input class="dk" id="pt-${p.id}" placeholder="+ tarefa deste projeto"><button class="mini" type="button" data-a="projAdd" data-id="${p.id}">+</button></div>
+      <div class="row"><button class="mini" type="button" data-a="projDone" data-id="${p.id}">${S.ui.confirm==="pd"+p.id?"Confirmar":"Concluir projeto"}</button></div></div>`}).join("")||`<div class="empty">Nenhum projeto ainda.</div>`}
+    <div class="inline"><input class="dk" id="np-n" placeholder="Novo projeto"><select class="dk" id="np-a" style="flex:0 0 120px"><option value="trab">trabalho</option><option value="casa">casa</option></select><button class="ghost" type="button" data-a="projNew">Criar</button></div>
+  </section>`;
+}
+function vTemplates(){
+  return `<section>${tudoChips("modelos")}<p class="sub">Checklists prontas. Um toque e vira tarefa com todos os passos. Para criar a sua, abra uma tarefa com passos e toque em "Salvar como modelo".</p>
+    <div class="tasks">${(S.templates||[]).map((m,i)=>`<div class="task"><span class="tag ${m.area}" style="justify-self:start">${durTxt(m.min)}</span><div><div class="tt">${esc(m.n)}</div><p class="sub" style="margin-top:4px">${m.steps.map(esc).join(" · ")}</p>
+      <div class="row" style="margin-top:8px"><button class="mini" type="button" data-a="tplUse" data-i="${i}" data-v="today">Usar hoje</button><button class="mini" type="button" data-a="tplUse" data-i="${i}" data-v="">Usar sem data</button><button class="mini" type="button" data-a="tplDel" data-i="${i}" style="color:var(--warn)">${S.ui.confirm==="tp"+i?"Confirmar":"Apagar"}</button></div></div></div>`).join("")}</div></section>`;
+}
 function vTudo(){
   const f=S.ui.filter||"tudo", q=norm(S.ui.q||"");
-  const F={tudo:x=>open(x),casa:x=>open(x)&&x.area==="casa",trab:x=>open(x)&&x.area==="trab",comprar:x=>open(x)&&x.tipo==="comprar",rapido:x=>open(x)&&x.min<=15,algum:x=>!x.done&&x.someday,feito:x=>!!x.done};
-  let L=S.tasks.filter(F[f]||F.tudo).filter(x=>!q||norm(x.t).includes(q));
+  if(f==="projetos")return vProjects();
+  if(f==="modelos")return vTemplates();
+  const cxf=S.ui.cxf||"";
+  const F={entrada:x=>x.inbox&&!x.done&&!x.someday,esperando:x=>!x.done&&!!x.wait,tudo:x=>open(x),casa:x=>open(x)&&x.area==="casa",trab:x=>open(x)&&x.area==="trab",comprar:x=>open(x)&&x.tipo==="comprar",rapido:x=>open(x)&&x.min<=15,algum:x=>!x.done&&x.someday,feito:x=>!!x.done};
+  let L=S.tasks.filter(F[f]||F.tudo).filter(x=>!q||norm(x.t).includes(q)).filter(x=>!cxf||x.ctx===cxf);
   L.sort(f==="feito"?(a,b)=>a.done<b.done?1:-1:(a,b)=>(b.prio-a.prio)||((a.due||"9999")<(b.due||"9999")?-1:(a.due||"9999")>(b.due||"9999")?1:0)||((a.when||"9999")<(b.when||"9999")?-1:1));
   const cnt=k=>S.tasks.filter(F[k]).length;
   return `<section>
-    <div class="chips">${[["tudo","Tudo"],["casa","Casa"],["trab","Trabalho"],["rapido","≤ 15 min"],["comprar","Comprar"],["algum","Algum dia"],["feito","Feitas"]].map(([k,l])=>`<button class="chip" type="button" data-a="filter" data-k="${k}" aria-pressed="${f===k}">${l} ${cnt(k)}</button>`).join("")}</div>
+    ${tudoChips(f,cnt)}
+    <div class="ctxrow"><span>onde:</span><button class="chip" type="button" data-a="cxf" data-k="" aria-pressed="${!cxf}">qualquer</button>${Object.entries(CTX).map(([k,v])=>`<button class="chip" type="button" data-a="cxf" data-k="${k}" aria-pressed="${cxf===k}">${v}</button>`).join("")}</div>
+    ${f==="entrada"&&L.length?`<button class="bigbtn" type="button" data-a="triOpen" style="font-size:22px">Triar ${L.length}, uma por uma</button>`:""}
     <input class="dk" id="q" data-ui="q" value="${esc(S.ui.q||"")}" placeholder="procurar" aria-label="Procurar">
     ${f==="comprar"&&L.length?`<p class="sub">Lista de compras. Marque quando comprar e lance o gasto no Bia$.</p>`:""}
     ${L.length?`<div class="tasks">${L.map(taskRow).join("")}</div>`:`<div class="empty">${f==="feito"?"Nada concluído ainda.":"Nada aqui. Use o campo do topo para despejar o que está na cabeça: uma coisa por vez, sem organizar."}</div>`}
@@ -623,7 +806,7 @@ function vFoco(){
   const tot=FT.total||t.min*60, frac=FT.end?(FT.paused?FT.paused:left)/tot:1;
   const C=2*Math.PI*45;
   return `<section class="focus">
-    <span class="tag ${t.area}">${t.area==="trab"?"trabalho":"casa"} · ${TIPOS[t.tipo]}</span>
+    <span class="tag ${t.area}">${t.area==="trab"?"trabalho":"casa"} · ${TIPOS[t.tipo]}${t.spent?` · já foram ${durTxt(Math.max(1,Math.round(t.spent/60)))}`:""}</span>
     <h2>${esc(t.t)}</h2>
     <div class="ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45" fill="none" stroke="#352f44" stroke-width="8"/><circle id="arc" cx="50" cy="50" r="45" fill="none" stroke="#ff3ea5" stroke-width="8" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-frac)}" stroke-linecap="butt"/></svg>
       <div class="tm"><div><span id="ftm">${FT.end?clock(FT.paused||left):clock(t.min*60)}</span><small>${run?"focando":FT.paused?"pausado":"pronta?"}</small></div></div></div>
@@ -641,7 +824,7 @@ function ftick(){
   const el=$("#ftm"),arc=$("#arc");if(!FT.end||FT.paused)return;
   const left=Math.max(0,Math.round((FT.end-Date.now())/1000));
   if(el)el.textContent=clock(left);if(arc){const C=2*Math.PI*45;arc.setAttribute("stroke-dashoffset",C*(1-left/FT.total))}
-  if(left<=0){clearInterval(FT.int);FT={end:0,total:0,int:null,paused:0};award(5,"Bloco de foco completo");burst();toast("Tempo! Bloco de foco completo. Pausa de 5 min ou mais um?");try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}render()}
+  if(left<=0){ftAccum();clearInterval(FT.int);FT={end:0,total:0,int:null,paused:0};award(5,"Bloco de foco completo");burst();const r=reward();toast(`Bloco completo! Pausa: ${r[1]}`);try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}render()}
 }
 
 /* =====================================================================
@@ -649,9 +832,15 @@ function ftick(){
    ===================================================================== */
 function vMais(){
   const sec=S.ui.mais||"avisos";
-  const tabs=[["avisos","Avisos no iPhone"],["rotinas","Rotinas"],["limpeza","Limpeza"],["conquistas","Conquistas"],["ajustes","Ajustes"]];
+  const tabs=[["avisos","Avisos no iPhone"],["rotinas","Rotinas"],["limpeza","Limpeza"],["recompensas","Recompensas"],["conquistas","Conquistas"],["ajustes","Ajustes"]];
   let b="";
-  if(sec==="avisos") b=`<article class="box"><div class="chk"></div><h3>1. Compromissos e tarefas com hora</h3><p style="margin-top:8px">Em cada compromisso ou tarefa com hora tem o botão <b>Avisar no iPhone</b>. Ele cria o evento no <b>Calendário do iPhone</b> já com alarme, e o próprio iPhone toca o aviso na hora, com o Destrava fechado.</p>
+  if(sec==="recompensas") b=`<p class="sub">Menu de recompensas: o app sorteia uma quando você termina as 3 de hoje, engole o sapo ou fecha um bloco de foco. Coloque coisas que você gosta de verdade.</p>
+    <div class="tasks">${(S.dopa||[]).map((d,i)=>`<div class="step"><span class="tag">${esc(d[0])}</span><span>${esc(d[1])}</span><button class="x" type="button" data-a="dopaRm" data-i="${i}" aria-label="Apagar">×</button></div>`).join("")}</div>
+    <div class="inline"><select class="dk" id="nd-s" style="flex:0 0 110px"><option>5 min</option><option>30 min</option><option>especial</option></select><input class="dk" id="nd-t" placeholder="+ recompensa"><button class="mini" type="button" data-a="dopaAdd">+</button></div>`;
+  if(sec==="avisos") b=`<article class="box c"><h3>0. Alarmes diários (recomendado)</h3><p style="margin-top:8px">Cria no Calendário do iPhone três alarmes que se repetem sozinhos: <b>planejar o dia</b>, <b>fechar o dia</b> e a <b>revisão da semana</b> no domingo. Você faz isso uma vez só.</p>
+      <div class="form" style="margin-top:8px"><label>Planejar às<input type="time" data-set="planH" value="${esc(S.settings.planH)}"></label><label>Fechar o dia às<input type="time" data-set="closeH" value="${esc(S.settings.closeH)}"></label></div>
+      <button class="ghost pk" type="button" data-a="alarms" style="margin-top:10px">Criar alarmes no Calendário</button></article>
+    <article class="box"><div class="chk"></div><h3>1. Compromissos e tarefas com hora</h3><p style="margin-top:8px">Em cada compromisso ou tarefa com hora tem o botão <b>Avisar no iPhone</b>. Ele cria o evento no <b>Calendário do iPhone</b> já com alarme, e o próprio iPhone toca o aviso na hora, com o Destrava fechado.</p>
       <ol class="how" style="margin-top:8px"><li>Toque em <b>Avisar no iPhone</b>.</li><li>Abre uma tela do Calendário: toque em <b>Adicionar</b> (ou "Adicionar todos").</li><li>Pronto. Se não abrir pelo app instalado, faça o mesmo pelo Safari.</li></ol></article>
     <article class="box p"><div class="chk"></div><h3>2. Empurrão diário automático</h3><p style="margin-top:8px">O app <b>Atalhos</b> do iPhone pode abrir o Destrava sozinho todo dia, por exemplo às 8h para escolher as 3 de hoje e às 21h para a rotina da noite.</p>
       <ol class="how" style="margin-top:8px"><li>Abra o app <b>Atalhos</b> → aba <b>Automação</b> → <b>Nova automação</b> (ou +).</li><li>Escolha <b>Horário do Dia</b>, coloque 08:00, marque <b>Diariamente</b> e <b>Executar imediatamente</b>.</li><li>Em ação, procure <b>Abrir URL</b> e cole:<br><input class="dk" readonly value="${esc(location.href.split("#")[0])}" onclick="this.select()" style="margin-top:6px"></li><li>Repita para a noite, se quiser.</li></ol></article>
@@ -667,7 +856,8 @@ function vMais(){
       <h2 class="label">Últimos 7 dias</h2>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:120px">${wk.map(d=>{const n=(S.log[d]||[]).length;return `<div style="display:grid;gap:4px;justify-items:center;height:100%;align-content:end"><span class="sub">${n||""}</span><div style="width:100%;height:${n/mx*80}px;background:linear-gradient(var(--pink),var(--purple));min-height:${n?4:0}px"></div><span class="sub">${DOWN[dow(d)]}</span></div>`}).join("")}</div>`}
   if(sec==="ajustes") b=`<div class="form"><label class="full">Seu nome<input data-set="name" value="${esc(S.settings.name)}"></label><label>Acordo por volta de<input type="time" data-set="wakeH" value="${esc(S.settings.wakeH)}"></label><label>Durmo por volta de<input type="time" data-set="sleepH" value="${esc(S.settings.sleepH)}"></label></div>
-    <p class="sub">Os horários servem para mostrar o tempo livre do dia.</p>
+    <p class="sub">Os horários servem para mostrar o tempo livre do dia e encaixar as tarefas.</p>
+    <article class="box c"><h3>Calibrador de tempo</h3><p style="margin-top:6px">${S.tasks.filter(t=>t.done&&t.spent>60).length>=3?`Pelos seus focos, você leva em média <b>${fmtF(factor())}×</b> o tempo que estima. O encaixe automático já usa essa folga.`:`Ainda aprendendo. Faça pelo menos 3 tarefas pelo modo Foco e eu descubro quanto você realmente leva. Até lá uso folga de 1,25×.`}</p></article>
     <h2 class="label">Backup</h2><p class="sub">Tudo fica só neste celular. Copie o backup de vez em quando e guarde nas Notas.</p>
     <div class="row"><button class="ghost" type="button" data-a="copyJson">Copiar backup</button></div>
     <textarea id="backupBox" placeholder="Cole aqui um backup e toque em Restaurar" aria-label="Backup"></textarea>
@@ -682,14 +872,14 @@ function vMais(){
 function render(){
   hello();
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===S.ui.tab)));
-  $("#view").innerHTML=S.ui.talk?vTalk():({hoje:vHoje,agenda:vAgenda,tudo:vTudo,foco:vFoco,mais:vMais}[S.ui.tab]||vHoje)();
+  $("#view").innerHTML=S.ui.ritual?vRitual():S.ui.triage?vTriage():S.ui.talk?vTalk():({hoje:vHoje,agenda:vAgenda,tudo:vTudo,foco:vFoco,mais:vMais}[S.ui.tab]||vHoje)();
   document.getElementById("storeWarn").hidden=storeOk;
 }
 function rerender(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function go(tab){S.ui.tab=tab;S.ui.confirm=null;save();render();window.scrollTo(0,0)}
 setInterval(()=>{if(S.ui.tab==="foco")ftick()},500);
 setInterval(()=>{if(S.ui.tab==="hoje"&&!document.activeElement.matches("input,textarea,select"))rerender()},60000);
-$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b){if(S.ui.talk){stopRec();S.ui.talk=null}go(b.dataset.tab)}});
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b){if(S.ui.talk){stopRec();S.ui.talk=null}S.ui.ritual=null;S.ui.triage=false;go(b.dataset.tab)}});
 $("#micBtn").addEventListener("click",()=>{S.ui.talk=S.ui.talk||{text:$("#capIn").value,items:[]};$("#capIn").value="";$("#parsed").innerHTML="";render();window.scrollTo(0,0);setTimeout(()=>{const t=$("#talkTxt");if(t)t.focus()},50)});
 
 /* captura */
@@ -704,18 +894,23 @@ $("#view").addEventListener("input",e=>{const t=e.target;
   if(t.dataset.ui){S.ui[t.dataset.ui]=t.value;clearTimeout(t._d);t._d=setTimeout(()=>{rerender();const n=document.getElementById(t.id);if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length)}catch(x){}}},300);return}
   if(t.dataset.te&&t.type!=="checkbox"&&t.tagName==="INPUT"&&t.type==="text"){const [id,k]=t.dataset.te.split(".");task(id)[k]=t.value;save();return}
   if(t.dataset.set){S.settings[t.dataset.set]=t.value;save();return}
+  if(t.dataset.good){dayState(today()).good=t.value;save();return}
+  if(t.dataset.wfoco){(S.weekly[t.dataset.wfoco]=S.weekly[t.dataset.wfoco]||{}).foco=t.value;save();return}
+  if(t.dataset.waitf){const [id,k]=t.dataset.waitf.split(".");task(id).wait[k]=t.value;save();return}
   if(t.dataset.lz!=null){S.limpeza[t.dataset.lz].z=t.value;save();return}
 });
 $("#view").addEventListener("change",e=>{const t=e.target;
   if(t.dataset.te){const [id,k]=t.dataset.te.split("."),x=task(id);let v=t.type==="checkbox"?t.checked:t.value;if(["min","energy"].includes(k))v=+v;if(k==="recur")v=v?+v:null;if(["when","time","due"].includes(k)&&!v)v=null;x[k]=v;save(true);rerender();return}
   if(t.dataset.set){S.settings[t.dataset.set]=t.value;save(true);return}
+  if(t.dataset.wait){const x=task(t.dataset.wait);x.wait=t.checked?{who:"",until:addDays(today(),3)}:null;if(t.checked)x.inbox=false;save(true);rerender();return}
+  if(t.dataset.waitf){const [id,k]=t.dataset.waitf.split(".");task(id).wait[k]=t.value;save(true);return}
 });
 $("#view").addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.fold){(S.ui.folds=S.ui.folds||{})[d.dataset.fold]=d.open;save()}},true);
-$("#view").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("input[id^=ns-],#fs-new,input[id^=nr-],input[id^=nl-]")){e.preventDefault();const b=e.target.parentElement.querySelector("button");if(b)b.click()}});
+$("#view").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("input[id^=ns-],#fs-new,input[id^=nr-],input[id^=nl-],input[id^=pt-],#np-n,#nd-t")){e.preventDefault();const b=e.target.parentElement.querySelector("button");if(b)b.click()}});
 $("#view").addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a, id=b.dataset.id, t=id?task(id):null, td=today();
-  if(!["delT","delEv"].includes(a))S.ui.confirm=null;
+  if(!["delT","delEv","projDone","tplDel"].includes(a))S.ui.confirm=null;
   const conf=(k,fn)=>{if(S.ui.confirm===k){fn();S.ui.confirm=null}else S.ui.confirm=k};
   switch(a){
     case "recStart":startRec();return;
@@ -726,6 +921,44 @@ $("#view").addEventListener("click",e=>{
     case "talkSave":{const n=saveTalk();S.ui.talk=null;save(true);toast(`${n} ${n===1?"coisa anotada":"coisas anotadas"}. Tirou da cabeça!`);go("tudo");return}
     case "talkClose":stopRec();S.ui.talk=null;break;
     case "energy":S.energy=+b.dataset.v;break;
+    case "ctxSet":S.ctx=b.dataset.k;break;
+    case "cxf":S.ui.cxf=b.dataset.k;break;
+    case "rOpen":S.ui.ritual={k:b.dataset.k,step:0};window.scrollTo(0,0);break;
+    case "rStep":{const R=S.ui.ritual;R.step=Math.max(0,R.step+ +b.dataset.v);window.scrollTo(0,0);break}
+    case "rClose":S.ui.ritual=null;break;
+    case "rDone":{const R=S.ui.ritual;if(R.k==="plan"){dayState(td).planned=true;award(10,"Planejou o dia");toast("Dia planejado. Agora é só seguir o cartão Agora.")}
+      if(R.k==="close"){dayState(td).closed=true;award(10,"Fechou o dia");toast("Dia fechado. Descansa, você merece.")}S.ui.ritual=null;burst();break}
+    case "r3":case "r3t":{const d=a==="r3"?td:addDays(td,1),L=(S.three[d]=S.three[d]||[]).filter(x=>task(x)),j=L.indexOf(id);if(j>=0)L.splice(j,1);else if(L.length<3){L.push(id);t.when=d;t.inbox=false}else{toast("Já tem 3. Tire uma antes.");return}S.three[d]=L;break}
+    case "frog":{t.frog=t.frog===td?null:td;if(t.frog)(S.three[td]||[]).forEach(x=>{const o=task(x);if(o&&o!==t&&o.frog===td)o.frog=null});break}
+    case "rFit":{const r=autoSchedule(td,S.three[td]||[]);S.ui.ritual.prev=r;break}
+    case "rCal":case "calDay":{const L=(S.three[td]||[]).map(task).filter(x=>x&&x.time&&!x.done);if(!L.length){toast("Encaixe as tarefas primeiro.");return}const f=factor();sendToCalendar(L.map(x=>({id:x.id+td,t:(x.frog===td?"🐸 ":"")+x.t,date:td,start:x.time,end:toH(Math.min(1439,toMin(x.time)+Math.ceil(x.min*f))),remind:5})));return}
+    case "fitToday":{const r=autoSchedule(td,S.three[td]||[]);toast(r.placed.length?`Encaixei ${r.placed.length}: ${r.placed.map(p=>toH(p.s)).join(", ")}${r.left.length?` · ${r.left.length} sem vaga`:""}`:"Não achei horário livre hoje.");break}
+    case "lateOne":{if(b.dataset.v==="today")t.when=td;else if(b.dataset.v==="tomorrow"){t.when=addDays(td,1);t.time=null}else if(b.dataset.v==="someday"){t.someday=true;t.when=null;t.time=null}else S.tasks=S.tasks.filter(x=>x.id!==id);break}
+    case "triOpen":S.ui.triage=true;S.ui.ritual=null;window.scrollTo(0,0);break;
+    case "triClose":S.ui.triage=false;break;
+    case "triArea":t.area=t.area==="trab"?"casa":"trab";break;
+    case "triCtx":t.ctx=b.dataset.k;break;
+    case "tri":{const v=b.dataset.v;t.inbox=false;
+      if(v==="now"){completeTask(t)}else if(v==="today")t.when=td;else if(v==="tomorrow")t.when=addDays(td,1);else if(v==="week")t.when=addDays(td,(8-dow(td))%7||7);
+      else if(v==="someday")t.someday=true;else if(v==="del")S.tasks=S.tasks.filter(x=>x.id!==id);
+      else if(v==="wait"){t.wait={who:"",until:addDays(td,3)}}
+      else if(v==="steps"){if(!t.steps.length)t.steps=(STEP_TPL[t.tipo]||STEP_TPL.outro).map(x=>({t:x,ok:false}));t.when=t.when||td;S.ui.triage=false;S.ui.open=t.id;S.ui.filter="tudo";save(true);go("tudo");setTimeout(()=>{const el=document.getElementById("t-"+t.id);if(el)el.scrollIntoView({block:"center"})},50);return}
+      if(v!=="now")toast({today:"Para hoje",tomorrow:"Para amanhã",week:"Semana que vem",someday:"Algum dia",del:"Apagada",wait:"Esperando: cobrar em 3 dias"}[v]);break}
+    case "waitLater":t.wait.until=addDays(td,3);break;
+    case "waitDone":t.wait=null;t.when=td;toast("Voltou para a lista de hoje.");break;
+    case "weekDone":{const ws=addDays(td,-((dow(td)+6)%7));(S.weekly[ws]=S.weekly[ws]||{}).done=true;award(20,"Revisão da semana");S.ui.ritual=null;burst();toast("Semana revisada. Você está no controle.");break}
+    case "projNew":{const n=$("#np-n").value.trim();if(!n)return;(S.projects=S.projects||[]).push({id:uid(),n,area:$("#np-a").value,done:false});break}
+    case "projAdd":{const v=$("#pt-"+id).value.trim(),P=proj(id);if(!v)return;const p=parseCap(v);S.tasks.push({id:uid(),ctx:p.ctx,t:p.t,tipo:p.tipo,area:P.area,min:p.min,energy:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:td,done:null,someday:false,proj:id});break}
+    case "projDone":conf("pd"+id,()=>{proj(id).done=true;award(25,"Projeto concluído: "+proj(id).n);burst()});break;
+    case "tplUse":{const m=S.templates[+b.dataset.i];const x={id:uid(),t:m.n,tipo:m.tipo,area:m.area,ctx:m.ctx||"",min:m.min,energy:2,when:b.dataset.v?td:null,time:null,due:null,steps:m.steps.map(s=>({t:s,ok:false})),prio:false,created:td,done:null,someday:false};S.tasks.push(x);S.ui.filter="tudo";S.ui.open=x.id;toast("Criada com "+m.steps.length+" passos.");break}
+    case "tplSave":{S.templates.push({n:t.t,tipo:t.tipo,area:t.area,ctx:t.ctx||"",min:t.min,steps:t.steps.map(s=>s.t)});toast("Virou modelo. Está em Tudo → Modelos.");break}
+    case "tplDel":conf("tp"+b.dataset.i,()=>{S.templates.splice(+b.dataset.i,1)});break;
+    case "dopaAdd":{const v=$("#nd-t").value.trim();if(!v)return;S.dopa.push([$("#nd-s").value,v]);break}
+    case "dopaRm":S.dopa.splice(+b.dataset.i,1);break;
+    case "alarms":{const base=location.href.split("#")[0],d0=today(),nextSun=addDays(d0,(7-dow(d0))%7);
+      sendToCalendar([{id:"plan-diario",t:"Destrava: planejar o dia",date:d0,start:S.settings.planH,end:toH(toMin(S.settings.planH)+10),remind:0,rrule:"FREQ=DAILY",url:base},
+        {id:"fechar-diario",t:"Destrava: fechar o dia",date:d0,start:S.settings.closeH,end:toH(toMin(S.settings.closeH)+10),remind:0,rrule:"FREQ=DAILY",url:base},
+        {id:"revisao-semanal",t:"Destrava: revisão da semana",date:nextSun,start:"18:00",end:"18:15",remind:0,rrule:"FREQ=WEEKLY;BYDAY=SU",url:base}]);return}
     case "pick":{const p=pickOne(Math.min(freeNow(),180));if(!p){toast("Lista vazia. Despeja alguma coisa no topo.");return}S.ui.focus=p.id;go("foco");return}
     case "pick3":S.ui.pick3=b.dataset.i===""?null:+b.dataset.i;break;
     case "set3":{const L=(S.three[td]=S.three[td]||[]).filter(x=>task(x));if(L.length<3)L.push(id);S.three[td]=L;S.ui.pick3=null;const x=task(id);if(!x.when||x.when<td)x.when=td;break}
@@ -758,10 +991,10 @@ $("#view").addEventListener("click",e=>{
     case "cal":{const ev=S.events.find(x=>x.id===id);if(!ev.start){toast("Coloque o horário para o iPhone avisar.");return}sendToCalendar([ev]);return}
     case "calWeek":{const sel=S.ui.day||td,st=addDays(sel,-((dow(sel)+6)%7)),en=addDays(st,6);sendToCalendar(S.events.filter(e=>e.date>=st&&e.date<=en&&e.start));return}
     case "fStart":startFocus(+b.dataset.v);return;
-    case "fPause":FT.paused=Math.max(0,Math.round((FT.end-Date.now())/1000));break;
-    case "fResume":FT.end=Date.now()+FT.paused*1000;FT.paused=0;break;
-    case "fStop":clearInterval(FT.int);FT={end:0,total:0,int:null,paused:0};break;
-    case "fLeave":S.ui.focus=null;FT={end:0,total:0,int:null,paused:0};break;
+    case "fPause":ftAccum();FT.paused=Math.max(0,Math.round((FT.end-Date.now())/1000));break;
+    case "fResume":FT.end=Date.now()+FT.paused*1000;FT.paused=0;FT.run=Date.now();break;
+    case "fStop":ftAccum();clearInterval(FT.int);FT={end:0,total:0,int:null,paused:0};break;
+    case "fLeave":ftAccum();S.ui.focus=null;FT={end:0,total:0,int:null,paused:0};break;
     case "mais":S.ui.mais=b.dataset.k;break;
     case "addRot":{const v=$("#nr-"+b.dataset.k).value.trim();if(!v)return;S.rot[b.dataset.k].push(v);break}
     case "rmRot":S.rot[b.dataset.k].splice(+b.dataset.i,1);break;
@@ -772,7 +1005,7 @@ $("#view").addEventListener("click",e=>{
   }
   save(true);rerender();
 });
-function startFocus(m){FT={end:Date.now()+m*60000,total:m*60,paused:0,int:null};award(3,"");S.log[today()].pop();save(true);rerender()}
+function startFocus(m){ftAccum();FT={end:Date.now()+m*60000,total:m*60,paused:0,int:null,task:S.ui.focus,run:Date.now()};award(3,"");S.log[today()].pop();save(true);rerender()}
 
 try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude/.test(location.hostname))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
 save(true);render();
