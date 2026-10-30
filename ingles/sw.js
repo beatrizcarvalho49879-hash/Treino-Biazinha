@@ -1,5 +1,5 @@
-const C="loud-v2";
-const CORE=["./","index.html","manifest.json","icon-skull-180.png","icon-skull-192.png","icon-skull-512.png"];
+const C="loud-v3";
+const CORE=["./","index.html","manifest.json","icon-star-180.png","icon-star-192.png","icon-star-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CORE)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x.startsWith("loud-")&&x!==C).map(x=>caches.delete(x)))));self.clients.claim()});
 // páginas: versão nova quando há internet, cópia guardada offline; o resto (e as fontes): cópia guardada primeiro
