@@ -211,6 +211,9 @@ textarea{font-family:var(--f-type);font-size:12px;min-height:100px}
 .dots{display:flex;gap:6px;margin:6px 0 10px}.dots i{flex:1;height:6px;background:var(--line)}.dots i.on{background:var(--pink)}
 .wk{display:grid;grid-template-columns:24px 1fr;gap:8px;padding:8px 0;border-bottom:2px dashed var(--line)}.wk>span{color:var(--dim);font-size:18px}.wk.ok>span{color:var(--ok)}.wk b{display:block;margin-bottom:4px}
 .nowc{border-color:var(--cyan);box-shadow:5px 5px 0 var(--pink)}
+.bigbtn.rec{background:var(--fg);color:var(--ink)}
+.recdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--pink);margin-right:6px;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.2}}
 .ritual{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:2px solid var(--cyan);background:var(--ink3);padding:12px;color:var(--fg);text-align:left;width:100%}
 .ritual b{font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.04em;text-transform:uppercase;display:block}
 .ritual small{font-family:var(--f-type);font-size:12px;color:var(--dim)}
@@ -390,27 +393,47 @@ function splitSpeech(text){
     return {...p,on:true,raw:x};
   });
 }
-let rec=null;
+let rec=null, recOn=false, recTimer=null;
 function speechOK(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition)}
+/* junta os pedaços reconhecidos. O Safari do iPhone às vezes repete o trecho anterior dentro do novo: aí substitui em vez de somar */
+function mergeResults(results){
+  let acc="";
+  for(let i=0;i<results.length;i++){const tr=String(results[i][0].transcript||"").trim();if(!tr)continue;
+    const a=norm(acc).trim(),b=norm(tr);
+    if(a&&b.startsWith(a))acc=tr;else if(a&&a.endsWith(b))continue;else acc=(acc?acc+" ":"")+tr}
+  return acc;
+}
 function startRec(){
   const R=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!R){S.ui.talk.err="Seu iPhone não liberou a gravação dentro do app. Toque no campo de texto e use o microfone do teclado.";rerender();return}
-  try{rec=new R();rec.lang="pt-BR";rec.continuous=true;rec.interimResults=true;
-    const base=($("#talkTxt")||{}).value||"";let fin="";
-    rec.onresult=ev=>{let inter="";for(let i=ev.resultIndex;i<ev.results.length;i++){const r=ev.results[i];if(r.isFinal)fin+=r[0].transcript+". ";else inter+=r[0].transcript}
-      const t=(base?base.trim()+" ":"")+fin+inter;S.ui.talk.text=t;const el=$("#talkTxt");if(el)el.value=t};
-    rec.onerror=ev=>{S.ui.talk.err=ev.error==="not-allowed"||ev.error==="service-not-allowed"?"O iPhone bloqueou o microfone para este app. Use o microfone do teclado (toque no campo de texto).":"A gravação parou ("+ev.error+"). Tente de novo ou use o microfone do teclado.";S.ui.talk.rec=false;rerender()};
-    rec.onend=()=>{if(S.ui.talk&&S.ui.talk.rec){S.ui.talk.rec=false;rerender()}};
-    rec.start();S.ui.talk.rec=true;S.ui.talk.err="";rerender();
-  }catch(e){S.ui.talk.err="Não consegui gravar aqui. Use o microfone do teclado.";S.ui.talk.rec=false;rerender()}
+  stopRec(true);
+  try{const r=new R();rec=r;r.lang="pt-BR";r.continuous=true;r.interimResults=true;
+    const base=(($("#talkTxt")||{}).value||"").trim();
+    r.onresult=ev=>{if(!recOn||rec!==r)return;const t=(base?base+" ":"")+mergeResults(ev.results);S.ui.talk.text=t;const el=$("#talkTxt");if(el)el.value=t};
+    r.onerror=ev=>{if(rec!==r)return;if(ev.error==="aborted"||ev.error==="no-speech"&&!recOn)return;
+      S.ui.talk.err=ev.error==="not-allowed"||ev.error==="service-not-allowed"?"O iPhone bloqueou o microfone para este app. Use o microfone do teclado (toque no campo de texto).":ev.error==="no-speech"?"Não ouvi nada. Toque em Gravar e fale logo em seguida.":"A gravação parou ("+ev.error+"). Tente de novo ou use o microfone do teclado.";
+      stopRec();rerender()};
+    r.onend=()=>{if(rec===r&&recOn){stopRec();save(true);rerender()}};
+    recOn=true;r.start();S.ui.talk.rec=true;S.ui.talk.err="";
+    clearTimeout(recTimer);recTimer=setTimeout(()=>{if(recOn){stopRec();toast("Parei depois de 3 minutos. Toque em Gravar para continuar.");rerender()}},180000);
+    rerender();
+  }catch(e){recOn=false;rec=null;S.ui.talk.err="Não consegui gravar aqui. Use o microfone do teclado.";S.ui.talk.rec=false;rerender()}
 }
-function stopRec(){try{rec&&rec.stop()}catch(e){}S.ui.talk.rec=false}
+/* parar de verdade: congela o texto na hora, pede para parar e, se o iPhone ignorar, aborta */
+function stopRec(silent){
+  recOn=false;clearTimeout(recTimer);
+  if(S.ui.talk){S.ui.talk.rec=false;const el=$("#talkTxt");if(el&&!silent)S.ui.talk.text=el.value}
+  const r=rec;rec=null;if(!r)return;
+  try{r.onresult=null}catch(e){}
+  try{r.stop()}catch(e){}
+  setTimeout(()=>{try{r.abort()}catch(e){}},350);
+}
 function vTalk(){
   const T=S.ui.talk, items=T.items||[];
   return `<section><article class="box p"><div class="chk"></div><h3>Fala que eu anoto</h3>
     <p class="sub" style="margin-block:6px 10px">Fala tudo de uma vez, do jeito que vier. Ex.: "amanhã preciso ligar pro banco e comprar lâmpada, ah e consertar o chuveiro, e sexta tenho reunião às 15h".</p>
-    <div class="row" style="margin-bottom:10px">${T.rec?`<button class="bigbtn" type="button" data-a="recStop" style="font-size:22px">■ Parar</button>`:`<button class="bigbtn" type="button" data-a="recStart" style="font-size:22px">● Gravar</button>`}</div>
-    ${T.rec?`<p class="pep">ouvindo… pode falar</p>`:""}
+    <div class="row" style="margin-bottom:10px">${T.rec?`<button class="bigbtn rec" type="button" data-a="recStop" style="font-size:22px">■ Parar</button>`:`<button class="bigbtn" type="button" data-a="recStart" style="font-size:22px">● Gravar</button>`}</div>
+    ${T.rec?`<p class="pep"><span class="recdot"></span> ouvindo… pode falar. Toque em Parar quando terminar.</p>`:""}
     ${T.err?`<div class="warn">${esc(T.err)}</div>`:""}
     <textarea id="talkTxt" class="dk" style="min-height:140px;font-family:var(--f-body);font-size:16px" placeholder="Ou toque aqui e use o microfone do teclado do iPhone (embaixo, à direita do espaço)">${esc(T.text||"")}</textarea>
     <div class="row" style="margin-top:10px"><button class="ghost pk" type="button" data-a="talkParse">Organizar em itens</button><button class="ghost" type="button" data-a="talkClose">Fechar</button></div>
@@ -914,7 +937,7 @@ $("#view").addEventListener("click",e=>{
   const conf=(k,fn)=>{if(S.ui.confirm===k){fn();S.ui.confirm=null}else S.ui.confirm=k};
   switch(a){
     case "recStart":startRec();return;
-    case "recStop":stopRec();break;
+    case "recStop":stopRec();toast("Gravação parada.");break;
     case "talkParse":{stopRec();const txt=($("#talkTxt").value||"").trim();S.ui.talk.text=txt;S.ui.talk.items=txt?splitSpeech(txt):[];S.ui.talk.err=txt&&!S.ui.talk.items.length?"Não achei nada para anotar nesse texto.":"";break}
     case "talkOn":{const p=S.ui.talk.items[+b.dataset.i];p.on=!p.on;break}
     case "talkArea":{const p=S.ui.talk.items[+b.dataset.i];p.area=p.area==="trab"?"casa":"trab";break}
