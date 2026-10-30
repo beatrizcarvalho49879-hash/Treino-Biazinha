@@ -692,6 +692,9 @@ function integrations(date){
     (gr.recur||[]).filter(r=>r.kind==="out"&&!r.card&&ym>=r.start&&(!r.months||mdiff(r.start,ym)<r.months)&&(!r.end||ym<=r.end)).forEach(r=>{const d=`${ym}-${pad(Math.min(r.day||1,md(y,mo)))}`,dd=Math.round((new Date(d+"T12:00")-new Date(date+"T12:00"))/864e5);if(!(gr.paid||{})[`${r.id}|${ym}`]&&dd>=0&&dd<=3)soon.push(`${r.desc} (${dd===0?"hoje":dmy(d)})`)});
     (gr.cards||[]).forEach(c=>{const d=`${ym}-${pad(Math.min(c.venc||1,md(y,mo)))}`,dd=Math.round((new Date(d+"T12:00")-new Date(date+"T12:00"))/864e5);if(!(gr.fat||{})[`${c.id}|${ym}`]&&dd>=0&&dd<=3&&(gr.tx||[]).some(t=>t.card===c.id&&t.fatura===ym))soon.push(`fatura ${c.n} (${dd===0?"hoje":dmy(d)})`)});
     if(soon.length)out.push({k:"bia$",c:"var(--warn)",t:`Vence: ${soon.join(", ")}`,href:"../grana/"})}
+  const en=readApp("speak-loud-v1");
+  if(en&&en.settings){const m=(en.log||[]).filter(l=>l.date===date).reduce((a,l)=>a+l.min,0),g=en.settings.goal||30,due=(en.cards||[]).filter(c=>c.reps&&c.due&&c.due<=date).length,hw=(en.hw||[]).filter(h=>!h.done).length;
+    out.push({k:"inglês",c:"var(--cyan)",t:`Inglês: ${m} de ${g} min${due?` · ${due} cards`:""}${hw?` · ${hw} lição de casa`:""}`,href:"../ingles/"})}
   return out;
 }
 
@@ -1112,7 +1115,7 @@ function vMais(){
     <div class="row"><button class="ghost" type="button" data-a="copyJson">Copiar backup</button></div>
     <textarea id="backupBox" placeholder="Cole aqui um backup e toque em Restaurar" aria-label="Backup"></textarea>
     <div class="row"><button class="ghost" type="button" data-a="restore">Restaurar do texto</button><span class="sub" id="bkMsg"></span></div>
-    <p class="sub">Outros apps: <a href="../" style="color:var(--lilac)">Treino</a> · <a href="../vida/" style="color:var(--lilac)">Vida</a> · <a href="../grana/" style="color:var(--lilac)">Bia$</a></p>`;
+    <p class="sub">Outros apps: <a href="../" style="color:var(--lilac)">Treino</a> · <a href="../vida/" style="color:var(--lilac)">Vida</a> · <a href="../grana/" style="color:var(--lilac)">Bia$</a> · <a href="../ingles/" style="color:var(--lilac)">Speak Loud</a></p>`;
   return `<section><div class="chips">${tabs.map(([k,l])=>`<button class="chip" type="button" data-a="mais" data-k="${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>${b}</section>`;
 }
 

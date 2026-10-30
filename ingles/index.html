@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0d10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Speak Loud">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Speak Loud</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&display=swap">
+</head><body>
+<style>
+/* Speak Loud: inglês punk. Fundo escuro liso com um brilho vermelho, recortes de revista no logo,
+   vermelho / amarelo / branco. Cada vertente de estudo tem uma cor fixa. Tema escuro fixo, de propósito. */
+:root{
+  --bg:#0e0d10; --bg2:#18161b; --bg3:#232027; --line:#36313d; --fg:#f6f2e9; --dim:#a8a19b;
+  --red:#ff3b30; --yel:#ffd60a; --blu:#5b9cff; --grn:#3ee6a8; --vio:#c792ff;
+  --f-d:"Anton","HelveticaNeue-CondensedBlack","Futura-CondensedExtraBold",Impact,"Arial Narrow",sans-serif;
+  --f-t:"Special Elite","American Typewriter","Courier New",monospace;
+  --f-m:"Permanent Marker","Marker Felt","Chalkboard SE",cursive;
+  --f-b:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--fg);font-family:var(--f-b);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) calc(100px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(90% 40% at 100% 0%,rgba(255,59,48,.16),transparent 70%),radial-gradient(70% 35% at 0% 100%,rgba(255,214,10,.07),transparent 70%)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:16;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+a{color:var(--yel)}
+
+/* topo */
+.top{padding:calc(18px + env(safe-area-inset-top,0px)) 0 8px;display:grid;gap:8px}
+.logo{display:flex;flex-wrap:wrap;gap:4px;align-items:center;line-height:1;margin:0}
+.logo span{display:inline-block;padding:4px 6px 3px;font-size:30px;box-shadow:2px 2px 0 rgba(0,0,0,.6)}
+.logo .gap{width:10px;padding:0;box-shadow:none}
+.r1{background:var(--red);color:#111;font-family:var(--f-d);transform:rotate(-4deg)}
+.r2{background:var(--fg);color:#111;font-family:Georgia,serif;font-weight:700;transform:rotate(3deg)}
+.r3{background:var(--yel);color:#111;font-family:var(--f-m);transform:rotate(-2deg)}
+.r4{border:2px solid var(--fg);font-family:var(--f-t);transform:rotate(5deg)}
+.r5{background:#111;color:var(--fg);border:2px solid var(--red);font-family:var(--f-d);transform:rotate(-6deg)}
+.hello{font-family:var(--f-t);font-size:13.5px;color:var(--dim)}
+.hello b{color:var(--yel);font-weight:400}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(14,13,16,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:2px solid var(--red);
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+nav.tabs button{background:none;border:0;padding:10px 2px 8px;font-family:var(--f-d);font-size:14px;letter-spacing:.05em;color:var(--dim);text-transform:uppercase;min-width:0}
+nav.tabs button[aria-current="true"]{color:#111;background:var(--yel);transform:rotate(-1.5deg)}
+
+section{display:flex;flex-direction:column;gap:16px;padding-block:6px}
+.label{font-family:var(--f-d);font-size:21px;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.label::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--red),transparent)}
+.sub{font-family:var(--f-t);color:var(--dim);font-size:13px;margin:0}
+p{margin:0}
+
+/* cartões */
+.box{position:relative;background:var(--bg2);border:2px solid var(--line);padding:16px 14px 14px;border-radius:4px}
+.box.red{border-color:var(--red)} .box.yel{border-color:var(--yel)} .box.grn{border-color:var(--grn)} .box.blu{border-color:var(--blu)} .box.vio{border-color:var(--vio)}
+.box.tape::before{content:"";position:absolute;top:-10px;left:22px;width:74px;height:20px;background:rgba(255,214,10,.75);transform:rotate(-4deg)}
+.box h3{font-family:var(--f-d);font-size:22px;text-transform:uppercase;letter-spacing:.03em;line-height:1.1}
+.big{display:block;width:100%;border:0;background:var(--red);color:#111;font-family:var(--f-d);font-size:28px;letter-spacing:.06em;padding:14px;text-transform:uppercase;border-radius:4px;box-shadow:5px 5px 0 var(--yel)}
+.big small{display:block;font-family:var(--f-t);font-size:12.5px;letter-spacing:0;text-transform:none}
+.big:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--yel)}
+.big.y{background:var(--yel);box-shadow:5px 5px 0 var(--red)}
+.big.w{background:var(--fg);box-shadow:5px 5px 0 var(--red)}
+.btn{background:transparent;border:2px solid var(--fg);padding:9px 13px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--fg);border-radius:4px}
+.btn.r{border-color:var(--red);color:var(--red)} .btn.y{border-color:var(--yel);color:var(--yel)}
+.btn.on,.btn.fill{background:var(--fg);color:#111}
+.btn.fy{background:var(--yel);border-color:var(--yel);color:#111}
+.btn.fr{background:var(--red);border-color:var(--red);color:#111}
+.mini{background:transparent;border:1.5px solid currentColor;padding:6px 9px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg);border-radius:3px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row.sp{justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid var(--line);background:transparent;padding:7px 11px;font-size:13px;font-weight:700;color:var(--fg);border-radius:99px}
+.chip[aria-pressed="true"]{border-color:var(--yel);background:var(--yel);color:#111}
+.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border:1.5px solid var(--line);color:var(--dim);border-radius:3px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:6px}
+.empty{font-family:var(--f-t);color:var(--dim);border:2px dashed var(--line);padding:12px;font-size:13px;border-radius:4px}
+
+/* hoje */
+.today{display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:center}
+.ring{position:relative;width:132px;height:132px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .c b{font-family:var(--f-d);font-weight:400;font-size:38px;line-height:1}
+.ring .c small{font-family:var(--f-t);font-size:12px;color:var(--dim)}
+.strands{display:grid;gap:7px}
+.strand{display:grid;grid-template-columns:76px 1fr 44px;gap:8px;align-items:center;font-size:12.5px}
+.strand span:first-child{font-weight:700}
+.strand .bar{height:10px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.strand .bar i{display:block;height:100%;border-radius:99px}
+.strand em{font-style:normal;font-family:var(--f-t);color:var(--dim);text-align:right}
+.lens{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.lens button{border:2px solid var(--line);background:transparent;color:var(--fg);padding:8px 0;font-family:var(--f-d);font-size:17px;border-radius:4px}
+.lens button[aria-pressed="true"]{border-color:var(--red);background:var(--red);color:#111}
+.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.quick button{border:2px solid var(--line);background:var(--bg2);color:var(--fg);padding:12px 10px;text-align:left;border-radius:4px;display:grid;gap:2px}
+.quick button b{font-family:var(--f-d);font-weight:400;font-size:18px;letter-spacing:.03em;text-transform:uppercase}
+.quick button small{font-family:var(--f-t);font-size:12px;color:var(--dim)}
+.timer{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.timer .clk{font-family:var(--f-d);font-size:44px;line-height:1}
+.mission{font-family:var(--f-m);font-size:19px;line-height:1.3}
+
+/* atividade em andamento */
+.runbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--bg);padding:10px 0 8px;border-bottom:2px solid var(--line);display:grid;gap:6px}
+.runbar .row b{font-family:var(--f-d);font-weight:400;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.runbar .clk{font-family:var(--f-d);font-size:22px;color:var(--yel)}
+.prog{height:6px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--yel);transition:width .4s}
+.runbar.over{border-bottom-color:var(--yel)}
+.runbar.over .nextb{animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.runbar.over .nextb{animation:none}}
+
+/* card */
+.flash{background:var(--fg);color:#111;border-radius:4px;padding:22px 18px;min-height:220px;display:grid;align-content:center;gap:12px;text-align:center;position:relative;box-shadow:6px 6px 0 var(--red)}
+.flash .q{font-size:24px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.flash .a{font-size:20px;font-weight:700;color:#b3150d;overflow-wrap:anywhere}
+.flash .ex{font-family:var(--f-t);font-size:14px;color:#444}
+.flash .hint{font-family:var(--f-t);font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.08em}
+.flash .deck{position:absolute;top:8px;left:10px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#777}
+.say{border:2px solid #111;background:var(--yel);color:#111;border-radius:99px;padding:6px 14px;font-weight:800;justify-self:center}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.grades button{border:2px solid var(--line);background:var(--bg2);color:var(--fg);padding:10px 2px;border-radius:4px;display:grid;gap:2px;font-weight:800;font-size:14px}
+.grades button small{font-family:var(--f-t);font-weight:400;font-size:11.5px;color:var(--dim)}
+.grades .g1{border-color:var(--red)} .grades .g3{border-color:var(--grn)} .grades .g4{border-color:var(--blu)}
+
+/* quiz */
+.opts{display:grid;gap:8px}
+.opt{border:2px solid var(--line);background:var(--bg2);color:var(--fg);padding:14px 12px;text-align:left;font-size:17px;font-weight:700;border-radius:4px}
+.opt.ok{border-color:var(--grn);background:rgba(62,230,168,.12)}
+.opt.no{border-color:var(--red);background:rgba(255,59,48,.12)}
+.bigword{font-family:var(--f-d);font-size:46px;letter-spacing:.03em;text-align:center;text-transform:lowercase}
+.score{font-family:var(--f-t);font-size:13px;color:var(--dim);text-align:right}
+.diff span{margin-right:4px;font-size:17px}
+.diff .ok{color:var(--grn)} .diff .miss{color:var(--red);text-decoration:underline wavy}
+.sent{font-size:21px;font-weight:700;line-height:1.35}
+.sent.hid{filter:blur(7px);user-select:none}
+.round{display:grid;justify-items:center;gap:6px;text-align:center}
+.round .clk{font-family:var(--f-d);font-size:72px;line-height:1}
+.round .clk.done{color:var(--yel)}
+.rsteps{display:flex;gap:6px;justify-content:center}
+.rsteps i{width:44px;height:8px;background:var(--bg3);border-radius:99px}.rsteps i.on{background:var(--yel)}.rsteps i.now{background:var(--red)}
+.topic{font-family:var(--f-m);font-size:24px;line-height:1.25}
+
+/* treinar */
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.act{border:2px solid var(--line);background:var(--bg2);color:var(--fg);padding:12px;text-align:left;border-radius:4px;display:grid;gap:4px;align-content:start;min-height:112px;border-top-width:6px}
+.act b{font-family:var(--f-d);font-weight:400;font-size:20px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05}
+.act small{font-size:12.5px;color:var(--dim)}
+
+/* progresso */
+.nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.num{border:2px solid var(--line);padding:10px 12px;border-radius:4px;background:var(--bg2)}
+.num b{display:block;font-family:var(--f-d);font-weight:400;font-size:32px;line-height:1.05}
+.num small{font-family:var(--f-t);font-size:12px;color:var(--dim)}
+.chart{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:150px}
+.chart>div{display:grid;gap:3px;justify-items:center;height:100%;align-content:end}
+.chart .col{width:100%;display:flex;flex-direction:column-reverse;border-radius:3px;overflow:hidden;background:var(--bg3)}
+.chart .col i{display:block;width:100%}
+.chart small{font-family:var(--f-t);font-size:11px;color:var(--dim)}
+.goalline{position:relative}
+.loglist{display:grid;gap:6px}
+.logi{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 0;font-size:14px}
+.logi small{font-family:var(--f-t);color:var(--dim);font-size:12px}
+.x{border:0;background:none;color:var(--dim);font-size:18px;width:32px;height:32px}
+
+/* formulários */
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.form label,.fl{display:flex;flex-direction:column;gap:4px;font-family:var(--f-t);font-size:12px;color:var(--dim)}
+.form .full{grid-column:1/-1}
+input.f,select.f,textarea.f,.form input,.form select,.form textarea{background:var(--bg);border:2px solid var(--line);padding:10px;font-size:16px;color:var(--fg);border-radius:4px;width:100%;min-width:0}
+textarea.f,.form textarea{font-family:var(--f-b);min-height:96px;resize:vertical}
+details.fold{border:2px solid var(--line);border-radius:4px}
+details.fold>summary{cursor:pointer;padding:12px;font-family:var(--f-d);font-size:18px;letter-spacing:.05em;text-transform:uppercase;list-style:none;display:flex;justify-content:space-between}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"+";color:var(--red)}
+details.fold[open]>summary::after{content:"–"}
+details.fold>div{padding:0 12px 14px;display:grid;gap:10px}
+.sci{display:grid;gap:4px;border-left:4px solid var(--red);padding:2px 0 2px 12px}
+.sci b{font-family:var(--f-d);font-weight:400;font-size:19px;letter-spacing:.03em;text-transform:uppercase}
+.sci em{font-style:normal;font-family:var(--f-t);font-size:12px;color:var(--yel)}
+.sci p{font-size:14px}
+.sci small{font-size:13px;color:var(--dim)}
+.rec{display:grid;gap:3px;border-bottom:1px dashed var(--line);padding:8px 0}
+.rec b{font-size:15px}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:var(--yel);color:#111;padding:10px 14px;font-weight:800;max-width:calc(100% - 32px);text-align:center;border-radius:4px;box-shadow:4px 4px 0 var(--red)}
+.flashbg{position:fixed;inset:0;z-index:25;pointer-events:none;background:var(--yel);opacity:0;animation:fl .7s ease-out}
+@keyframes fl{20%{opacity:.35}100%{opacity:0}}
+.warn{font-family:var(--f-t);font-size:13px;background:var(--yel);color:#111;padding:6px 10px}
+ol.how{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="logo" aria-label="Speak Loud"><span class="r1">S</span><span class="r2">P</span><span class="r3">E</span><span class="r4">A</span><span class="r5">K</span><span class="gap"></span><span class="r3">L</span><span class="r1">O</span><span class="r4">U</span><span class="r2">D</span></h1>
+    <p class="hello" id="hello"></p>
+    <div class="warn" id="storeWarn" hidden>Este navegador não está guardando dados. Use o backup (aba Mais).</div>
+  </header>
+  <main id="view"></main>
+</div>
+<nav class="tabs" id="tabs" aria-label="Seções">
+  <button type="button" data-tab="hoje">Hoje</button>
+  <button type="button" data-tab="treinar">Treinar</button>
+  <button type="button" data-tab="cards">Cards</button>
+  <button type="button" data-tab="prog">Progresso</button>
+  <button type="button" data-tab="mais">Mais</button>
+</nav>
+
+<script>
+/* =====================================================================
+   CONTEÚDO (decks, erros comuns de brasileiros, pronúncia, frases, temas)
+   formato das listas: uma linha por item, campos separados por |
+   ===================================================================== */
+const DECKS={
+reuniao:{n:"Reuniões e trabalho",d:"frases prontas para calls e reuniões",c:`
+Let's get started.|Vamos começar.|OK everyone, let's get started.
+Could you walk me through it?|Você pode me explicar passo a passo?|Could you walk me through the timeline?
+Just to clarify, ...|Só para esclarecer, ...|Just to clarify, is the deadline Friday?
+Sorry to interrupt, but...|Desculpe interromper, mas...|Sorry to interrupt, but we're running out of time.
+Let me get back to you on that.|Deixa eu verificar e te retorno.|Good question. Let me get back to you on that.
+I'll keep you posted.|Vou te mantendo informado(a).|I'll keep you posted on the client's answer.
+Can we circle back to that later?|Podemos voltar nesse ponto depois?|Can we circle back to the fees later?
+What's the deadline for this?|Qual é o prazo para isso?|
+We're on the same page.|Estamos alinhados.|Great, so we're on the same page.
+That makes sense.|Faz sentido.|
+I see your point, but...|Entendo seu ponto, mas...|I see your point, but the contract says otherwise.
+Could you elaborate on that?|Você pode desenvolver melhor isso?|
+Let's touch base next week.|Vamos nos falar semana que vem.|
+I'm running a bit late.|Estou um pouco atrasada.|I'm running a bit late, I'll be there in ten minutes.
+You're on mute.|Você está no mudo.|
+Can you hear me okay?|Você está me ouvindo bem?|
+Let me share my screen.|Deixa eu compartilhar minha tela.|
+I'll send you a summary by email.|Vou te mandar um resumo por e-mail.|
+Does that work for you?|Isso funciona para você?|How about Tuesday at ten? Does that work for you?
+Moving on to the next item...|Passando para o próximo item...|
+To sum up, ...|Resumindo, ...|To sum up, we need two more weeks.
+I'm afraid I can't make it.|Infelizmente não vou conseguir ir.|I'm afraid I can't make it on Thursday.
+Let's put it on hold.|Vamos deixar isso em espera.|
+Who's in charge of this?|Quem é o responsável por isso?|
+We're running out of time.|Nosso tempo está acabando.|
+I'd like to follow up on...|Gostaria de dar seguimento a...|I'd like to follow up on yesterday's meeting.
+As far as I know, ...|Até onde eu sei, ...|As far as I know, the client hasn't signed yet.
+It's up to you.|Você que sabe. / Depende de você.|
+Could you send me that in writing?|Você pode me mandar isso por escrito?|
+I'll look into it.|Vou verificar isso.|I'll look into it and let you know by Friday.`},
+juridico:{n:"Inglês jurídico",d:"vocabulário de escritório e contrato",c:`
+lawyer / attorney|advogado(a)|She's a lawyer at a law firm in Fortaleza.
+law firm|escritório de advocacia|I work at a law firm.
+case law|jurisprudência|Is there any case law on this issue?
+jurisprudence|teoria do direito (falso amigo! jurisprudência = case law)|
+lawsuit|ação judicial, processo|The client filed a lawsuit against the bank.
+to file a lawsuit|ajuizar uma ação|We filed the lawsuit last week.
+to sue|processar (alguém)|The client wants to sue the supplier.
+plaintiff|autor(a) da ação|The plaintiff is claiming damages.
+defendant|réu / ré|The defendant denied the allegations.
+damages|indenização (perdas e danos)|The court awarded damages to the plaintiff.
+breach of contract|descumprimento contratual|This is a clear breach of contract.
+liability|responsabilidade (civil)|The company denies any liability.
+judgment|sentença (decisão do juiz)|The judgment was handed down yesterday.
+sentence|pena (criminal), não é sentença cível|In civil cases, say "judgment", not "sentence".
+appeal|recurso / apelação|We're going to appeal the decision.
+hearing|audiência|The hearing is scheduled for Monday.
+settlement|acordo (para encerrar o processo)|The parties reached a settlement.
+deadline|prazo|The deadline to file the appeal is fifteen days.
+statute|lei (escrita)|
+statute of limitations|prescrição|The statute of limitations has expired.
+power of attorney|procuração|We need a power of attorney signed by the client.
+articles of association|contrato social / estatuto|
+shareholder|acionista / sócio(a)|
+merger|fusão|The merger was approved last month.
+due diligence|auditoria jurídica|
+non-disclosure agreement (NDA)|acordo de confidencialidade|
+termination|rescisão|The contract allows termination with thirty days' notice.
+governing law|lei aplicável|
+jurisdiction|jurisdição / foro|
+shall|deverá (obrigação em contrato)|The Seller shall deliver the goods within ten days.
+hereby|pelo presente (instrumento)|The parties hereby agree as follows.
+whereas|considerando que|
+notwithstanding|não obstante|
+to enforce|fazer cumprir / executar|We need to enforce the judgment.
+waiver|renúncia (a um direito)|
+civil litigation|contencioso cível|I work in civil litigation.
+legal advice|consultoria jurídica|
+claim|pedido / pretensão|
+attorney-client privilege|sigilo entre advogado e cliente|`},
+falsos:{n:"Falsos amigos",d:"as armadilhas clássicas do português",c:`
+actually|na verdade (atualmente = currently)|Actually, I'm a lawyer.
+currently|atualmente|I'm currently working on a big case.
+pretend|fingir (pretender = intend)|He pretended to be sick.
+intend|pretender, ter a intenção|I intend to travel next year.
+push|empurrar (puxar = pull)|
+parents|pai e mãe (parentes = relatives)|My parents live in Fortaleza.
+relatives|parentes|
+library|biblioteca (livraria = bookstore)|
+college|faculdade (colégio = school)|
+eventually|no fim, por fim (eventualmente = occasionally)|Eventually, we won the case.
+assist|ajudar (assistir = watch)|
+attend|comparecer, frequentar (atender = answer)|I attended the hearing.
+realize|perceber (realizar = carry out)|I realized I was wrong.
+resume|retomar (currículo = résumé / CV)|Let's resume the meeting after lunch.
+sensible|sensato (sensível = sensitive)|That's a sensible decision.
+exquisite|requintado (esquisito = weird)|
+prejudice|preconceito (prejuízo = loss)|
+costume|fantasia (costume = habit)|
+novel|romance (livro)|
+appointment|consulta, horário marcado|I have a doctor's appointment.
+agenda|pauta da reunião (agenda pessoal = planner)|What's on the agenda today?
+argument|discussão, briga|
+data|dados (data = date)|
+lunch|almoço (lanche = snack)|
+legend|lenda (legenda = subtitles)|
+fabric|tecido (fábrica = factory)|
+injury|lesão (injúria = insult)|
+policy|política (de empresa), apólice|Our privacy policy has changed.
+tax|imposto (taxa = fee)|`},
+phrasal:{n:"Phrasal verbs",d:"os 25 que mais aparecem",c:`
+figure out|descobrir, entender|I need to figure out how to fix this.
+find out|descobrir (uma informação)|I found out about it yesterday.
+look up|procurar (no dicionário/internet)|Look it up on YouGlish.
+look forward to|estar ansiosa por (algo bom)|I look forward to hearing from you.
+put off|adiar|Stop putting it off!
+carry out|realizar, executar|We carried out the due diligence.
+come up with|ter (uma ideia), bolar|She came up with a great solution.
+deal with|lidar com|I deal with clients every day.
+get along (with)|se dar bem (com)|I get along with my team.
+give up|desistir|Never give up.
+go over|revisar|Let's go over the contract.
+set up|organizar, configurar|Can you set up a meeting?
+run out of|ficar sem|We ran out of time.
+turn down|recusar|They turned down the offer.
+bring up|mencionar, trazer à tona|Don't bring it up now.
+follow up|dar seguimento|I'll follow up with the client.
+catch up|colocar o papo/trabalho em dia|Let's catch up over coffee.
+show up|aparecer, comparecer|He didn't show up.
+point out|apontar, destacar|She pointed out a mistake.
+work out|dar certo; malhar|It worked out in the end.
+sort out|resolver, organizar|I'll sort it out.
+back up|apoiar; fazer backup|Can you back me up?
+call off|cancelar|They called off the meeting.
+take over|assumir|She took over the case.
+end up|acabar (fazendo algo)|We ended up staying late.`},
+diaadia:{n:"Dia a dia",d:"frases naturais de conversa",c:`
+How's it going?|Como vão as coisas?|
+I'm into...|Eu curto...|I'm into punk rock.
+I can't stand...|Não suporto...|I can't stand traffic.
+I'm used to...|Estou acostumada a...|I'm used to waking up early.
+I'm about to...|Estou prestes a...|I'm about to leave.
+No worries.|Sem problemas.|
+My bad.|Foi mal.|
+What do you mean?|Como assim?|
+Could you say that again, please?|Pode repetir, por favor?|
+How do you say ... in English?|Como se diz ... em inglês?|
+I've been working here for two years.|Trabalho aqui há dois anos.|
+It's on me.|Essa é por minha conta.|
+I'm starving.|Estou morrendo de fome.|
+I'm exhausted.|Estou exausta.|
+Never mind.|Deixa pra lá.|
+It doesn't matter.|Não importa.|
+Fair enough.|Justo. / Faz sentido.|
+Make yourself at home.|Fique à vontade.|
+Let me think.|Deixa eu pensar.|
+That sounds great!|Parece ótimo!|
+I didn't get it.|Não entendi.|
+Can I ask you something?|Posso te perguntar uma coisa?|
+I'd rather stay home.|Prefiro ficar em casa.|
+What have you been up to?|O que você tem feito?|`}};
+const MYDECKS={meus:"Minhas palavras",aula:"Das aulas",erros:"Meus erros"};
+
+const ERRORS=`
+I have 30 years.|I'm 30 (years old).|Idade usa "be": I'm 30.
+I am agree.|I agree.|"Agree" já é verbo: I agree / I don't agree.
+She explained me the problem.|She explained the problem to me.|Explain something TO someone.
+It depends of the client.|It depends on the client.|Depend ON.
+I'm married with João.|I'm married to João.|Married TO.
+People is nice.|People are nice.|"People" é plural.
+I didn't went.|I didn't go.|Depois de did/didn't, verbo na forma base.
+I live here since 2020.|I've lived here since 2020.|Começou no passado e continua: present perfect + since/for.
+I have a doubt.|I have a question.|Para perguntar use "question". "Doubt" é desconfiança.
+Can I make a question?|Can I ask a question?|ASK a question.
+I did a mistake.|I made a mistake.|MAKE a mistake.
+I lost the bus.|I missed the bus.|Perder transporte ou evento = miss.
+He said me the truth.|He told me the truth.|Tell + pessoa. Say + coisa.
+I need some informations.|I need some information.|Information é incontável.
+She gave me good advices.|She gave me good advice.|Advice é incontável (a piece of advice).
+I want that you come.|I want you to come.|Want + pessoa + to + verbo.
+Is raining.|It's raining.|Inglês precisa de sujeito: it.
+Is possible to change?|Is it possible to change?|Sujeito "it" obrigatório.
+The life is hard.|Life is hard.|Sem "the" para coisas em geral.
+I go to the work by car.|I go to work by car.|"Go to work", sem "the".
+We discussed about the contract.|We discussed the contract.|Discuss não leva "about".
+He entered in the room.|He entered the room.|Enter não leva "in".
+I pretend to travel.|I intend to travel.|Pretend = fingir.
+Everybody are here.|Everybody is here.|Everybody / everyone + singular.
+I'm boring today.|I'm bored today.|Bored = entediada. Boring = chata.
+I arrived in home.|I arrived home.|Home sem preposição com arrive / go / come.
+How do you call this in English?|What do you call this in English?|WHAT do you call...
+Since how long do you work here?|How long have you worked here?|How long + present perfect.
+I will travel in the next week.|I'm traveling next week.|Plano combinado: present continuous. "Next week" sem "in the".
+I stayed in home all day.|I stayed home all day.|Stay home, sem "in".
+She is more tall than me.|She is taller than me.|Adjetivo curto: -er.`;
+
+const PAIRS=`
+ship|sheep|/ɪ/ curto e relaxado × /iː/ longo, sorrindo
+live|leave|/ɪ/ curto × /iː/ longo
+sit|seat|/ɪ/ curto × /iː/ longo
+bit|beat|/ɪ/ curto × /iː/ longo
+full|fool|/ʊ/ curto × /uː/ longo
+pull|pool|/ʊ/ curto × /uː/ longo
+bad|bed|/æ/ boca bem aberta × /e/
+man|men|/æ/ boca bem aberta × /e/
+cat|cut|/æ/ × /ʌ/ (um "a" fechado e curto)
+cap|cup|/æ/ × /ʌ/
+think|sink|TH: língua entre os dentes, só sopro
+thank|tank|TH: língua entre os dentes, só sopro
+three|tree|TH: língua entre os dentes, só sopro
+then|den|TH sonoro: língua nos dentes, vibrando
+they|day|TH sonoro: língua nos dentes, vibrando
+walk|work|"walk" não tem R. "work" tem R e boca menor
+law|low|/ɔː/ ("ló") × /oʊ/ ("lou")
+caught|coat|/ɔː/ × /oʊ/
+hit|heat|/ɪ/ curto × /iː/ longo
+rich|reach|/ɪ/ curto × /iː/ longo
+right|ride|T final seco × D final vibrado (vogal mais longa antes do D)
+hat|had|T final seco × D final vibrado
+some|sun|M final: feche os lábios. N final: língua no céu da boca
+price|prize|S × Z (Z vibra)
+hate|head|/eɪ/ × /e/, e consoante final diferente
+rat|hat|R inicial em inglês não é o "rr" de "rato": é um R enrolado suave`;
+
+const ED=`
+worked|t
+watched|t
+stopped|t
+laughed|t
+finished|t
+asked|t
+missed|t
+helped|t
+played|d
+called|d
+lived|d
+cleaned|d
+opened|d
+changed|d
+signed|d
+filed|d
+wanted|id
+needed|id
+decided|id
+started|id
+visited|id
+ended|id
+attended|id
+appealed|d`;
+
+const SHADOW={
+work:{n:"Trabalho",l:`Good morning, everyone. Thanks for joining. Let's get started.
+I'd like to give you a quick update on the case.
+We filed the appeal yesterday, and we're waiting for the court's decision.
+Could you send me the draft by the end of the day?
+I'm afraid we need a little more time to review the contract.
+Let me share my screen so we can go over the main points.
+If there are no further questions, let's wrap it up.
+The client is happy with the settlement, but they want it in writing.
+I'll look into it and get back to you by Friday.
+Just to make sure we're on the same page, the deadline is next Monday.`},
+life:{n:"Dia a dia",l:`I usually work out three times a week, before work.
+I've been trying to get more organized lately.
+I'm really into punk rock and old-school tattoos.
+Honestly, I didn't expect it to be that good.
+What have you been up to lately?
+I'd love to, but I've got a lot on my plate this week.
+We should grab a coffee sometime.
+It's been a crazy week, but I'm finally getting some rest.
+I can't believe it's already the end of the year.
+If I had more time, I'd travel much more.`},
+flow:{n:"Conectar ideias",l:`I was about to leave when my phone rang.
+It turned out that the meeting had been canceled.
+At first I was nervous, but then I started to enjoy it.
+What I mean is that we need a better plan.
+Not only did we win the case, but we also got a great settlement.
+The thing is, I don't have enough time to do everything.
+I should have called you earlier.
+Let me put it another way.
+To be honest, I'm not sure that's a good idea.
+As soon as I get home, I'll send you the file.`}};
+
+const TOPICS=`
+Describe your job to someone who knows nothing about law.|What you do · a typical day · what you like most
+Tell the story of a case or project that taught you something.|The situation · what went wrong or right · the lesson
+Your perfect weekend.|Where · who with · what you eat and do
+A place you'd love to visit and why.|What you know about it · what you'd do · when
+Describe your workout routine.|Days · exercises · how it makes you feel
+What makes a good leader?|Two qualities · an example · a bad example
+A song or band that changed your life.|When you heard it · why it matters · a memory
+Your morning routine, and how you'd improve it.|What you do now · what goes wrong · one change
+Should people work from home? Give your opinion.|Pros · cons · your conclusion
+A difficult decision you made.|The options · what you chose · would you do it again?
+Describe Fortaleza to a tourist.|Where to go · what to eat · a warning
+What would you do if you won the lottery?|First week · first year · what wouldn't change
+The best advice you've ever received.|Who gave it · when · how you use it
+A habit you want to build in the next 30 days.|Why · how · what could stop you
+AI in law firms: good or bad?|What it does well · risks · your prediction
+Your favorite TV series and why people should watch it.|The story (no spoilers!) · a character · why it's good
+What makes a good meeting? What makes a bad one?|Before · during · after
+How do you deal with stress?|What stresses you · what works · what doesn't
+Someone who inspires you.|Who · what they did · what you learned
+Pitch an idea to your boss in two minutes.|The problem · your idea · why now
+What would you tell your 18-year-old self?|Two pieces of advice · one thing to keep doing
+Your favorite dish and how to make it.|Ingredients · steps · when you eat it
+A memorable trip.|Where · what happened · would you go back?
+Explain a Brazilian legal right that surprises foreigners.|What it is · why it exists · your opinion`;
+
+const THINK=`Describe everything you can see right now.
+What did you do this morning? Step by step.
+What are you going to do in the next hour?
+Explain your job to a seven-year-old.
+Narrate what you're doing, like a sports commentator.
+Complain about something, politely.
+Plan your next trip out loud.
+Your boss calls you right now. What do you say?
+Describe what you're wearing today.
+Talk about the last thing you ate.
+Summarize the last episode you watched.
+Give advice to a friend who wants to learn English.
+What are three things you're grateful for today?
+Describe your perfect home.`;
+
+const WRITE=`What happened today? Write 5 sentences.
+One thing I learned today, and why it matters.
+Write an email to a client postponing a meeting.
+Write a short LinkedIn post about a recent achievement.
+Describe a problem at work and how you solved it.
+What are your goals for the next three months?
+Describe the last series you watched, without spoilers.
+Write a message inviting a friend to a punk show.
+What would you change in your city?
+Write a short summary of a meeting you had this week.`;
+
+const MISSIONS=`Mude o idioma do celular para inglês por hoje.
+Pense em inglês durante o banho: narre o que está fazendo.
+Assista 1 episódio com legenda em INGLÊS (não em português).
+Anote 3 frases que você ouviu numa série e vire cards.
+Mande um áudio de 1 minuto em inglês para alguém (ou para você mesma).
+Leia uma notícia curta em inglês (VOA Learning English ou BBC).
+Escreva a lista de tarefas do dia em inglês.
+Grave 2 min falando do seu dia, escute e anote 1 erro.
+Procure 1 palavra jurídica no YouGlish e repita 5 vezes junto com o vídeo.
+Faça 10 min de shadowing com uma cena de Suits.
+Durante o treino, ouça um podcast em inglês.
+Descreva sua roupa e o lugar onde você está, em voz alta.
+Aprenda 3 phrasal verbs e use cada um numa frase falada.
+Releia em voz alta os seus erros da última aula.
+Converse por voz com uma IA por 5 min, em inglês.
+Explique um conceito jurídico em inglês em 1 minuto.
+Troque a playlist por um podcast em inglês hoje.
+Fale sozinha no carro: comente o trânsito em inglês.
+Leia em voz alta 1 página de um livro em inglês.
+Mande uma mensagem em inglês para um amigo.
+Assista um TED de até 10 min sem legenda, depois com legenda.
+Use "I'd rather..." três vezes hoje.
+Escreva 5 linhas de diário antes de dormir.
+Faça uma frase com cada falso amigo que você erra.`;
+
+const RECS=[
+ {t:"Suits",k:"série",l:"B2",u:"",w:"Advogados corporativos: vocabulário jurídico e de negócios. Legenda em inglês."},
+ {t:"The Good Wife",k:"série",l:"B2",u:"",w:"Contencioso, audiências e linguagem de tribunal."},
+ {t:"How to Get Away with Murder",k:"série",l:"B2",u:"",w:"Faculdade de direito, júri e muito diálogo rápido."},
+ {t:"Friends",k:"série",l:"B1",u:"",w:"Inglês do dia a dia, frases curtas e muita repetição."},
+ {t:"Modern Family",k:"série",l:"B1",u:"",w:"Conversa de família, humor e ritmo natural."},
+ {t:"Ted Lasso",k:"série",l:"B2",u:"",w:"Sotaque britânico e americano juntos."},
+ {t:"BBC 6 Minute English",k:"podcast",l:"A2",u:"https://www.bbc.co.uk/learningenglish/english/features/6-minute-english",w:"6 minutos, com transcrição e vocabulário explicado."},
+ {t:"VOA Learning English",k:"notícias",l:"A2",u:"https://learningenglish.voanews.com",w:"Notícias faladas devagar, com o texto junto."},
+ {t:"News in Levels",k:"notícias",l:"A1",u:"https://www.newsinlevels.com",w:"A mesma notícia em 3 níveis de dificuldade."},
+ {t:"All Ears English",k:"podcast",l:"B1",u:"https://www.allearsenglish.com",w:"Inglês americano de conversa, episódios curtos."},
+ {t:"Luke's English Podcast",k:"podcast",l:"B2",u:"https://teacherluke.co.uk",w:"Longo, natural e britânico. Ótimo para treino ou trânsito."},
+ {t:"Rachel's English",k:"YouTube",l:"A2",u:"https://www.youtube.com/results?search_query=Rachel%27s+English",w:"O melhor canal de pronúncia americana e fala encadeada."},
+ {t:"English with Lucy",k:"YouTube",l:"B1",u:"https://www.youtube.com/results?search_query=English+with+Lucy",w:"Pronúncia e vocabulário britânico."},
+ {t:"YouGlish",k:"ferramenta",l:"A1",u:"https://youglish.com",w:"Digite uma palavra e ouça em centenas de vídeos reais."},
+ {t:"Cambridge Dictionary",k:"ferramenta",l:"A1",u:"https://dictionary.cambridge.org",w:"Pronúncia UK/US e exemplos de uso."},
+ {t:"Oyez (Suprema Corte dos EUA)",k:"áudio jurídico",l:"C1",u:"https://www.oyez.org",w:"Sustentações orais reais com transcrição. Inglês jurídico de verdade."},
+ {t:"TED Talks",k:"vídeo",l:"B2",u:"https://www.ted.com/talks",w:"Ideias curtas, com legenda em inglês."},
+ {t:"Penguin Readers / Oxford Bookworms",k:"livros",l:"A2",u:"",w:"Livros adaptados ao seu nível: leitura extensa sem dicionário."},
+ {t:"Stuff You Should Know",k:"podcast",l:"B2",u:"",w:"Curiosidades explicadas em conversa natural."},
+ {t:"The Daily (NYT)",k:"podcast",l:"C1",u:"",w:"Notícias aprofundadas, inglês nativo rápido."},
+ {t:"Conversa por voz com IA",k:"speaking",l:"B1",u:"",w:"Parceiro de conversa 24h. Peça para corrigir só os erros que se repetem."}];
+
+const SCIENCE=[
+ ["As 4 vertentes","Paul Nation (2007), linguista da Victoria University","Um curso equilibrado divide o tempo em partes parecidas: input (ouvir e ler), output (falar e escrever), estudo da língua e fluência.","O anel do Hoje mostra as 4 cores e o app sugere a que está ficando para trás."],
+ ["Input compreensível","Krashen (1982); Hu & Nation (2000)","A gente adquire a língua entendendo mensagens. Para ler sem dicionário, é preciso conhecer uns 98% das palavras do texto.","Recomendações filtradas pelo seu nível. Série com legenda em inglês conta como input."],
+ ["Output e interação","Swain (1985); Long (1996)","Falar e escrever te faz perceber o que falta. A negociação na conversa acelera o aprendizado.","Speaking 4/3/2, pensar em inglês, diário e o registro de conversas."],
+ ["Notar o erro","Schmidt (1990)","O que você não percebe, você não aprende. Correção só vira aprendizado quando você presta atenção nela.","Depois da aula: as correções do professor viram cards em Meus erros."],
+ ["Repetição espaçada (FSRS)","Ebbinghaus; Cepeda et al. (2006); algoritmo aberto FSRS","Revisar logo antes de esquecer fixa com o mínimo de revisões. O FSRS é o algoritmo moderno usado pelo Anki.","Os cards usam o FSRS-6 com os parâmetros padrão do projeto open-spaced-repetition."],
+ ["Tentar lembrar","Roediger & Karpicke (2006)","Puxar da memória fixa muito mais do que reler.","Os cards pedem para você PRODUZIR o inglês a partir do português antes de mostrar."],
+ ["Dificuldades desejáveis","Robert Bjork (1994)","Misturar atividades e se esforçar um pouco dá mais retenção, mesmo parecendo mais difícil.","A sessão guiada intercala blocos curtos diferentes."],
+ ["Fluência 4/3/2","Maurice (1983); Nation (1989)","Contar a mesma história em 4, 3 e 2 minutos aumenta a velocidade e diminui as pausas.","Atividade Speaking 4/3/2 com cronômetro por rodada."],
+ ["Shadowing","Kadota (2019) e estudos recentes","Repetir junto com o áudio ajuda ritmo, entonação e pronúncia. As evidências são promissoras, mas os estudos ainda são pequenos.","Ouvir sem ler, ler, repetir junto, gravar e comparar."],
+ ["Aprender em blocos","Michael Lewis (1993), abordagem lexical","Nativos falam em blocos prontos (chunks), não palavra por palavra.","Os decks são de frases inteiras: reuniões, jurídico, dia a dia."],
+ ["Treino de percepção","Thomson (2018), HVPT","Treinar o ouvido com pares mínimos e vozes variadas melhora a pronúncia.","Pares mínimos e final -ED usam vozes diferentes do aparelho, sorteadas."],
+ ["Idade não é desculpa","Hartshorne, Tenenbaum & Pinker (2018), MIT e Harvard","Estudo com mais de 600 mil pessoas: soar como nativo na gramática é mais fácil para quem começa cedo, mas adultos aprendem rápido e chegam a níveis altíssimos. O que você controla é tempo e qualidade de prática.","Tudo é medido em minutos, para você ver o volume crescer."],
+ ["Horas até o próximo nível","Cambridge English, horas guiadas","Estimativa total de estudo: A2 ~200 h, B1 ~375 h, B2 ~550 h, C1 ~750 h, C2 ~1.100 h. É aproximado e varia muito.","Progresso mostra quantas horas faltam até o próximo nível."],
+ ["Prática deliberada","Ericsson (1993)","Melhora quem treina o ponto fraco com feedback, não quem só repete o que já sabe.","Placar de acertos em pronúncia, erros e ditado, e um registro dos seus erros."]];
+
+const LEVELS=[["A1",90,"Entendo e uso frases muito básicas e me apresento."],["A2",190,"Falo de rotina, compras e trabalho de forma simples."],["B1",375,"Me viro em viagens, conto experiências e dou opiniões simples."],["B2",550,"Converso com fluência razoável e entendo séries com legenda em inglês."],["C1",750,"Uso o inglês com flexibilidade no trabalho e entendo quase tudo sem legenda."],["C2",1100,"Entendo praticamente tudo e me expresso com precisão e nuance."]];
+
+/* =====================================================================
+   BASE
+   ===================================================================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today=()=>iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
+const dayDiff=(a,b)=>Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
+const dow=s=>new Date(s+"T12:00").getDay();
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const dmy=s=>s.slice(8)+"/"+s.slice(5,7);
+const DOWN=["dom","seg","ter","qua","qui","sex","sáb"];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const hm=m=>m>=60?`${Math.floor(m/60)}h${m%60?pad(m%60):""}`:`${m} min`;
+const clock=ms=>{const s=Math.max(0,Math.round(ms/1000));return `${Math.floor(s/60)}:${pad(s%60)}`};
+const rows=t=>t.trim().split("\n").map(l=>l.split("|"));
+const hash=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+const ERR=rows(ERRORS), PR=rows(PAIRS), EDV=rows(ED), TOP=rows(TOPICS), THK=THINK.trim().split("\n"), WRT=WRITE.trim().split("\n"), MIS=MISSIONS.trim().split("\n");
+const SH=Object.fromEntries(Object.entries(SHADOW).map(([k,v])=>[k,{n:v.n,l:v.l.trim().split("\n")}]));
+const SHALL=Object.values(SH).flatMap(x=>x.l);
+
+/* vertentes (Paul Nation) e atividades */
+const STR={input:["Input","ouvir e ler","var(--blu)"],output:["Output","falar e escrever","var(--red)"],lang:["Língua","vocabulário, gramática, pronúncia","var(--yel)"],flu:["Fluência","velocidade com o que já sabe","var(--grn)"],aula:["Aula","com professor","var(--vio)"]};
+const CORE=["input","output","lang","flu"];
+// [nome, vertente, externa? (cronômetro livre), descrição]
+const ACTS={
+  aula:["Aula","aula",1,"tempo de aula com professor"],
+  conversa:["Conversa","output",1,"falar com alguém ou com IA por voz"],
+  serie:["Série / filme","input",1,"com legenda em inglês"],
+  listen:["Podcast / áudio","input",1,"no carro, no treino, em casa"],
+  read:["Leitura","input",1,"livro, notícia, artigo"],
+  escrita:["Escrita","output",1,"e-mail, mensagem, texto"],
+  outro:["Outro estudo","lang",1,"apostila, app, exercício"],
+  cards:["Cards","lang",0,"repetição espaçada, você produz o inglês"],
+  pron:["Pronúncia","lang",0,"pares mínimos e final -ED"],
+  gram:["Erros de brasileiro","lang",0,"os 30 erros mais comuns"],
+  dict:["Ditado","input",0,"ouvir e escrever o que entendeu"],
+  shadow:["Shadowing","flu",0,"ouvir, repetir junto, gravar e comparar"],
+  speak:["Speaking 4/3/2","flu",0,"mesma história em 4, 3 e 2 min"],
+  think:["Pensar em inglês","output",0,"falar sozinha com temas que mudam"],
+  write:["Diário","output",0,"escrever e pedir correção"]};
+const EXT=Object.keys(ACTS).filter(k=>ACTS[k][2]);
+const SESS={10:[["cards",4],["shadow",3],["speak",3]],20:[["cards",5],["pron",3],["shadow",4],["speak",5],["write",3]],
+  30:[["cards",6],["pron",4],["shadow",5],["speak",9],["write",4],["think",2]],45:[["cards",8],["pron",5],["gram",4],["shadow",6],["speak",9],["dict",4],["write",6],["think",3]]};
+
+/* =====================================================================
+   ESTADO
+   ===================================================================== */
+const KEY="speak-loud-v1";
+let storeOk=true;
+function fresh(){return {v:1,start:today(),log:[],timer:null,cards:[],decks:{},seeded:{},newDay:{date:"",n:0},rev:{},journal:[],hw:[],fluency:[],mission:{},
+  stats:{pairs:[0,0],ed:[0,0],gram:[0,0],dict:[0,0]},
+  settings:{name:"Bia",goal:30,level:"B1",accent:"en-US",rate:1,voice:"",newPerDay:10,sessLen:20,dir:"mix",remH:"20:00"},ui:{tab:"hoje"}}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r),n=Object.assign(fresh(),s);n.settings=Object.assign(fresh().settings,s.settings||{});n.stats=Object.assign(fresh().stats,s.stats||{});n.ui=Object.assign({tab:"hoje"},s.ui||{});return n}}catch(e){storeOk=false}return fresh()}
+let S=load();
+function seed(){Object.entries(DECKS).forEach(([k,d])=>{if(S.seeded[k])return;rows(d.c).forEach((r,i)=>S.cards.push({id:`${k}-${i}`,deck:k,en:r[0],pt:r[1]||"",ex:r[2]||"",reps:0,lapses:0,s:0,d:0,due:null,last:null,added:today()}));S.seeded[k]=1;if(S.decks[k]==null)S.decks[k]=true})}
+seed();
+let saveT=null;
+function save(now){clearTimeout(saveT);const go=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));storeOk=true}catch(e){storeOk=false}const w=$("#storeWarn");if(w)w.hidden=storeOk};now?go():saveT=setTimeout(go,150)}
+window.addEventListener("pagehide",()=>{pauseRun();save(true)});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){pauseRun();save(true)}else{resumeRun();render()}});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}
+
+function addLog(act,min,note,date){if(!(min>0))return;S.log.push({id:uid(),date:date||today(),act,min:Math.round(min),note:note||""})}
+function dayMin(d){return S.log.filter(l=>l.date===d).reduce((a,l)=>a+l.min,0)}
+function balance(from,to){const m={input:0,output:0,lang:0,flu:0,aula:0};S.log.filter(l=>l.date>=from&&l.date<=(to||"9")).forEach(l=>{const a=ACTS[l.act];m[a?a[1]:"lang"]+=l.min});return m}
+function streak(){let n=0,miss=0;for(let i=0;i<730;i++){const d=addDays(today(),-i);if(dayMin(d)>0){n++;miss=0}else if(i===0)continue;else{miss++;if(miss>1)break}}return n}
+function totalMin(){return S.log.reduce((a,l)=>a+l.min,0)}
+
+/* =====================================================================
+   REPETIÇÃO ESPAÇADA: FSRS-6 (open-spaced-repetition), parâmetros padrão.
+   Agendamento por dia; "Errei" volta para a fila da mesma sessão.
+   ===================================================================== */
+const W=[0.212,1.2931,2.3065,8.2956,6.4133,0.8334,3.0194,0.001,1.8722,0.1666,0.796,1.4835,0.0614,0.2629,1.6483,0.6014,1.8729,0.5425,0.0912,0.0658,0.1542];
+const DECAY=-W[20], FACTOR=Math.pow(0.9,1/DECAY)-1;
+const clampD=d=>Math.min(10,Math.max(1,d));
+const D0=g=>clampD(W[4]-Math.exp(W[5]*(g-1))+1);
+const retr=(t,s)=>Math.pow(1+FACTOR*t/s,DECAY);
+const ivl=s=>s/FACTOR*(Math.pow(0.9,1/DECAY)-1);
+const nextD=(d,g)=>{const d1=d+(-W[6]*(g-3))*(10-d)/9;return clampD(W[7]*D0(4)+(1-W[7])*d1)};
+const sSucc=(d,s,r,g)=>s*(1+Math.exp(W[8])*(11-d)*Math.pow(s,-W[9])*(Math.exp(W[10]*(1-r))-1)*(g===2?W[15]:1)*(g===4?W[16]:1));
+const sFail=(d,s,r)=>Math.min(s,W[11]*Math.pow(d,-W[12])*(Math.pow(s+1,W[13])-1)*Math.exp(W[14]*(1-r)));
+const sShort=(s,g)=>{let inc=Math.exp(W[17]*(g-3+W[18]))*Math.pow(s,-W[19]);if(g>=2)inc=Math.max(1,inc);return s*inc};
+function schedule(c,g){
+  const td=today();
+  if(!c.reps){c.s=Math.max(0.1,W[g-1]);c.d=D0(g)}
+  else{const t=Math.max(0,dayDiff(c.last||td,td));
+    if(t===0)c.s=Math.max(0.1,sShort(c.s,g));
+    else{const r=retr(t,c.s);c.s=Math.max(0.1,g===1?sFail(c.d,c.s,r):sSucc(c.d,c.s,r,g))}
+    c.d=nextD(c.d,g);if(g===1)c.lapses=(c.lapses||0)+1}
+  c.reps=(c.reps||0)+1;c.last=td;
+  const days=g===1?0:Math.min(3650,Math.max(1,Math.round(ivl(c.s))));
+  c.due=addDays(td,days);return days;
+}
+const ivlTxt=d=>d===0?"agora":d===1?"1 dia":d<30?`${d} dias`:d<365?`${Math.round(d/30)} mês${Math.round(d/30)>1?"es":""}`:`${(d/365).toFixed(1).replace(".",",")} ano`;
+const card=id=>S.cards.find(c=>c.id===id);
+function dueCards(){const td=today();return S.cards.filter(c=>c.reps&&c.due<=td)}
+function newLeft(){return Math.max(0,S.settings.newPerDay-(S.newDay.date===today()?S.newDay.n:0))}
+function newCards(){const left=newLeft(),by={};
+  S.cards.filter(c=>!c.reps&&S.decks[c.deck]!==false).forEach(c=>(by[c.deck]=by[c.deck]||[]).push(c));
+  const order=["erros","aula","meus",...Object.keys(DECKS)].filter(k=>by[k]);const out=[];let i=0;
+  while(out.length<left&&order.some(k=>by[k].length)){const k=order[i++%order.length];if(by[k].length)out.push(by[k].shift())}
+  return out}
+function buildQueue(){const due=shuffle(dueCards()).map(c=>c.id),nw=newCards().map(c=>c.id),q=[];let i=0,j=0;
+  while(i<due.length||j<nw.length){for(let k=0;k<3&&i<due.length;k++)q.push(due[i++]);if(j<nw.length)q.push(nw[j++])}return q}
+function addCard(deck,en,pt,ex){en=(en||"").trim();if(!en)return null;const dup=S.cards.find(c=>c.en.toLowerCase()===en.toLowerCase());
+  // já existe num deck pronto e ainda não estudado: passa para o seu deck, que tem prioridade na fila
+  if(dup){if(!dup.reps&&DECKS[dup.deck]&&MYDECKS[deck]){dup.deck=deck;if(pt&&!dup.pt)dup.pt=pt.trim();if(ex)dup.ex=ex.trim()}return dup}
+  const c={id:"u"+uid(),deck,en,pt:(pt||"").trim(),ex:(ex||"").trim(),reps:0,lapses:0,s:0,d:0,due:null,last:null,added:today()};S.cards.push(c);return c}
+// "palavra = significado" ou "errado -> certo"
+function parseWords(t){return t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/\s*(?:=|:|\s-\s|–)\s*/);return [m[0],m.slice(1).join(" = ")]})}
+function parseFixes(t){return t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>l.split(/\s*(?:->|→|=>)\s*/)).filter(x=>x.length>=2&&x[0]&&x[1])}
+
+/* =====================================================================
+   VOZ (sintetizador do aparelho, funciona offline) E GRAVADOR
+   ===================================================================== */
+let VOICES=[];
+function loadVoices(){try{VOICES=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang))}catch(e){VOICES=[]}}
+if("speechSynthesis" in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+const lang=v=>v.lang.replace("_","-");
+function pickVoice(vary){const acc=VOICES.filter(v=>lang(v)===S.settings.accent);
+  if(vary){const pool=acc.length?acc:VOICES;return pool[Math.floor(Math.random()*pool.length)]}
+  return VOICES.find(v=>v.name===S.settings.voice)||acc.find(v=>/Samantha|Ava|Allison|Daniel|Serena|Karen|Google/.test(v.name))||acc[0]||VOICES[0]}
+function say(t,slow,vary){if(!("speechSynthesis" in window)){toast("Este aparelho não tem voz em inglês.");return}
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t).replace(/\.\.\./g,"").replace(/\s\/\s/g,", "));u.lang=S.settings.accent;const v=pickVoice(vary);if(v)u.voice=v;u.rate=(slow?0.7:1)*S.settings.rate;speechSynthesis.speak(u)}catch(e){}}
+let REC={mr:null,chunks:[],url:null,stream:null};
+async function recStart(){
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast("Este navegador não grava áudio.");return}
+  try{REC.stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast("Microfone bloqueado. Libere em Ajustes do iPhone.");return}
+  REC.chunks=[];const mr=new MediaRecorder(REC.stream);mr.ondataavailable=e=>{if(e.data&&e.data.size)REC.chunks.push(e.data)};
+  mr.onstop=()=>{const b=new Blob(REC.chunks,{type:mr.mimeType||"audio/mp4"});if(REC.url)URL.revokeObjectURL(REC.url);REC.url=URL.createObjectURL(b);recRelease();rerender()};
+  mr.start();REC.mr=mr;rerender()}
+function recRelease(){if(REC.stream)REC.stream.getTracks().forEach(t=>t.stop());REC.stream=null;REC.mr=null}
+function recStop(){if(REC.mr&&REC.mr.state!=="inactive")REC.mr.stop();else recRelease()}
+function recClear(){recStop();if(REC.url)URL.revokeObjectURL(REC.url);REC.url=null}
+function recUI(){return `<div class="row">${REC.mr?`<button class="btn fr" type="button" data-a="recStop">■ Parar gravação</button>`:`<button class="btn r" type="button" data-a="recStart">● Gravar minha voz</button>`}${REC.url&&!REC.mr?`<button class="btn" type="button" data-a="recPlay">▶ Ouvir minha voz</button>`:""}</div>`}
+
+/* =====================================================================
+   CRONÔMETROS
+   - atividade no app: conta só com a tela aberta
+   - cronômetro livre (aula, série, podcast): conta mesmo com o celular bloqueado
+   ===================================================================== */
+const runMs=()=>{const r=S.ui.run;return r?r.acc+(r.since?Date.now()-r.since:0):0};
+function pauseRun(){const r=S.ui.run;if(r&&r.since){r.acc+=Date.now()-r.since;r.since=null}}
+function resumeRun(){const r=S.ui.run;if(r&&!r.since)r.since=Date.now()}
+const tmMs=()=>{const t=S.timer;return t?t.acc+(t.paused?0:Date.now()-t.t0):0};
+
+function initAct(a,blockMin){
+  const U=S.ui;
+  if(a==="cards")U.rv={q:buildQueue(),show:false,dir:null,n:0};
+  if(a==="shadow")U.sh={cat:U.sh&&U.sh.cat||"work",i:Math.floor(Math.random()*10),show:false,reps:0};
+  if(a==="pron")U.pr=newPron(U.pr&&U.pr.mode||(dow(today())%2?"pairs":"ed"));
+  if(a==="gram")U.gr=newGram();
+  if(a==="dict")U.dc={i:Math.floor(Math.random()*SHALL.length),typed:"",res:null};
+  if(a==="write")U.wr={p:Math.floor(Math.random()*WRT.length),text:"",fix:""};
+  if(a==="speak")U.sp={t:Math.floor(Math.random()*TOP.length),r:0,end:null,left:null,over:false,scale:blockMin&&blockMin<9?blockMin/9:1};
+  if(a==="think")U.th={off:Math.floor(Math.random()*THK.length),last:-1};
+}
+function startRun(a,blockMin){if(S.ui.run)finishRun(true);recClear();S.ui.run={act:a,acc:0,since:Date.now(),min:blockMin||0};initAct(a,blockMin);S.ui.overT=false;save(true)}
+function finishRun(silent){const r=S.ui.run;if(!r)return 0;const ms=runMs();let m=0;
+  if(ms>=30000){m=Math.max(1,Math.round(ms/60000));addLog(r.act,m)}
+  S.ui.run=null;recClear();try{speechSynthesis.cancel()}catch(e){}
+  if(!silent&&!S.ui.sess)toast(m?`+${m} min de ${ACTS[r.act][0]}. Boa!`:"Menos de 30 s, não contei.");return m}
+function startSess(len){const b=clone(SESS[len]).map(x=>x[0]==="pron"&&len<45&&dow(today())%2===0?["gram",x[1]]:x);
+  S.ui.sess={len,blocks:b,i:0,mins:[],done:false};S.ui.tab="hoje";startRun(b[0][0],b[0][1])}
+function nextBlock(){const s=S.ui.sess;s.mins.push(finishRun(true));s.i++;
+  if(s.i<s.blocks.length)startRun(s.blocks[s.i][0],s.blocks[s.i][1]);else{s.done=true;celebrate()}}
+
+/* =====================================================================
+   UI
+   ===================================================================== */
+let toastT=null;
+function toast(m){let el=$(".toast");if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),2600)}
+function celebrate(){const f=document.createElement("div");f.className="flashbg";document.body.appendChild(f);setTimeout(()=>f.remove(),800)}
+function hello(){const h=new Date().getHours(),g=h<12?"good morning":h<18?"good afternoon":"good evening",m=dayMin(today()),st=streak();
+  $("#hello").innerHTML=`${g}, <b>${esc(S.settings.name)}</b> · nível ${esc(S.settings.level)} · ${m?`<b>${m}</b> de ${S.settings.goal} min hoje`:"bora começar?"}${st>1?` · <b>${st}</b> dias seguidos`:""}`}
+function ring(m,g){const r=56,c=2*Math.PI*r,p=Math.min(1,m/g);
+  return `<div class="ring" role="img" aria-label="${m} de ${g} minutos hoje"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="12"/><circle cx="66" cy="66" r="${r}" fill="none" stroke="${p>=1?"var(--yel)":"var(--red)"}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}"/></svg><div class="c"><b>${m}</b><small>de ${g} min</small></div></div>`}
+function strandBars(b,ref){const mx=Math.max(1,ref||Math.max(...Object.values(b)));return `<div class="strands">${[...CORE,"aula"].map(k=>`<div class="strand"><span style="color:${STR[k][2]}">${STR[k][0]}</span><span class="bar"><i style="width:${Math.min(100,b[k]/mx*100)}%;background:${STR[k][2]}"></i></span><em>${b[k]}′</em></div>`).join("")}</div>`}
+
+function advice(){
+  const b=balance(addDays(today(),-6),today()),core=CORE.reduce((a,k)=>a+b[k],0);
+  if(core+b.aula<20)return {t:"Comece pequeno",d:"Uma sessão de 10 minutos hoje já conta. O que vale é a constância.",a:"sess",v:10};
+  const pct=k=>b[k]/Math.max(1,core),low=CORE.slice().sort((x,y)=>pct(x)-pct(y))[0];
+  const T={input:["Pouco input esta semana","Input é o combustível: 20 min de série com legenda em inglês ou um podcast no trânsito.","serie"],
+    output:["Você está falando e escrevendo pouco","Falar faz você perceber o que falta. Faça o 4/3/2 ou converse por voz com uma IA.","speak"],
+    lang:["Pouco estudo de língua","Revise os cards e faça 5 min de pronúncia ou de erros de brasileiro.","cards"],
+    flu:["Pouca fluência","Shadowing de 5 min: velocidade com o que você já sabe.","shadow"]};
+  if(pct(low)<0.15)return {t:T[low][0],d:T[low][1],a:EXT.includes(T[low][2])?"timer":"run",v:T[low][2],k:low};
+  return {t:"Semana equilibrada",d:"As 4 vertentes estão bem distribuídas. Mantenha o ritmo e suba um pouco a dificuldade: tire a legenda em uma cena por dia.",a:"",v:""};
+}
+
+/* ---------- HOJE ---------- */
+function vHoje(){
+  if(S.ui.run)return vRun();
+  if(S.ui.sess&&S.ui.sess.done)return vSessDone();
+  const td=today(),m=dayMin(td),g=S.settings.goal,b=balance(td,td),due=dueCards().length,nw=Math.min(newLeft(),S.cards.filter(c=>!c.reps&&S.decks[c.deck]!==false).length);
+  const adv=advice(),mis=MIS[hash(td)%MIS.length],hw=S.hw.filter(h=>!h.done);
+  return `<section>
+    <div class="today">${ring(m,g)}${strandBars(b,Math.max(g/4,...Object.values(b)))}</div>
+    ${S.timer?timerCard():""}
+    ${S.ui.tstop?stopForm():""}
+    <article class="box red tape"><h3>Sessão guiada</h3><p class="sub" style="margin:4px 0 10px">Tudo pronto, sem decidir nada: blocos curtos e intercalados, com cronômetro. O tempo entra sozinho no seu registro.</p>
+      <div class="lens" style="margin-bottom:12px">${[10,20,30,45].map(n=>`<button type="button" data-a="sessLen" data-v="${n}" aria-pressed="${S.settings.sessLen===n}">${n} min</button>`).join("")}</div>
+      <button class="big" type="button" data-a="sess" data-v="${S.settings.sessLen}">Começar<small>${SESS[S.settings.sessLen].map(x=>ACTS[x[0]][0]).join(" → ")}</small></button></article>
+    <div class="quick">
+      <button type="button" data-a="run" data-v="cards"><b>Cards</b><small>${due} para revisar · ${nw} novos</small></button>
+      <button type="button" data-a="aulaForm"><b>Depois da aula</b><small>tempo, palavras e correções</small></button>
+    </div>
+    ${S.ui.aulaForm?aulaForm():""}
+    <h2 class="label">Cronômetro</h2>
+    <p class="sub">Para o que acontece fora do app. Continua contando com o celular bloqueado.</p>
+    <div class="chips">${EXT.map(k=>`<button class="chip" type="button" data-a="timer" data-v="${k}" style="border-color:${STR[ACTS[k][1]][2]}">${ACTS[k][0]}</button>`).join("")}<button class="chip" type="button" data-a="manual">+ lançar tempo</button></div>
+    ${S.ui.manual?manualForm():""}
+    <article class="box ${adv.k==="input"?"blu":adv.k==="lang"?"yel":adv.k==="flu"?"grn":"red"}"><h3>${esc(adv.t)}</h3><p style="margin-top:6px">${esc(adv.d)}</p>${adv.a?`<div class="row" style="margin-top:10px"><button class="btn y" type="button" data-a="${adv.a}" data-v="${adv.v}">${adv.a==="sess"?"Sessão de 10 min":adv.a==="timer"?"Iniciar "+ACTS[adv.v][0]:"Fazer "+ACTS[adv.v][0]}</button></div>`:""}</article>
+    <article class="box yel"><h3>Missão do dia</h3><p class="mission" style="margin-top:8px">${esc(mis)}</p>
+      <div class="row" style="margin-top:10px"><button class="btn ${S.mission[td]?"fy":"y"}" type="button" data-a="mission">${S.mission[td]?"✓ Feita!":"Marcar como feita"}</button></div></article>
+    ${hw.length?`<h2 class="label">Lição de casa</h2><div class="loglist">${hw.map(h=>`<div class="logi"><button class="mini" type="button" data-a="hwDone" data-id="${h.id}">✓</button><span>${esc(h.t)}</span><small>${dmy(h.date)}</small></div>`).join("")}</div>`:""}
+  </section>`;
+}
+function timerCard(){const t=S.timer,a=ACTS[t.act];return `<article class="box" style="border-color:${STR[a[1]][2]}"><div class="timer"><div><p class="sub">${esc(a[0])}${t.paused?" · pausado":" · contando"}</p><div class="clk" data-clock="timer">${clock(tmMs())}</div></div>
+  <div class="row" style="justify-content:flex-end"><button class="btn" type="button" data-a="tPause">${t.paused?"Continuar":"Pausar"}</button><button class="btn fy" type="button" data-a="tStop">Parar</button></div></div></article>`}
+function stopForm(){const f=S.ui.tstop;return `<article class="box yel"><h3>Salvar ${esc(ACTS[f.act][0])}</h3><div class="form" style="margin-top:10px"><label>Minutos<input type="number" inputmode="numeric" id="ts-min" value="${f.min}" min="1"></label><label>Dia<input type="date" id="ts-d" value="${f.date}"></label><label class="full">Nota (opcional)<input id="ts-n" placeholder="ex.: Suits T1E3, professora Ana"></label></div>
+  <div class="row" style="margin-top:10px"><button class="btn fy" type="button" data-a="tSave">Salvar</button><button class="btn" type="button" data-a="tDiscard">Descartar</button></div></article>`}
+function manualForm(){return `<article class="box"><h3>Lançar tempo</h3><div class="form" style="margin-top:10px"><label class="full">Atividade<select id="mf-a">${Object.keys(ACTS).map(k=>`<option value="${k}">${ACTS[k][0]} · ${STR[ACTS[k][1]][0]}</option>`).join("")}</select></label>
+  <label>Minutos<input type="number" inputmode="numeric" id="mf-m" value="30" min="1"></label><label>Dia<input type="date" id="mf-d" value="${today()}"></label><label class="full">Nota<input id="mf-n" placeholder="opcional"></label></div>
+  <div class="row" style="margin-top:10px"><button class="btn fy" type="button" data-a="manSave">Salvar</button><button class="btn" type="button" data-a="manual">Fechar</button></div></article>`}
+function aulaForm(){return `<article class="box vio"><h3>Depois da aula</h3><p class="sub" style="margin-top:4px">Registrar logo depois da aula é o que transforma correção em aprendizado (Schmidt: notar o erro).</p>
+  <div class="form" style="margin-top:10px"><label>Minutos de aula<input type="number" inputmode="numeric" id="af-m" value="60"></label><label>Dia<input type="date" id="af-d" value="${today()}"></label>
+  <label class="full">Tema da aula<input id="af-t" placeholder="ex.: present perfect, reunião com cliente"></label>
+  <label class="full">Palavras novas, uma por linha (palavra = significado)<textarea id="af-w" placeholder="deadline = prazo&#10;to sue = processar"></textarea></label>
+  <label class="full">Correções do professor (errado -> certo)<textarea id="af-c" placeholder="I have 30 years -> I'm 30&#10;depend of -> depend on"></textarea></label>
+  <label class="full">Lição de casa<input id="af-h" placeholder="opcional"></label></div>
+  <div class="row" style="margin-top:10px"><button class="btn fy" type="button" data-a="aulaSave">Salvar aula</button><button class="btn" type="button" data-a="aulaForm">Fechar</button></div></article>`}
+
+/* ---------- ATIVIDADE EM ANDAMENTO ---------- */
+function vRun(){
+  const r=S.ui.run,a=ACTS[r.act],s=S.ui.sess,blk=s&&!s.done?s.blocks[s.i]:null,over=blk&&runMs()>=blk[1]*60000;
+  const bar=`<div class="runbar ${over?"over":""}" id="runbar">
+    <div class="row sp"><b>${esc(a[0])}</b><span class="clk" data-clock="run">${clock(runMs())}${blk?` / ${blk[1]}:00`:""}</span></div>
+    ${blk?`<div class="prog"><i data-bar="blk" style="width:${Math.min(100,runMs()/(blk[1]*600))}%"></i></div><p class="sub">Bloco ${s.i+1} de ${s.blocks.length}${s.i+1<s.blocks.length?` · depois: ${ACTS[s.blocks[s.i+1][0]][0]}`:" · último!"}</p>`:""}
+    <div class="row">${blk?`<button class="btn ${over?"fy":"y"} nextb" type="button" data-a="next">${s.i+1<s.blocks.length?"Próximo bloco ▶":"Terminar sessão ✓"}</button><button class="btn" type="button" data-a="sessStop">Sair</button>`:`<button class="btn fy" type="button" data-a="finish">Terminar ✓</button>`}</div></div>`;
+  const B={cards:bCards,shadow:bShadow,pron:bPron,gram:bGram,dict:bDict,write:bWrite,speak:bSpeak,think:bThink}[r.act];
+  return `<section>${bar}${B?B():""}</section>`;
+}
+function vSessDone(){const s=S.ui.sess,tot=s.mins.reduce((a,b)=>a+b,0);
+  return `<section><article class="box yel tape" style="text-align:center"><h3 style="font-size:34px">Sessão feita!</h3><p class="mission" style="margin:10px 0">${tot} minutos de inglês. ${["You rock!","Keep it loud!","Nailed it!","That's the spirit!"][tot%4]}</p>
+    <div class="loglist" style="text-align:left">${s.blocks.map((b,i)=>`<div class="logi"><span class="dot" style="background:${STR[ACTS[b[0]][1]][2]}"></span><span>${ACTS[b[0]][0]}</span><small>${s.mins[i]||0} min</small></div>`).join("")}</div>
+    <div class="row" style="margin-top:12px;justify-content:center"><button class="big y" type="button" data-a="sessClose" style="width:auto;padding:10px 24px;font-size:20px">Fechar</button></div></article></section>`}
+
+/* cards */
+function cardDir(c){if(c.deck==="erros")return "pt";if(!c.reps)return "en";const d=S.settings.dir;return d==="mix"?(Math.random()<0.6?"pt":"en"):d}
+function bCards(){
+  const rv=S.ui.rv;
+  if(!rv.q.length)return `<article class="box grn" style="text-align:center"><h3>${rv.n?"Revisão feita!":"Nada para revisar agora"}</h3><p class="sub" style="margin-top:6px">${rv.n?`${rv.n} cards. A próxima revisão vem na hora certa de não esquecer.`:"Adicione palavras na aba Cards ou ative mais decks."}</p></article>`;
+  const c=card(rv.q[0]);if(!c){rv.q.shift();return bCards()}
+  if(!rv.dir)rv.dir=cardDir(c);
+  const front=rv.dir==="pt"?(c.pt||c.en):c.en,deck=DECKS[c.deck]?DECKS[c.deck].n:MYDECKS[c.deck]||"";
+  const prev=[1,2,3,4].map(g=>schedule(clone(c),g));
+  return `<p class="sub">${rv.q.length} na fila${!c.reps?" · card novo":""}</p>
+  <div class="flash"><span class="deck">${esc(deck)}</span>
+    <span class="hint">${rv.dir==="pt"?(c.deck==="erros"?"diga certo, em voz alta":"diga em inglês, em voz alta"):"o que significa?"}</span>
+    <div class="q">${esc(front)}</div>
+    ${rv.dir==="en"?`<button class="say" type="button" data-a="say" data-t="${esc(c.en)}">🔊 ouvir</button>`:""}
+    ${rv.show?`<div class="a">${esc(rv.dir==="pt"?c.en:c.pt)}</div>${rv.dir==="pt"?`<button class="say" type="button" data-a="say" data-t="${esc(c.en)}">🔊 ouvir de novo</button>`:""}${c.ex?`<div class="ex">${esc(c.ex)}</div>`:""}`:""}
+  </div>
+  ${rv.show?`<div class="grades">${[["Errei",1],["Difícil",2],["Bom",3],["Fácil",4]].map(([l,g])=>`<button class="g${g}" type="button" data-a="grade" data-v="${g}">${l}<small>${ivlTxt(prev[g-1])}</small></button>`).join("")}</div>`
+    :`<button class="big w" type="button" data-a="reveal">Mostrar resposta</button>`}`;
+}
+/* shadowing */
+function bShadow(){const h=S.ui.sh,L=SH[h.cat].l,t=L[h.i%L.length];
+  return `<div class="chips">${Object.entries(SH).map(([k,v])=>`<button class="chip" type="button" data-a="shCat" data-v="${k}" aria-pressed="${h.cat===k}">${v.n}</button>`).join("")}</div>
+  <article class="box grn"><p class="sub">1. Ouça sem ler · 2. Mostre o texto · 3. Repita JUNTO com a voz, imitando o ritmo · 4. Grave e compare</p>
+    <p class="sent ${h.show?"":"hid"}" style="margin:14px 0">${esc(t)}</p>
+    <div class="row"><button class="btn fy" type="button" data-a="say" data-t="${esc(t)}">🔊 Ouvir</button><button class="btn y" type="button" data-a="say" data-t="${esc(t)}" data-slow="1">🐢 Devagar</button>${h.show?"":`<button class="btn" type="button" data-a="shShow">Mostrar texto</button>`}</div>
+    <div style="margin-top:10px">${recUI()}</div>
+    <div class="row sp" style="margin-top:12px"><button class="btn" type="button" data-a="shRep">+1 repeti (${h.reps})</button><button class="btn r" type="button" data-a="shNext">Próxima frase ▶</button></div>
+    <div class="row" style="margin-top:8px"><button class="mini" type="button" data-a="shCard">Virar card</button></div></article>
+  <p class="sub">Dica: repita a mesma frase 5 a 10 vezes antes de passar. Preste atenção em onde a voz sobe e desce e nas palavras que se juntam.</p>`}
+/* pronúncia */
+function newPron(mode){if(mode==="ed"){const i=Math.floor(Math.random()*EDV.length);return {mode,i,ans:null}}const i=Math.floor(Math.random()*PR.length);return {mode:"pairs",i,w:Math.random()<.5?0:1,ans:null}}
+function bPron(){const p=S.ui.pr,st=S.stats[p.mode==="ed"?"ed":"pairs"];
+  const head=`<div class="row sp"><div class="chips"><button class="chip" type="button" data-a="prMode" data-v="pairs" aria-pressed="${p.mode==="pairs"}">Pares mínimos</button><button class="chip" type="button" data-a="prMode" data-v="ed" aria-pressed="${p.mode==="ed"}">Final -ED</button></div><span class="score">${st[0]}/${st[1]} acertos</span></div>`;
+  if(p.mode==="ed"){const [v,k]=EDV[p.i];const O=[["t","/t/ como worked"],["d","/d/ como played"],["id","/ɪd/ como wanted"]];
+    return head+`<article class="box yel"><p class="sub">Ouça o verbo no passado. Como termina o som?</p>${p.ans?`<p class="bigword">${esc(v)}</p>`:`<p class="bigword">?</p>`}
+      <div class="row" style="justify-content:center;margin-bottom:12px"><button class="btn fy" type="button" data-a="sayVar" data-t="${esc(v)}">🔊 Ouvir</button></div>
+      <div class="opts">${O.map(([o,l])=>`<button class="opt ${p.ans?(o===k?"ok":o===p.ans?"no":""):""}" type="button" data-a="edAns" data-v="${o}" ${p.ans?"disabled":""}>${l}</button>`).join("")}</div>
+      ${p.ans?`<p style="margin-top:12px">${p.ans===k?"✓ Isso!":"✗ Era /"+(k==="id"?"ɪd":k)+"/."} <span class="sub">Regra: /ɪd/ só depois de som de T ou D. /t/ depois de sons sem voz (p, k, f, s, sh, ch). /d/ no resto. Nunca fale "uorkédi".</span></p><button class="btn r" type="button" data-a="prNext" style="margin-top:10px">Próximo ▶</button>`:""}</article>`}
+  const [a,b,tip]=PR[p.i],w=[a,b][p.w];
+  return head+`<article class="box yel"><p class="sub">Ouça e escolha a palavra que a voz falou. As vozes mudam de propósito (treino de percepção).</p>
+    <div class="row" style="justify-content:center;margin:12px 0"><button class="btn fy" type="button" data-a="sayVar" data-t="${esc(w)}">🔊 Ouvir</button></div>
+    <div class="opts" style="grid-template-columns:1fr 1fr">${[a,b].map((o,i)=>`<button class="opt ${p.ans!=null?(i===p.w?"ok":i===p.ans?"no":""):""}" type="button" data-a="prAns" data-v="${i}" ${p.ans!=null?"disabled":""} style="text-align:center;font-size:24px">${esc(o)}</button>`).join("")}</div>
+    ${p.ans!=null?`<p style="margin-top:12px">${p.ans===p.w?"✓ Isso!":"✗ Era "+esc(w)+"."} <span class="sub">${esc(tip)}</span></p>
+      <div class="row" style="margin-top:10px"><button class="btn" type="button" data-a="say" data-t="${esc(a)}">🔊 ${esc(a)}</button><button class="btn" type="button" data-a="say" data-t="${esc(b)}">🔊 ${esc(b)}</button><button class="btn r" type="button" data-a="prNext">Próximo ▶</button></div><p class="sub" style="margin-top:8px">Agora fale as duas em voz alta, exagerando a diferença.</p>`:""}</article>`}
+/* erros de brasileiro */
+function newGram(){return {i:Math.floor(Math.random()*ERR.length),flip:Math.random()<.5,ans:null}}
+function bGram(){const g=S.ui.gr,[w,r,tip]=ERR[g.i],o=g.flip?[r,w]:[w,r],st=S.stats.gram;
+  return `<div class="row sp"><p class="sub">Qual está certa?</p><span class="score">${st[0]}/${st[1]} acertos</span></div>
+  <div class="opts">${o.map(x=>`<button class="opt ${g.ans?(x===r?"ok":x===g.ans?"no":""):""}" type="button" data-a="grAns" data-v="${esc(x)}" ${g.ans?"disabled":""}>${esc(x)}</button>`).join("")}</div>
+  ${g.ans?`<article class="box ${g.ans===r?"grn":"red"}"><p><b>${g.ans===r?"✓ Isso!":"✗ Pegadinha clássica."}</b> ${esc(tip)}</p>${g.ans!==r?`<p class="sub" style="margin-top:6px">Virou card em Meus erros.</p>`:""}
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" data-a="say" data-t="${esc(r)}">🔊 Ouvir a certa</button><button class="btn r" type="button" data-a="grNext">Próxima ▶</button></div></article>`:""}`}
+/* ditado */
+const words=t=>t.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9' ]+/g," ").split(/\s+/).filter(Boolean);
+function lcsMark(a,b){const n=a.length,m=b.length,L=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)L[i][j]=a[i]===b[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+  const ok=new Array(n).fill(false);let i=0,j=0;while(i<n&&j<m){if(a[i]===b[j]){ok[i]=true;i++;j++}else if(L[i+1][j]>=L[i][j+1])i++;else j++}return ok}
+function bDict(){const d=S.ui.dc,t=SHALL[d.i],st=S.stats.dict;
+  return `<div class="row sp"><p class="sub">Ouça quantas vezes quiser e escreva o que entendeu.</p><span class="score">${st[1]?Math.round(st[0]/st[1]*100):0}% de palavras</span></div>
+  <div class="row"><button class="btn fy" type="button" data-a="say" data-t="${esc(t)}">🔊 Ouvir</button><button class="btn y" type="button" data-a="say" data-t="${esc(t)}" data-slow="1">🐢 Devagar</button></div>
+  <textarea class="f" id="dcTxt" placeholder="Escreva aqui..." autocapitalize="sentences" autocorrect="off" spellcheck="false" ${d.res?"disabled":""}>${esc(d.typed)}</textarea>
+  ${d.res?`<article class="box ${d.res.p>=0.8?"grn":"yel"}"><p class="sub">${Math.round(d.res.p*100)}% das palavras. Em vermelho, o que escapou:</p><p class="diff" style="margin-top:8px">${t.split(/\s+/).map((w,i)=>`<span class="${d.res.ok[i]?"ok":"miss"}">${esc(w)}</span>`).join("")}</p>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" data-a="dcCard">Virar card</button><button class="btn r" type="button" data-a="dcNext">Próxima ▶</button></div></article>`
+  :`<button class="big w" type="button" data-a="dcCheck">Conferir</button>`}`}
+/* diário */
+function bWrite(){const w=S.ui.wr,n=words(w.text).length;
+  return `<article class="box red"><p class="sub">Tema (ou escreva o que quiser):</p><p class="topic" style="margin-top:6px">${esc(WRT[w.p])}</p><button class="mini" type="button" data-a="wrNew" style="margin-top:8px">Outro tema</button></article>
+  <textarea class="f" id="wrTxt" style="min-height:180px" placeholder="Write in English. Don't translate in your head, just write." spellcheck="false">${esc(w.text)}</textarea>
+  <p class="sub"><span id="wrN">${n}</span> palavras · meta: 50 a 100</p>
+  <div class="row"><button class="btn fy" type="button" data-a="wrCopy">Copiar pedido de correção</button><button class="btn" type="button" data-a="wrSave">Salvar no diário</button></div>
+  <p class="sub">Cole no Claude ou no ChatGPT. Depois cole aqui embaixo as correções no formato "errado -> certo": elas viram cards.</p>
+  <textarea class="f" id="wrFix" placeholder="I have a doubt -> I have a question">${esc(w.fix)}</textarea>
+  <button class="btn r" type="button" data-a="wrFix">Virar cards</button>`}
+/* speaking 4/3/2 */
+function spRounds(){const s=S.ui.sp;return [240,180,120].map(x=>Math.round(x*s.scale))}
+function spLeft(){const s=S.ui.sp;return s.end?Math.max(0,s.end-Date.now()):s.left!=null?s.left:spRounds()[s.r]*1000}
+function bSpeak(){const s=S.ui.sp,[t,h]=TOP[s.t],R=spRounds(),fin=s.r>=3;
+  const msg=["Conte para alguém imaginário. Sem parar para corrigir.","A MESMA história, em menos tempo. Corte as pausas.","De novo, só o essencial. Rápido e direto."];
+  return `<article class="box red tape"><p class="sub">Tema</p><p class="topic" style="margin:6px 0">${esc(t)}</p><p class="sub">${esc(h)}</p>${s.r===0&&!s.end&&s.left==null?`<button class="mini" type="button" data-a="spNew" style="margin-top:8px">Outro tema</button>`:""}</article>
+  ${fin?`<article class="box grn"><h3>Feito: 3 rodadas!</h3><p style="margin-top:6px">Na 3ª você falou a mesma coisa em metade do tempo. Isso é fluência sendo construída.</p>
+      <p class="sub" style="margin-top:10px">Como foi a fluência hoje?</p><div class="lens" style="grid-template-columns:repeat(5,1fr);margin-top:6px">${[1,2,3,4,5].map(v=>`<button type="button" data-a="spRate" data-v="${v}" aria-pressed="${s.rated===v}">${v}</button>`).join("")}</div>
+      <div class="row" style="margin-top:10px"><button class="btn r" type="button" data-a="spNew">Outro tema</button></div></article>`
+  :`<div class="round"><div class="rsteps">${R.map((_,i)=>`<i class="${i<s.r?"on":i===s.r?"now":""}"></i>`).join("")}</div>
+      <p class="sub">Rodada ${s.r+1} de 3 · ${clock(R[s.r]*1000)}</p><div class="clk ${s.over?"done":""}" data-clock="round">${clock(spLeft())}</div><p>${msg[s.r]}</p>
+      <div class="row" style="justify-content:center">${s.over?`<button class="btn fy" type="button" data-a="spNext">${s.r<2?"Próxima rodada ▶":"Terminar ✓"}</button>`:s.end?`<button class="btn" type="button" data-a="spPause">Pausar</button><button class="btn y" type="button" data-a="spNext">Pular ▶</button>`:`<button class="btn fy" type="button" data-a="spGo">${s.left!=null?"Continuar":"▶ Começar"}</button>`}</div></div>`}
+  ${recUI()}<p class="sub">Gravar e ouvir depois mostra seus vícios (ééé, tipo, pausas). Não precisa gravar todo dia.</p>`}
+/* pensar em inglês */
+function bThink(){const th=S.ui.th,i=(th.off+Math.floor(runMs()/45000))%THK.length;th.last=i;
+  return `<article class="box red tape" style="text-align:center"><p class="sub">Fale em voz alta (ou sussurrando). O tema muda a cada 45 s.</p><p class="topic" style="margin:14px 0" id="thP">${esc(THK[i])}</p>
+    <button class="btn y" type="button" data-a="thSkip">Outro ▶</button></article>
+  <p class="sub">Travou numa palavra? Contorne com outras ("the thing you use to...") e anote para pesquisar depois. Isso é estratégia de nativo.</p>`}
+
+/* ---------- TREINAR ---------- */
+function vTreinar(){if(S.ui.run)return vRun();
+  const L=["cards","shadow","speak","think","pron","gram","dict","write"];
+  return `<section><p class="sub">Cada atividade conta o tempo sozinha enquanto a tela está aberta.</p>
+  <div class="acts">${L.map(k=>`<button class="act" type="button" data-a="run" data-v="${k}" style="border-top-color:${STR[ACTS[k][1]][2]}"><b>${ACTS[k][0]}</b><small>${ACTS[k][3]}</small><span class="tag" style="justify-self:start;color:${STR[ACTS[k][1]][2]};border-color:currentColor">${STR[ACTS[k][1]][0]}</span></button>`).join("")}</div>
+  <h2 class="label">Fora do app</h2><div class="chips">${EXT.map(k=>`<button class="chip" type="button" data-a="timer" data-v="${k}" style="border-color:${STR[ACTS[k][1]][2]}">${ACTS[k][0]}</button>`).join("")}</div></section>`}
+
+/* ---------- CARDS ---------- */
+function vCards(){if(S.ui.run)return vRun();
+  const due=dueCards().length,learned=S.cards.filter(c=>c.reps).length,q=(S.ui.q||"").toLowerCase();
+  const list=q?S.cards.filter(c=>(c.en+" "+c.pt).toLowerCase().includes(q)).slice(0,40):S.cards.filter(c=>!DECKS[c.deck]).slice(-20).reverse();
+  const ed=S.ui.ced?card(S.ui.ced):null;
+  return `<section>
+    <button class="big" type="button" data-a="run" data-v="cards">Revisar<small>${due} para revisar · ${Math.min(newLeft(),S.cards.filter(c=>!c.reps&&S.decks[c.deck]!==false).length)} novos hoje · ${learned} já estudados</small></button>
+    <article class="box yel"><h3>${ed?"Editar card":"Nova palavra ou frase"}</h3><div class="form" style="margin-top:10px">
+      <label class="full">Inglês<input id="nc-en" value="${esc(ed?ed.en:"")}" placeholder="ex.: to file a lawsuit" autocapitalize="off"></label>
+      <label class="full">Português<input id="nc-pt" value="${esc(ed?ed.pt:"")}" placeholder="ex.: ajuizar uma ação"></label>
+      <label class="full">Exemplo (frase em que ouviu)<input id="nc-ex" value="${esc(ed?ed.ex:"")}" placeholder="opcional, mas ajuda muito"></label>
+      ${ed?"":`<label class="full">Deck<select id="nc-d">${Object.entries(MYDECKS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label>`}</div>
+      <div class="row" style="margin-top:10px"><button class="btn fy" type="button" data-a="ncSave">${ed?"Salvar":"Adicionar"}</button>${ed?`<button class="btn" type="button" data-a="ncCancel">Cancelar</button><button class="btn r" type="button" data-a="ncDel">${S.ui.confirm==="del"+ed.id?"Confirmar":"Apagar"}</button>`:""}</div>
+      <p class="sub" style="margin-top:8px">Melhor que palavra solta: a frase inteira em que você ouviu (o "chunk").</p></article>
+    <h2 class="label">Decks</h2>
+    <div class="loglist">${[...Object.entries(DECKS).map(([k,d])=>[k,d.n,d.d]),...Object.entries(MYDECKS).map(([k,n])=>[k,n,"seus"])].map(([k,n,d])=>{const cs=S.cards.filter(c=>c.deck===k),l=cs.filter(c=>c.reps).length;
+      return `<div class="logi"><label class="row" style="gap:8px"><input type="checkbox" data-deck="${k}" ${S.decks[k]!==false?"checked":""} style="width:20px;height:20px;accent-color:var(--yel)"></label><span><b>${esc(n)}</b><br><small>${esc(d)} · ${l}/${cs.length}</small></span><small>${cs.filter(c=>c.reps&&c.due<=today()).length} hoje</small></div>`}).join("")}</div>
+    <p class="sub">Desmarcar um deck para de trazer cards novos dele. Os que você já estudou continuam na revisão.</p>
+    <div class="form"><label class="full">Buscar<input data-ui="q" id="cq" value="${esc(S.ui.q||"")}" placeholder="palavra em inglês ou português"></label></div>
+    <div class="loglist">${list.length?list.map(c=>`<div class="logi"><button class="mini" type="button" data-a="say" data-t="${esc(c.en)}">🔊</button><span>${esc(c.en)}<br><small>${esc(c.pt)}${c.reps?` · revisa ${c.due<=today()?"hoje":dmy(c.due)}`:" · novo"}</small></span><button class="mini" type="button" data-a="ncEdit" data-id="${c.id}">editar</button></div>`).join(""):`<div class="empty">${q?"Nada encontrado.":"Suas palavras aparecem aqui."}</div>`}</div>
+  </section>`}
+
+/* ---------- PROGRESSO ---------- */
+function vProg(){
+  const td=today(),tot=totalMin(),wk=Array.from({length:7},(_,i)=>addDays(td,i-6)),g=S.settings.goal;
+  const days=wk.map(d=>balance(d,d)),mx=Math.max(g,...days.map(b=>Object.values(b).reduce((a,x)=>a+x,0)));
+  const b30=balance(addDays(td,-29),td),c30=CORE.reduce((a,k)=>a+b30[k],0);
+  const li=LEVELS.findIndex(l=>l[0]===S.settings.level),cur=LEVELS[li],nx=LEVELS[li+1];
+  const since=S.log.filter(l=>l.date>=(S.levelSince||S.start)).reduce((a,l)=>a+l.min,0)/60;
+  const need=nx?nx[1]-cur[1]:0,pct=nx?Math.min(1,since/need):1;
+  const learned=S.cards.filter(c=>c.reps).length,revs=Object.entries(S.rev).filter(([d])=>d>=addDays(td,-29)),rn=revs.reduce((a,[,v])=>a+v.n,0),ra=revs.reduce((a,[,v])=>a+v.again,0);
+  const acc=k=>S.stats[k][1]?Math.round(S.stats[k][0]/S.stats[k][1]*100)+"%":"—";
+  const speakMin=S.log.filter(l=>["conversa","speak","think","shadow"].includes(l.act)).reduce((a,l)=>a+l.min,0),aulaMin=S.log.filter(l=>l.act==="aula").reduce((a,l)=>a+l.min,0);
+  const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-5+i);return iso(d).slice(0,7)}),mm=months.map(m=>S.log.filter(l=>l.date.startsWith(m)).reduce((a,l)=>a+l.min,0)),mmx=Math.max(1,...mm);
+  const MES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  return `<section>
+    <div class="nums"><div class="num"><b>${hm(tot)}</b><small>de inglês no total</small></div><div class="num"><b>${streak()}</b><small>dias seguidos (pular 1 não zera)</small></div>
+      <div class="num"><b>${hm(aulaMin)}</b><small>de aula</small></div><div class="num"><b>${hm(speakMin)}</b><small>falando (conversa, 4/3/2, shadowing, pensar)</small></div></div>
+    <h2 class="label">Últimos 7 dias</h2>
+    <div class="chart">${days.map((b,i)=>{const s=Object.values(b).reduce((a,x)=>a+x,0);return `<div><small>${s||""}</small><div class="col" style="height:${Math.max(4,s/mx*110)}px">${[...CORE,"aula"].map(k=>b[k]?`<i style="height:${b[k]/Math.max(1,s)*100}%;background:${STR[k][2]}"></i>`:"").join("")}</div><small>${DOWN[dow(wk[i])]}</small></div>`}).join("")}</div>
+    <p class="sub">Meta: ${g} min por dia · ${wk.filter(d=>dayMin(d)>=g).length} de 7 dias batidos</p>
+    <h2 class="label">Equilíbrio (30 dias)</h2>
+    <div class="strands">${CORE.map(k=>{const p=c30?b30[k]/c30:0;return `<div class="strand"><span style="color:${STR[k][2]}">${STR[k][0]}</span><span class="bar" style="position:relative"><i style="width:${p*100}%;background:${STR[k][2]}"></i><u style="position:absolute;left:25%;top:-2px;bottom:-2px;border-left:2px dashed var(--fg);opacity:.5"></u></span><em>${Math.round(p*100)}%</em></div>`}).join("")}</div>
+    <p class="sub">A linha tracejada é 25%: o ideal de Paul Nation é dividir parecido entre as 4. Aula fica à parte.</p>
+    <h2 class="label">Nível</h2>
+    <article class="box vio"><div class="row sp"><h3>${cur[0]}${nx?` → ${nx[0]}`:""}</h3><span class="sub">${since.toFixed(1).replace(".",",")} h desde que marcou ${cur[0]}</span></div>
+      <div class="prog" style="height:12px;margin:10px 0"><i style="width:${pct*100}%;background:var(--vio)"></i></div>
+      <p class="sub">${nx?`Estimativa Cambridge: ~${need} h de estudo entre ${cur[0]} e ${nx[0]}. Faltam ~${Math.max(0,Math.round(need-since))} h. ${tot>0?`No seu ritmo dos últimos 30 dias, cerca de ${(()=>{const r=Object.values(b30).reduce((a,x)=>a+x,0)/30/60;return r>0?Math.ceil((need-since)/r/30):"?"})()} meses.`:""}`:"Topo da escala. Agora é manter e refinar."}</p>
+      <div class="chips" style="margin-top:10px">${LEVELS.map(l=>`<button class="chip" type="button" data-a="level" data-v="${l[0]}" aria-pressed="${l[0]===cur[0]}">${l[0]}</button>`).join("")}</div>
+      <p class="sub" style="margin-top:8px">${esc(cur[2])}</p></article>
+    <h2 class="label">Cards e acertos</h2>
+    <div class="nums"><div class="num"><b>${learned}</b><small>cards estudados</small></div><div class="num"><b>${rn?Math.round((1-ra/rn)*100)+"%":"—"}</b><small>lembrou de primeira (30 dias)</small></div>
+      <div class="num"><b>${acc("pairs")}</b><small>pares mínimos</small></div><div class="num"><b>${acc("ed")}</b><small>final -ED</small></div>
+      <div class="num"><b>${acc("gram")}</b><small>erros de brasileiro</small></div><div class="num"><b>${acc("dict")}</b><small>palavras no ditado</small></div></div>
+    ${S.fluency.length?`<h2 class="label">Sua fluência (como você sentiu)</h2><div class="chart" style="height:90px;grid-template-columns:repeat(${Math.min(10,S.fluency.length)},1fr)">${S.fluency.slice(-10).map(f=>`<div><div class="col" style="height:${f.v*16}px"><i style="height:100%;background:var(--grn)"></i></div><small>${dmy(f.date)}</small></div>`).join("")}</div>`:""}
+    <h2 class="label">Por mês</h2>
+    <div class="chart" style="grid-template-columns:repeat(6,1fr);height:120px">${mm.map((m,i)=>`<div><small>${m?hm(m):""}</small><div class="col" style="height:${Math.max(4,m/mmx*80)}px"><i style="height:100%;background:var(--red)"></i></div><small>${MES[+months[i].slice(5)-1]}</small></div>`).join("")}</div>
+    <h2 class="label">Registro</h2>
+    <div class="loglist">${S.log.slice().sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0).slice(0,40).map(l=>`<div class="logi"><span class="dot" style="background:${STR[(ACTS[l.act]||ACTS.outro)[1]][2]}"></span><span>${esc((ACTS[l.act]||ACTS.outro)[0])} · ${l.min} min<br><small>${dmy(l.date)}${l.note?" · "+esc(l.note):""}</small></span><button class="x" type="button" data-a="logDel" data-id="${l.id}" aria-label="Apagar">${S.ui.confirm==="log"+l.id?"✓?":"×"}</button></div>`).join("")||`<div class="empty">Nada ainda. Comece uma sessão!</div>`}</div>
+    ${S.journal.length?`<h2 class="label">Diário</h2><div class="loglist">${S.journal.slice(-10).reverse().map(j=>`<details class="fold"><summary>${dmy(j.date)} · ${j.words} palavras</summary><div><p style="white-space:pre-wrap">${esc(j.text)}</p></div></details>`).join("")}</div>`:""}
+  </section>`}
+
+/* ---------- MAIS ---------- */
+function ics(t,time){const d=today().replace(/-/g,""),h=time.replace(":","")+"00",url=location.href.split("#")[0];
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Speak Loud//PT-BR","BEGIN:VEVENT",`UID:speakloud-${Date.now()}@bia`,`DTSTAMP:${d}T000000`,`DTSTART:${d}T${h}`,`DTEND:${d}T${h.slice(0,2)}${pad(Math.min(59,+h.slice(2,4)+20))}00`,"RRULE:FREQ=DAILY",`SUMMARY:${t}`,`DESCRIPTION:Abrir: ${url}`,`URL:${url}`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${t}`,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n")}
+function vMais(){
+  const sec=S.ui.mais||"recs",T=[["recs","Recomendações"],["sci","Por que funciona"],["avisos","Lembrete"],["ajustes","Ajustes"]];
+  let b="";
+  if(sec==="recs"){const li=LEVELS.findIndex(l=>l[0]===S.settings.level),ok=r=>LEVELS.findIndex(l=>l[0]===r.l)<=li+1;
+    b=`<p class="sub">Filtrado para o nível ${esc(S.settings.level)}: até um degrau acima, que é onde se aprende (input compreensível). Série com legenda EM INGLÊS.</p>
+    <div>${RECS.filter(ok).map(r=>`<div class="rec"><div class="row sp"><b>${r.u?`<a href="${r.u}" target="_blank" rel="noopener">${esc(r.t)}</a>`:esc(r.t)}</b><span class="tag">${esc(r.k)} · ${r.l}+</span></div><small class="sub">${esc(r.w)}</small></div>`).join("")}</div>
+    <article class="box yel"><h3>Mineração de frases</h3><p style="margin-top:6px">Ouviu uma frase legal na série? Pause, anote a frase INTEIRA na aba Cards com o exemplo. Cards tirados da sua vida fixam muito mais.</p></article>`}
+  if(sec==="sci")b=`<p class="sub">O que a pesquisa em aquisição de segunda língua e em memória diz, e como o app usa cada coisa.</p>${SCIENCE.map(([t,w,p,a])=>`<div class="sci"><b>${esc(t)}</b><em>${esc(w)}</em><p>${esc(p)}</p><small>No app: ${esc(a)}</small></div>`).join("")}
+    <p class="sub">Não existe "método de Harvard" secreto. O que funciona é volume de exposição, falar desde cedo, revisar na hora certa e corrigir o ponto fraco.</p>`;
+  if(sec==="avisos")b=`<article class="box"><h3>Lembrete diário</h3><p style="margin-top:6px">O iPhone só deixa app da web avisar pelo Calendário. Escolha a hora e adicione o lembrete diário.</p>
+    <div class="form" style="margin-top:10px"><label>Hora<input type="time" data-set="remH" value="${esc(S.settings.remH)}"></label></div>
+    <div class="row" style="margin-top:10px"><button class="btn fy" type="button" data-a="remind">Adicionar ao Calendário</button></div></article>
+    <p class="sub">Dica TDAH: amarre o inglês a algo que você já faz (depois do café, no carro, depois do treino). Hábito com gatilho dura mais.</p>`;
+  if(sec==="ajustes"){
+    b=`<div class="form"><label class="full">Seu nome<input data-set="name" value="${esc(S.settings.name)}"></label>
+      <label>Meta por dia (min)<input type="number" inputmode="numeric" data-set="goal" data-num="1" value="${S.settings.goal}"></label><label>Cards novos por dia<input type="number" inputmode="numeric" data-set="newPerDay" data-num="1" value="${S.settings.newPerDay}"></label>
+      <label>Sotaque<select data-set="accent"><option value="en-US" ${S.settings.accent==="en-US"?"selected":""}>Americano</option><option value="en-GB" ${S.settings.accent==="en-GB"?"selected":""}>Britânico</option><option value="en-AU" ${S.settings.accent==="en-AU"?"selected":""}>Australiano</option></select></label>
+      <label>Velocidade da voz<select data-set="rate" data-num="1">${[0.8,0.9,1,1.1].map(r=>`<option value="${r}" ${+S.settings.rate===r?"selected":""}>${r===1?"normal":r<1?"mais devagar ("+r+")":"mais rápida ("+r+")"}</option>`).join("")}</select></label>
+      <label class="full">Voz<select data-set="voice"><option value="">automática</option>${VOICES.filter(v=>lang(v)===S.settings.accent).map(v=>`<option ${S.settings.voice===v.name?"selected":""}>${esc(v.name)}</option>`).join("")}</select></label>
+      <label class="full">Cards: direção<select data-set="dir"><option value="mix" ${S.settings.dir==="mix"?"selected":""}>Misto (recomendado)</option><option value="pt" ${S.settings.dir==="pt"?"selected":""}>Português → inglês (produzir)</option><option value="en" ${S.settings.dir==="en"?"selected":""}>Inglês → português (reconhecer)</option></select></label></div>
+      <div class="row"><button class="btn y" type="button" data-a="say" data-t="Hi Bia! This is how I sound. Let's practice every day.">🔊 Testar voz</button></div>
+      <p class="sub">Mais vozes: Ajustes do iPhone → Acessibilidade → Conteúdo Falado → Vozes → Inglês. As vozes "Aprimoradas" são bem melhores e funcionam offline.</p>
+      <h2 class="label">Backup</h2><p class="sub">Tudo fica só neste celular. Copie o backup de vez em quando e guarde nas Notas.</p>
+      <div class="row"><button class="btn" type="button" data-a="copyJson">Copiar backup</button></div>
+      <textarea class="f" id="backupBox" placeholder="Cole aqui um backup e toque em Restaurar" aria-label="Backup"></textarea>
+      <div class="row"><button class="btn" type="button" data-a="restore">Restaurar do texto</button><span class="sub" id="bkMsg"></span></div>
+      <p class="sub">Outros apps: <a href="../">Treino</a> · <a href="../vida/">Vida</a> · <a href="../grana/">Bia$</a> · <a href="../destrava/">Destrava</a></p>`}
+  return `<section><div class="chips">${T.map(([k,l])=>`<button class="chip" type="button" data-a="mais" data-v="${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>${b}</section>`}
+
+/* =====================================================================
+   RENDER E EVENTOS
+   ===================================================================== */
+let rendering=false;
+function render(){if(rendering)return;rendering=true;try{hello();
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===S.ui.tab)));
+  $("#view").innerHTML=({hoje:vHoje,treinar:vTreinar,cards:vCards,prog:vProg,mais:vMais}[S.ui.tab]||vHoje)();
+  $("#storeWarn").hidden=storeOk}finally{rendering=false}}
+function rerender(){const y=window.scrollY;render();window.scrollTo(0,y)}
+function go(tab){S.ui.tab=tab;S.ui.confirm=null;save();render();window.scrollTo(0,0)}
+
+// relógios sem redesenhar a tela inteira
+setInterval(()=>{if(document.hidden)return;
+  document.querySelectorAll("[data-clock]").forEach(el=>{const k=el.dataset.clock;
+    if(k==="timer")el.textContent=clock(tmMs());
+    if(k==="run"){const s=S.ui.sess,blk=s&&!s.done?s.blocks[s.i]:null;el.textContent=clock(runMs())+(blk?` / ${blk[1]}:00`:"")}
+    if(k==="round")el.textContent=clock(spLeft())});
+  const s=S.ui.sess,r=S.ui.run;
+  if(r&&s&&!s.done){const blk=s.blocks[s.i],bar=document.querySelector("[data-bar=blk]");if(bar)bar.style.width=Math.min(100,runMs()/(blk[1]*600))+"%";
+    if(!S.ui.overT&&runMs()>=blk[1]*60000&&r.act!=="speak"){S.ui.overT=true;celebrate();const rb=$("#runbar");if(rb){rb.classList.add("over");const nb=rb.querySelector(".nextb");if(nb){nb.classList.remove("y");nb.classList.add("fy")}}}}
+  if(r&&r.act==="speak"&&S.ui.sp&&S.ui.sp.end&&Date.now()>=S.ui.sp.end&&!S.ui.sp.over){S.ui.sp.over=true;S.ui.sp.end=null;S.ui.sp.left=0;celebrate();rerender()}
+  if(r&&r.act==="think"&&S.ui.th){const i=(S.ui.th.off+Math.floor(runMs()/45000))%THK.length;if(i!==S.ui.th.last){S.ui.th.last=i;const p=$("#thP");if(p)p.textContent=THK[i]}}
+},500);
+
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.tab)});
+$("#view").addEventListener("input",e=>{const t=e.target;
+  if(t.id==="wrTxt"){S.ui.wr.text=t.value;const n=$("#wrN");if(n)n.textContent=words(t.value).length;save();return}
+  if(t.id==="wrFix"){S.ui.wr.fix=t.value;save();return}
+  if(t.id==="dcTxt"){S.ui.dc.typed=t.value;save();return}
+  if(t.dataset.ui){S.ui[t.dataset.ui]=t.value;clearTimeout(t._d);t._d=setTimeout(()=>{rerender();const n=document.getElementById(t.id);if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length)}catch(x){}}},300);return}
+  if(t.dataset.set&&t.tagName==="INPUT"&&t.type!=="time"){S.settings[t.dataset.set]=t.dataset.num?+t.value||0:t.value;save();hello()}});
+$("#view").addEventListener("change",e=>{const t=e.target;
+  if(t.dataset.set){S.settings[t.dataset.set]=t.dataset.num?+t.value||0:t.value;if(t.dataset.set==="accent")S.settings.voice="";if(t.dataset.set==="goal")S.settings.goal=Math.max(5,S.settings.goal);save(true);if(!rendering)setTimeout(rerender,0);return}
+  if(t.dataset.deck){S.decks[t.dataset.deck]=t.checked;save(true);rerender()}});
+$("#view").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("#nc-en,#nc-pt,#nc-ex")){e.preventDefault();$("[data-a=ncSave]").click()}});
+$("#view").addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;
+  const a=b.dataset.a,v=b.dataset.v,td=today(),U=S.ui;
+  if(!["logDel","ncDel"].includes(a))U.confirm=null;
+  switch(a){
+    case "say":say(b.dataset.t,!!b.dataset.slow);return;
+    case "sayVar":say(b.dataset.t,false,true);return;
+    case "sessLen":S.settings.sessLen=+v;break;
+    case "sess":startSess(+v);save(true);render();window.scrollTo(0,0);return;
+    case "next":nextBlock();save(true);render();window.scrollTo(0,0);return;
+    case "sessStop":{const s=U.sess;s.mins.push(finishRun(true));U.sess=null;const m=s.mins.reduce((x,y)=>x+y,0);toast(m?`${m} min salvos. Volta logo!`:"Sessão encerrada.");break}
+    case "sessClose":U.sess=null;break;
+    case "run":startRun(v);if(U.tab!=="hoje"&&U.tab!=="treinar"&&U.tab!=="cards")U.tab="treinar";save(true);render();window.scrollTo(0,0);return;
+    case "finish":finishRun();break;
+    case "timer":{if(S.timer){toast(`Pare ${ACTS[S.timer.act][0]} primeiro.`);U.tab="hoje";break}S.timer={act:v,t0:Date.now(),acc:0,paused:false};U.tab="hoje";toast(`${ACTS[v][0]}: contando. Pode bloquear o celular.`);save(true);render();window.scrollTo(0,0);return}
+    case "tPause":{const t=S.timer;if(t.paused){t.t0=Date.now();t.paused=false}else{t.acc+=Date.now()-t.t0;t.paused=true}break}
+    case "tStop":{const ms=tmMs();U.tstop={act:S.timer.act,min:Math.max(1,Math.round(ms/60000)),date:td};S.timer=null;break}
+    case "tSave":{const f=U.tstop,m=+$("#ts-min").value;if(m>0){addLog(f.act,m,$("#ts-n").value.trim(),$("#ts-d").value||td);toast(`+${m} min de ${ACTS[f.act][0]}.`);celebrate()}U.tstop=null;break}
+    case "tDiscard":U.tstop=null;break;
+    case "manual":U.manual=!U.manual;break;
+    case "manSave":{const m=+$("#mf-m").value;if(!(m>0)){toast("Coloque os minutos.");return}addLog($("#mf-a").value,m,$("#mf-n").value.trim(),$("#mf-d").value||td);U.manual=false;toast(`+${m} min.`);break}
+    case "aulaForm":U.aulaForm=!U.aulaForm;break;
+    case "aulaSave":{const m=+$("#af-m").value||0,d=$("#af-d").value||td,tema=$("#af-t").value.trim();if(m>0)addLog("aula",m,tema,d);
+      let n=0;parseWords($("#af-w").value).forEach(([en,pt])=>{if(addCard("aula",en,pt,tema))n++});
+      parseFixes($("#af-c").value).forEach(([w,r])=>{if(addCard("erros",r,"Corrija: "+w,tema?"Aula: "+tema:""))n++});
+      const h=$("#af-h").value.trim();if(h)S.hw.push({id:uid(),t:h,date:d,done:false});
+      U.aulaForm=false;celebrate();toast(`Aula salva${m?` (${m} min)`:""}${n?` · ${n} cards novos`:""}.`);break}
+    case "hwDone":{const h=S.hw.find(x=>x.id===b.dataset.id);if(h){h.done=true;toast("Lição feita!")}break}
+    case "mission":S.mission[td]=!S.mission[td];if(S.mission[td])celebrate();break;
+    /* cards */
+    case "reveal":{U.rv.show=true;const c=card(U.rv.q[0]);if(c&&U.rv.dir==="pt")say(c.en);break}
+    case "grade":{const rv=U.rv,c=card(rv.q[0]),g=+v,wasNew=!c.reps;schedule(c,g);rv.q.shift();if(g===1)rv.q.splice(Math.min(3,rv.q.length),0,c.id);
+      if(wasNew){if(S.newDay.date!==td)S.newDay={date:td,n:0};S.newDay.n++}
+      const R=S.rev[td]=S.rev[td]||{n:0,again:0};R.n++;if(g===1)R.again++;rv.show=false;rv.dir=null;rv.n++;
+      if(!rv.q.length)celebrate();break}
+    case "ncSave":{const en=$("#nc-en").value.trim();if(!en){toast("Escreva em inglês.");return}
+      if(U.ced){const c=card(U.ced);c.en=en;c.pt=$("#nc-pt").value.trim();c.ex=$("#nc-ex").value.trim();U.ced=null;toast("Card salvo.")}
+      else{const c=addCard($("#nc-d").value,en,$("#nc-pt").value,$("#nc-ex").value);toast(c&&c.added===td&&!c.reps?"Card criado. Ele aparece na próxima revisão.":"Esse já existe.")}break}
+    case "ncEdit":U.ced=b.dataset.id;window.scrollTo(0,0);break;
+    case "ncCancel":U.ced=null;break;
+    case "ncDel":{const k="del"+U.ced;if(U.confirm===k){S.cards=S.cards.filter(c=>c.id!==U.ced);U.ced=null;U.confirm=null}else U.confirm=k;break}
+    /* shadowing */
+    case "shCat":U.sh={cat:v,i:0,show:false,reps:0};recClear();break;
+    case "shShow":U.sh.show=true;break;
+    case "shRep":U.sh.reps++;break;
+    case "shNext":{U.sh.i++;U.sh.show=false;U.sh.reps=0;recClear();const L=SH[U.sh.cat].l;say(L[U.sh.i%L.length]);break}
+    case "shCard":{const L=SH[U.sh.cat].l;addCard("meus",L[U.sh.i%L.length],"","");toast("Virou card.");return}
+    case "recStart":recStart();return;
+    case "recStop":recStop();return;
+    case "recPlay":if(REC.url){try{new Audio(REC.url).play()}catch(x){}}return;
+    /* pronúncia */
+    case "prMode":U.pr=newPron(v);break;
+    case "prAns":{const p=U.pr;p.ans=+v;S.stats.pairs[1]++;if(p.ans===p.w)S.stats.pairs[0]++;break}
+    case "edAns":{const p=U.pr;p.ans=v;S.stats.ed[1]++;if(v===EDV[p.i][1])S.stats.ed[0]++;break}
+    case "prNext":{U.pr=newPron(U.pr.mode);const p=U.pr;say(p.mode==="ed"?EDV[p.i][0]:PR[p.i][p.w],false,true);break}
+    /* erros */
+    case "grAns":{const g=U.gr,[w,r,tip]=ERR[g.i];g.ans=v;S.stats.gram[1]++;if(v===r)S.stats.gram[0]++;else addCard("erros",r,"Corrija: "+w,tip);break}
+    case "grNext":U.gr=newGram();break;
+    /* ditado */
+    case "dcCheck":{const d=U.dc,t=SHALL[d.i],tw=t.split(/\s+/),norm=tw.map(x=>words(x).join(" ")),ok=lcsMark(norm,words(d.typed)),p=ok.filter(Boolean).length/tw.length;
+      d.res={ok,p};S.stats.dict[0]+=ok.filter(Boolean).length;S.stats.dict[1]+=tw.length;break}
+    case "dcNext":{U.dc={i:Math.floor(Math.random()*SHALL.length),typed:"",res:null};say(SHALL[U.dc.i]);break}
+    case "dcCard":addCard("meus",SHALL[U.dc.i],"","");toast("Virou card.");return;
+    /* diário */
+    case "wrNew":U.wr.p=(U.wr.p+1)%WRT.length;break;
+    case "wrCopy":{const txt=`Please correct my English text. List each mistake as "wrong -> right" (one per line) with a very short explanation in Portuguese. Then give me a natural version, like a native speaker would write it. Topic: ${WRT[U.wr.p]}\n\n${U.wr.text}`;
+      try{navigator.clipboard.writeText(txt).then(()=>toast("Copiado! Cole no Claude ou no ChatGPT."),()=>toast("Não consegui copiar."))}catch(x){toast("Não consegui copiar.")}return}
+    case "wrSave":{const t=U.wr.text.trim();if(!t){toast("Escreva alguma coisa primeiro.");return}S.journal.push({id:uid(),date:td,text:t,words:words(t).length,prompt:WRT[U.wr.p]});toast("Salvo no diário.");celebrate();break}
+    case "wrFix":{let n=0;parseFixes(U.wr.fix).forEach(([w,r])=>{if(addCard("erros",r,"Corrija: "+w,""))n++});U.wr.fix="";toast(n?`${n} cards em Meus erros.`:'Use o formato "errado -> certo".');break}
+    /* speaking */
+    case "spNew":U.sp={t:(U.sp.t+1+Math.floor(Math.random()*(TOP.length-1)))%TOP.length,r:0,end:null,left:null,over:false,scale:U.sp.scale};recClear();break;
+    case "spGo":{const s=U.sp;s.end=Date.now()+(s.left!=null?s.left:spRounds()[s.r]*1000);s.left=null;break}
+    case "spPause":{const s=U.sp;s.left=Math.max(0,s.end-Date.now());s.end=null;break}
+    case "spNext":{const s=U.sp;s.r++;s.end=null;s.left=null;s.over=false;break}
+    case "spRate":U.sp.rated=+v;S.fluency.push({date:td,v:+v});toast("Anotado.");break;
+    case "thSkip":U.th.off++;break;
+    /* resto */
+    case "level":S.settings.level=v;S.levelSince=td;break;
+    case "logDel":{const k="log"+b.dataset.id;if(U.confirm===k){S.log=S.log.filter(l=>l.id!==b.dataset.id);U.confirm=null}else U.confirm=k;break}
+    case "mais":U.mais=v;break;
+    case "remind":{const txt=ics("Speak Loud: inglês de hoje",S.settings.remH),url=URL.createObjectURL(new Blob([txt],{type:"text/calendar"})),l=document.createElement("a");l.href=url;l.download="lembrete-ingles.ics";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Abra e toque em Adicionar ao Calendário.");return}
+    case "copyJson":{const txt=JSON.stringify(Object.assign({},S,{ui:undefined})),box=$("#backupBox");box.value=txt;try{navigator.clipboard.writeText(txt).then(()=>$("#bkMsg").textContent="Backup copiado.",()=>{box.select();$("#bkMsg").textContent="Selecionado: toque em Copiar."})}catch(x){box.select()}return}
+    case "restore":{try{const d=JSON.parse($("#backupBox").value);if(!d||!d.log||!d.cards)throw 0;S=Object.assign(fresh(),d);S.settings=Object.assign(fresh().settings,d.settings||{});S.ui={tab:"mais",mais:"ajustes"};seed();save(true);render();$("#bkMsg").textContent="Backup restaurado."}catch(x){$("#bkMsg").textContent="Esse texto não é um backup válido."}return}
+  }
+  save(true);rerender();
+});
+
+if(S.ui.run)resumeRun();
+try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude/.test(location.hostname))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
+save(true);render();
+</script>
+
+</body></html>
