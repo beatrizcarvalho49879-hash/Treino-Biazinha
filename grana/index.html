@@ -181,6 +181,20 @@ details.fold[open]>summary::after{content:"−"}
 details.fold>div{padding:0 12px 14px;display:flex;flex-direction:column;gap:12px}
 .tog{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
 .tog input{width:22px;height:22px;flex:0 0 22px;accent-color:var(--pink);margin:0}
+.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ctile{position:relative;text-align:left;border:2px solid var(--fg);border-left:10px solid var(--cc,var(--fg));background:var(--ink2);color:var(--fg);padding:10px;display:grid;gap:3px;min-width:0}
+.ctile.on{outline:3px solid var(--tape);outline-offset:1px}
+.ctile b{font-family:var(--f-display);font-weight:400;font-size:18px;text-transform:uppercase;letter-spacing:.03em;overflow-wrap:anywhere}
+.ctile>span{font-family:var(--f-display);font-size:22px}
+.ctile small{font-family:var(--f-type);font-size:11px;color:var(--dim)}
+.ctile.add{border-style:dashed;border-left-width:2px}
+.ctile .mbar{display:block;height:6px;border:1px solid var(--fg);position:relative}
+.ctile .mbar i{position:absolute;inset:0 auto 0 0;background:var(--cc,var(--pink))}
+.bankrow{border:2px solid var(--line);border-left:8px solid var(--cc);padding:10px;display:grid;gap:8px}
+.bankrow.on{border-color:var(--fg);border-left-color:var(--cc)}
+.imp{display:grid;gap:8px}
+.improw{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;border:2px solid var(--line);padding:10px}
+.improw.off{opacity:.5}
 @media (max-width:400px){.crow{grid-template-columns:92px 1fr 104px}}
 </style>
 
@@ -375,18 +389,36 @@ function txRow(t){
 /* =====================================================================
    ABA CARTÕES
    ===================================================================== */
+const BANKS={c6:{n:"C6 Bank",cor:"#d9d9d9"},mercadopago:{n:"Mercado Pago",cor:"#00b1ea"},nubank:{n:"Nubank",cor:"#a24bff"},bradescard:{n:"Bradescard",cor:"#ff3b5c"},digio:{n:"Digio",cor:"#3b6bff"},wise:{n:"Wise",cor:"#9fe870"},picpay:{n:"PicPay",cor:"#21c25e"}};
+const COLOR_NAMES={"#ff2d7a":"rosa","#ffd21f":"amarelo","#3ee08c":"verde","#7fd4ff":"azul","#b48cff":"lilás","#ff8a4c":"laranja"};
+Object.values(BANKS).forEach(b=>{if(!COLOR_NAMES[b.cor])COLOR_NAMES[b.cor]="cor do "+b.n});
+const bankOf=c=>Object.keys(BANKS).find(k=>norm(c.n).includes(norm(BANKS[k].n).split(" ")[0]));
+function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")}
+/* comprar hoje: quantos dias até pagar */
+const payDays=c=>daysTo(dueDate(faturaOf(c,today()),c.venc));
 function vCartoes(){
-  if(!S.cards.length) return `<section>${cardForm(null)}</section>`;
+  if(S.ui.imp) return `<section>${importView()}</section>`;
+  if(!S.cards.length) return `<section>${S.ui.cardForm==="new"?cardForm(null):setupCards()}</section>`;
   const cid=S.ui.card&&card(S.ui.card)?S.ui.card:S.cards[0].id, c=card(cid), open=openFatura(c), fym=S.ui.fym||open;
   const items=faturaItems(cid,fym), tot=items.reduce((a,t)=>a+t.val,0), used=cardUsed(c), lim=num0(c.limite), f=S.fat[`${cid}|${fym}`];
-  const closeDate=(()=>{const due=fym;const cm=c.venc>c.fech?due:addMonths(due,-1);return dueDate(cm,c.fech)})();
+  const closeDate=(()=>{const cm=c.venc>c.fech?fym:addMonths(fym,-1);return dueDate(cm,c.fech)})();
   const st=f?"paga":fym<open?"fechada, não paga":fym===open?"aberta":"futura";
   const parcFut=S.tx.filter(t=>t.card===cid&&t.fatura>open&&t.parc&&t.parc.n>1).reduce((a,t)=>a+t.val,0);
+  const best=[...S.cards].sort((a,b)=>payDays(b)-payDays(a))[0];
+  const totLim=S.cards.reduce((a,x)=>a+num0(x.limite),0), totUsed=S.cards.reduce((a,x)=>a+cardUsed(x),0);
   return `<section>
-    <div class="chips">${S.cards.map(x=>`<button class="chip" type="button" data-a="card" data-id="${x.id}" aria-pressed="${x.id===cid}" style="border-color:${x.cor}">${esc(x.n)}<small>vence dia ${x.venc}</small></button>`).join("")}<button class="chip" type="button" data-a="newCard">+ cartão</button></div>
+    ${flash?`<div class="done-card ${flash.bad?"bad":""}"><h3>${esc(flash.t)}</h3><p>${esc(flash.m)}</p><div class="row"><button class="ghost" type="button" data-a="closeFlash">Fechar</button></div></div>`:""}
+    <h2 class="label">Meus cartões</h2>
+    <div class="cgrid">${S.cards.map(x=>{const o=openFatura(x),ft=faturaTotal(x.id,o),l=num0(x.limite),u=cardUsed(x);return `<button type="button" class="ctile ${x.id===cid?"on":""}" data-a="card" data-id="${x.id}" style="--cc:${x.cor}"><b>${esc(x.n)}</b><span class="money">${brl(ft)}</span><small>fatura de ${MES3[+o.slice(5)-1]} · vence ${dmy(dueDate(o,x.venc))}</small>${l?`<i class="mbar"><i style="width:${Math.min(100,u/l*100)}%"></i></i><small>livre <span class="money">${brl(l-u)}</span></small>`:""}</button>`}).join("")}
+      <button type="button" class="ctile add" data-a="newCard"><b>+ cartão</b><small>C6, Nubank, Picpay…</small></button></div>
+    <div class="stats">
+      ${S.cards.length>1?`<div class="stat"><b style="color:var(--green)">${esc(best.n)}</b><span>melhor para comprar hoje: só paga em ${dmy(dueDate(faturaOf(best,today()),best.venc))} (${payDays(best)} dias)</span></div>`:""}
+      ${totLim?`<div class="stat"><b class="money">${brl(totLim-totUsed)}</b><span>limite livre somando todos (de ${brl(totLim)})</span></div>`:""}
+    </div>
+    <button class="cta" type="button" data-a="impOpen">Ler print da fatura</button>
     ${S.ui.cardForm?cardForm(S.ui.cardForm==="new"?null:c):""}
     <div class="card" style="--cc:${c.cor}"><span class="stripe"></span><span class="cn">${esc(c.n)}</span>
-      <span class="meta">fecha dia ${c.fech} · vence dia ${c.venc} · melhor dia de compra: ${c.fech}</span>
+      <span class="meta">fecha dia ${c.fech} · vence dia ${c.venc} · comprando hoje, paga em ${dmy(dueDate(faturaOf(c,today()),c.venc))}</span>
       ${lim?`<div class="bar" style="color:var(--fg)" role="img" aria-label="Limite usado"><i class="${used>lim?"over":used>lim*.8?"warn":"pink"}" style="width:${Math.min(100,used/lim*100)}%"></i></div>
       <span class="meta limit">usado <span class="money">${brl(used)}</span> · livre <span class="money">${brl(lim-used)}</span> de <span class="money">${brl(lim)}</span></span>`:`<span class="meta">Sem limite cadastrado.</span>`}
       <span class="meta">Parcelas já compradas para as próximas faturas: <span class="money" style="color:var(--tape)">${brl(parcFut)}</span></span>
@@ -398,16 +430,122 @@ function vCartoes(){
     <p class="sub">Compras no dia do fechamento ou depois entram na fatura seguinte. Parcelas aparecem uma em cada fatura.</p>
   </section>`;
 }
+function setupCards(){
+  const sel=S.ui.setup||(S.ui.setup={});
+  return `<div class="sheet"><h3>Quais cartões você tem?</h3><p class="sub">Marque e preencha os dias. Eles estão no app de cada banco: "fechamento" (ou "melhor dia de compra") e "vencimento".</p>
+    ${Object.entries(BANKS).map(([k,b])=>{const on=!!sel[k];return `<div class="bankrow ${on?"on":""}" style="--cc:${b.cor}"><label class="tog"><input type="checkbox" data-setup="${k}" ${on?"checked":""}> <b>${b.n}</b></label>
+      ${on?`<div class="form"><label>Fecha dia<input id="su-f-${k}" inputmode="numeric" placeholder="ex.: 3"></label><label>Vence dia<input id="su-v-${k}" inputmode="numeric" placeholder="ex.: 10"></label><label class="full">Limite (R$)<input id="su-l-${k}" inputmode="decimal" placeholder="opcional"></label></div>`:""}</div>`}).join("")}
+    <div class="row" style="margin:0"><button class="ghost" type="button" data-a="setupSave">Salvar cartões</button><button class="ghost" type="button" data-a="newCard">Outro banco</button></div>
+    <p class="sub" id="setupMsg"></p></div>`;
+}
 function cardForm(c){
-  const v=c||{n:"",limite:"",fech:"",venc:"",cor:CARD_COLORS[S.cards.length%CARD_COLORS.length]};
+  const d=S.ui.cfDraft||{}, v=Object.assign({n:"",limite:"",fech:"",venc:"",cor:CARD_COLORS[S.cards.length%CARD_COLORS.length]},c||{},d);
+  const colors=[...new Set([...CARD_COLORS,...Object.values(BANKS).map(b=>b.cor),v.cor])];
   return `<div class="sheet"><h3>${c?"Editar cartão":"Novo cartão"}</h3>
-    <div class="form"><label class="full">Nome<input id="cf-n" value="${esc(v.n)}" placeholder="ex.: Nubank, Itaú"></label>
+    ${c?"":`<div class="chips">${Object.entries(BANKS).map(([k,b])=>`<button type="button" class="chip" data-a="bankPick" data-k="${k}" aria-pressed="${v.n===b.n}" style="border-color:${b.cor}">${b.n}</button>`).join("")}</div>`}
+    <div class="form"><label class="full">Nome<input id="cf-n" value="${esc(v.n)}" placeholder="ex.: Nubank, C6"></label>
       <label>Limite (R$)<input id="cf-l" inputmode="decimal" value="${esc(v.limite)}"></label>
-      <label>Cor<select id="cf-c">${CARD_COLORS.map((x,i)=>`<option value="${x}" ${v.cor===x?"selected":""}>${["rosa","amarelo","verde","azul","lilás","laranja"][i]}</option>`).join("")}</select></label>
+      <label>Cor<select id="cf-c">${colors.map(x=>`<option value="${x}" ${v.cor===x?"selected":""}>${esc(COLOR_NAMES[x]||x)}</option>`).join("")}</select></label>
       <label>Dia que fecha<input id="cf-f" inputmode="numeric" value="${esc(v.fech)}" placeholder="ex.: 3"></label>
       <label>Dia que vence<input id="cf-v" inputmode="numeric" value="${esc(v.venc)}" placeholder="ex.: 10"></label></div>
     <p class="sub">No app do banco: "fechamento" ou "melhor dia de compra" e "vencimento".</p>
-    <div class="row" style="margin:0"><button class="ghost" type="button" data-a="saveCard" data-id="${c?c.id:""}">Salvar</button>${S.cards.length?`<button class="ghost" type="button" data-a="cancelCard">Cancelar</button>`:""}${c?`<button class="ghost danger" type="button" data-a="delCard" data-id="${c.id}">${S.ui.confirm==="card"+c.id?"Apagar cartão e compras?":"Apagar"}</button>`:""}</div></div>`;
+    <div class="row" style="margin:0"><button class="ghost" type="button" data-a="saveCard" data-id="${c?c.id:""}">Salvar</button><button class="ghost" type="button" data-a="cancelCard">Cancelar</button>${c?`<button class="ghost danger" type="button" data-a="delCard" data-id="${c.id}">${S.ui.confirm==="card"+c.id?"Apagar cartão e compras?":"Apagar"}</button>`:""}</div></div>`;
+}
+
+/* =====================================================================
+   LER PRINT / COLAR TEXTO DA FATURA
+   ===================================================================== */
+const MON={jan:1,fev:2,mar:3,abr:4,mai:5,jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
+const CAT_RULES=[[/ifood|rappi|restaur|lanch|burger|pizza|padaria|cafe|starbucks|mc ?donald|bk |habib|outback|delivery|z[eé] delivery/,"Alimentação fora"],
+  [/uber|99|cabify|posto|shell|ipiranga|br mania|combust|estacion|sem parar|veloe|onibus|metro/,"Transporte"],
+  [/mercado(?! ?livre| ?pago)|atacad|assai|carrefour|p[aã]o de a[cç]|extra |big ?bompreco|hortifruti|supermerc|frangol|sacolao/,"Mercado"],
+  [/drog|farm|raia|pague menos|panvel|hospital|clinic|laborat|unimed|hapvida|odonto|dentist/,"Saúde"],
+  [/smart ?fit|academia|bluefit|gympass|wellhub|pilates|crossfit|bodytech|selfit/,"Academia e esporte"],
+  [/netflix|spotify|amazon prime|prime video|disney|hbo|max\b|globoplay|youtube|apple\.com|icloud|google one|deezer|chatgpt|openai|claude|anthropic|canva/,"Assinaturas"],
+  [/shopee|shein|mercado ?livre|amazon|magalu|magazine|renner|riachuelo|c ?& ?a|zara|centauro|netshoes|americanas|aliexpress|temu/,"Roupas e compras"],
+  [/salao|sal[aã]o|beleza|botic|natura|sephora|eudora|manicure|barbear|estetica|o boticario/,"Beleza e cuidados"],
+  [/cinema|ingresso|show|bar |cervej|balada|steam|playstation|xbox|nintendo/,"Lazer"],
+  [/escola|curso|udemy|alura|faculdade|livraria|livro/,"Educação"],
+  [/petz|cobasi|pet ?shop|veterin/,"Pets"],
+  [/latam|gol |azul |airbnb|booking|hotel|decolar|123milhas/,"Viagem"],
+  [/enel|coelce|neoenergia|cemig|sabesp|cagece|claro|vivo|tim |oi |net |internet|gas /,"Contas da casa"],
+  [/aluguel|condom/,"Moradia"]];
+const guessCat=d=>{const t=" "+norm(d)+" ";const r=CAT_RULES.find(([re])=>re.test(t));return r?r[1]:"Outros"};
+const SKIP=/^(total|fatura|saldo|limite|pagamento|pagto|pgto|vencimento|valor m[ií]nimo|resumo|lan[cç]amentos|compras|data|descri|hoje|ver mais|detalhes|em aberto|fechada|aberta)/i;
+function parseStatement(text,ref){
+  ref=ref||today(); const [ry,rm]=ref.split("-").map(Number);
+  const out=[]; let ctx=null, pending="";
+  const mkDate=(d,m)=>{let y=ry;if(m>rm+1)y--;return `${y}-${pad(m)}-${pad(d)}`};
+  const dateRe=/^(\d{1,2})\s*(?:\/|\.|-|\s|de\s)\s*(\d{1,2}|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-zç]*\.?(?:\s*(?:\/|de)?\s*(?:20)?\d{2})?\b/i;
+  text.split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim()).filter(Boolean).forEach(line=>{
+    let l=line, date=null;
+    // valor: o último "R$ 1.234,56" da linha (aceita 32/15 lido errado no lugar de 32,15)
+    const mm=[...l.matchAll(/(-|−)?\s*R\s?\$\s*(-|−)?\s*([\d.]{1,9})[,\/.](\d{2})(?!\d)/g)];
+    let m=mm[mm.length-1], neg=false, val=null;
+    if(m){val=parseFloat(m[3].replace(/\./g,"")+"."+m[4]);neg=!!(m[1]||m[2]);l=(l.slice(0,m.index)+" "+l.slice(m.index+m[0].length)).trim()}
+    else{const m2=l.match(/(-|−)?\s*(\d{1,3}(?:\.\d{3})*|\d+),(\d{2})\s*$/);if(m2){val=parseFloat(m2[2].replace(/\./g,"")+"."+m2[3]);neg=!!m2[1];l=l.slice(0,m2.index).trim()}}
+    const dm=l.match(dateRe);
+    if(dm){const mo=isNaN(+dm[2])?MON[dm[2].toLowerCase().slice(0,3)]:+dm[2];if(mo>=1&&mo<=12&&+dm[1]>=1&&+dm[1]<=31){date=mkDate(+dm[1],mo);l=l.slice(dm[0].length).trim()}}
+    if(val==null){
+      if(date&&l.replace(/[^a-z]/gi,"").length<=3){ctx=date;return}   // só a data: vale para as linhas de baixo
+      if(!SKIP.test(l)&&l.length>2)pending=l;
+      return;
+    }
+    let pi=null,pn=null;
+    const pm=l.match(/(?:parc(?:ela)?\.?\s*)?\b(\d{1,2})\s*(?:\/|de)\s*(\d{1,2})\b/i);
+    if(pm&&+pm[2]>=2&&+pm[2]<=48&&+pm[1]>=1&&+pm[1]<=+pm[2]){pi=+pm[1];pn=+pm[2];l=(l.slice(0,pm.index)+l.slice(pm.index+pm[0].length)).trim()}
+    l=l.replace(/\bparcela\b|[-–•|·]+\s*$/gi,"").replace(/^[-–•|·\s]+/,"").replace(/\s{2,}/g," ").trim();
+    if(!l&&pending)l=pending; pending="";
+    if(!l||SKIP.test(l))return;
+    out.push({on:!neg,date:date||ctx||ref,desc:l,val,pi,pn,neg,cat:guessCat(l)});
+  });
+  return out;
+}
+let ocrWorker=null;
+function loadScript(src){return new Promise((res,rej)=>{if(window.Tesseract)return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("load"));document.head.appendChild(s)})}
+async function ocrImages(files,onStep){
+  await loadScript("ocr/tesseract.min.js");
+  if(!ocrWorker) ocrWorker=await Tesseract.createWorker("por",1,{workerPath:"ocr/worker.min.js",corePath:"ocr/",langPath:"ocr/",gzip:true,workerBlobURL:false});
+  let text="";for(let i=0;i<files.length;i++){onStep(i+1,files.length);const r=await ocrWorker.recognize(files[i]);text+=r.data.text+"\n"}
+  return text;
+}
+function isDup(cid,row,fat){return S.tx.some(t=>t.card===cid&&Math.abs(t.val-row.val)<.01&&norm(t.desc).slice(0,8)===norm(row.desc).slice(0,8)&&(!row.pn||!t.parc||t.parc.n===row.pn))}
+function importView(){
+  const I=S.ui.imp, cid=I.card&&card(I.card)?I.card:(S.ui.card&&card(S.ui.card)?S.ui.card:(S.cards[0]||{}).id), c=card(cid);
+  I.card=cid; if(!I.fat&&c) I.fat=openFatura(c);
+  const rows=I.rows||[], on=rows.filter(r=>r.on), tot=on.reduce((a,r)=>a+r.val,0);
+  const fats=c?[-3,-2,-1,0,1,2].map(k=>addMonths(openFatura(c),k)):[];
+  return `<div class="sheet"><h3>Importar fatura</h3>
+    ${!S.cards.length?`<div class="empty">Cadastre um cartão antes.</div>`:`
+    <div class="form"><label>Cartão<select id="imp-card" data-imp="card">${S.cards.map(x=>`<option value="${x.id}" ${x.id===cid?"selected":""}>${esc(x.n)}</option>`).join("")}</select></label>
+      <label>Fatura<select id="imp-fat" data-imp="fat">${fats.map(f=>`<option value="${f}" ${f===I.fat?"selected":""}>${mName(f)}${f===openFatura(c)?" (aberta)":""}</option>`).join("")}</select></label></div>
+    <div class="row" style="margin:0"><label class="ghost" for="imp-files" style="cursor:pointer">${rows.length?"+ mais prints":"Escolher prints"}</label><input type="file" id="imp-files" accept="image/*" multiple hidden>
+      <button class="ghost" type="button" data-a="impPasteToggle">${I.paste?"Fechar texto":"Colar texto"}</button></div>
+    ${I.busy?`<div class="preview">${esc(I.busy)}</div>`:""}
+    ${I.err?`<div class="warn">${esc(I.err)}</div>`:""}
+    ${I.paste?`<textarea id="imp-text" placeholder="Cole aqui o texto da fatura (do app do banco, do PDF ou o que o Claude te mandar). Uma compra por linha, ex.:&#10;12/10 iFood R$ 45,90&#10;15/10 Mercado Livre 3/10 R$ 129,99"></textarea><button class="ghost" type="button" data-a="impParse">Ler texto</button>`:""}
+    ${rows.length?`<p class="sub">Confira antes de importar. Desmarque o que não for compra (pagamentos e estornos já vêm desmarcados). Em parceladas, o valor é o da parcela e as parcelas seguintes vão para as próximas faturas.</p>
+    <div class="imp">${rows.map((r,i)=>`<div class="improw ${r.on?"":"off"}">
+      <label class="tog"><input type="checkbox" data-ir="${i}.on" ${r.on?"checked":""} aria-label="Importar linha ${i+1}"></label>
+      <div class="form">
+        <label class="full">Descrição${isDup(cid,r)?` <b style="color:var(--tape)">· parece já lançado</b>`:""}${r.neg?` <b style="color:var(--green)">· valor negativo (pagamento/estorno)</b>`:""}<input id="ir-d-${i}" data-ir="${i}.desc" value="${esc(r.desc)}"></label>
+        <label>Valor${r.pn?" da parcela":""} (R$)<input id="ir-v-${i}" data-ir="${i}.val" inputmode="decimal" value="${esc(r.val.toFixed(2).replace(".",","))}"></label>
+        <label>Parcela<input id="ir-p-${i}" data-ir="${i}.parc" value="${r.pn?r.pi+"/"+r.pn:""}" placeholder="à vista"></label>
+        <label>Data<input type="date" id="ir-dt-${i}" data-ir="${i}.date" value="${esc(r.date)}"></label>
+        <label>Categoria<select id="ir-c-${i}" data-ir="${i}.cat">${CATS_OUT.map(x=>`<option ${x===r.cat?"selected":""}>${x}</option>`).join("")}</select></label>
+      </div></div>`).join("")}</div>
+    <div class="preview">${on.length} compra(s) · ${brl(tot)} nesta fatura${on.some(r=>r.pn&&r.pi<r.pn)?` · + parcelas futuras: ${brl(on.filter(r=>r.pn).reduce((a,r)=>a+r.val*(r.pn-r.pi),0))}`:""}</div>
+    <button class="cta" type="button" data-a="impDo">Importar ${on.length}</button>`:`<p class="sub">Tire print da tela da fatura no app do banco (pode ser mais de um, rolando a lista). O app lê no próprio celular: as imagens não saem dele.</p>`}`}
+    <button class="ghost" type="button" data-a="impClose">${rows.length?"Cancelar":"Voltar"}</button></div>`;
+}
+function importRows(){
+  const I=S.ui.imp,c=card(I.card);let n=0;
+  I.rows.filter(r=>r.on&&r.val>0).forEach(r=>{
+    const g=uid();
+    if(r.pn&&r.pn>1){for(let k=r.pi;k<=r.pn;k++){S.tx.push({id:uid(),kind:"out",desc:r.desc,cat:r.cat,date:r.date,val:r.val,card:c.id,fatura:addMonths(I.fat,k-r.pi),parc:{i:k,n:r.pn,g,total:Math.round(r.val*r.pn*100)/100},imp:true});}}
+    else S.tx.push({id:uid(),kind:"out",desc:r.desc,cat:r.cat,date:r.date,val:r.val,card:c.id,fatura:I.fat,imp:true});
+    n++});
+  return n;
 }
 
 /* =====================================================================
@@ -539,7 +677,7 @@ function saveTx(){
 function render(){
   title();
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===S.ui.tab)));
-  $("#fab").hidden=S.ui.tab==="lancar";
+  $("#fab").hidden=S.ui.tab==="lancar"||(S.ui.tab==="cartoes"&&!!S.ui.imp);
   $("#view").innerHTML=({mes:vMes,cartoes:vCartoes,fixos:vFixos,futuro:vFuturo,mais:vMais,lancar:vLancar}[S.ui.tab]||vMes)();
   document.getElementById("storeWarn").hidden=storeOk;
 }
@@ -556,10 +694,21 @@ $("#view").addEventListener("input",e=>{
   if(t.dataset.acc){const [i,k]=t.dataset.acc.split(".");S.accounts[+i][k]=t.value;save();return}
   if(t.dataset.bud){const v=money(t.value);if(v==null||v<=0)delete S.budget[t.dataset.bud];else S.budget[t.dataset.bud]=v;save();return}
 });
-$("#view").addEventListener("change",e=>{
+$("#view").addEventListener("change",async e=>{
   const t=e.target;
   if(t.dataset.lf){S.ui.lf[t.dataset.lf]=t.type==="checkbox"?t.checked:t.value;save();if(t.tagName==="SELECT"||t.type==="date"||t.type==="checkbox")rerender();return}
   if(t.dataset.acc){save(true);return}
+  if(t.dataset.setup){S.ui.setup=S.ui.setup||{};S.ui.setup[t.dataset.setup]=t.checked;rerender();return}
+  if(t.dataset.imp){S.ui.imp[t.dataset.imp]=t.value;if(t.dataset.imp==="card")S.ui.imp.fat=null;rerender();return}
+  if(t.dataset.ir){const [i,k]=t.dataset.ir.split("."),r=S.ui.imp.rows[+i];
+    if(k==="on")r.on=t.checked;else if(k==="val"){const v=money(t.value);if(v!=null)r.val=v}
+    else if(k==="parc"){const m=t.value.match(/(\d+)\s*(?:\/|de)\s*(\d+)/);if(m&&+m[2]>1&&+m[1]<=+m[2]){r.pi=+m[1];r.pn=+m[2]}else{r.pi=null;r.pn=null}}
+    else r[k]=t.value;rerender();return}
+  if(t.id==="imp-files"&&t.files.length){const files=[...t.files],I=S.ui.imp;I.err="";
+    try{const text=await ocrImages(files,(i,n)=>{I.busy=`Lendo print ${i} de ${n}…`;rerender()});const rows=parseStatement(text);I.rows=(I.rows||[]).concat(rows);I.busy="";
+      if(!rows.length)I.err="Não achei compras nesses prints. Tente um print mais de perto, só da lista de compras, ou use Colar texto.";}
+    catch(e){I.busy="";I.err="A leitura de prints funciona no app instalado (pelo link do site). Aqui, use Colar texto."}
+    rerender();return}
 });
 $("#view").addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
@@ -580,14 +729,24 @@ $("#view").addEventListener("click",e=>{
     case "delTx":{const t=S.tx.find(x=>x.id===b.dataset.id);conf("tx"+t.id,()=>{S.tx=t.parc&&t.parc.n>1?S.tx.filter(x=>!(x.parc&&x.parc.g===t.parc.g)):S.tx.filter(x=>x.id!==t.id)});break}
     case "card":S.ui.card=b.dataset.id;S.ui.fym=null;S.ui.cardForm=null;break;
     case "fm":{const c=card(S.ui.card)||S.cards[0];S.ui.card=c.id;S.ui.fym=addMonths(S.ui.fym||openFatura(c),+b.dataset.v);break}
-    case "newCard":S.ui.cardForm="new";break;
+    case "newCard":S.ui.cardForm="new";S.ui.cfDraft=null;break;
+    case "bankPick":{const bk=BANKS[b.dataset.k];S.ui.cfDraft={n:bk.n,cor:bk.cor,limite:$("#cf-l").value,fech:$("#cf-f").value,venc:$("#cf-v").value};break}
+    case "setupSave":{let made=0,miss=[];Object.keys(S.ui.setup||{}).filter(k=>S.ui.setup[k]).forEach(k=>{const fe=parseInt($("#su-f-"+k).value),ve=parseInt($("#su-v-"+k).value);
+        if(fe>=1&&fe<=31&&ve>=1&&ve<=31){S.cards.push({id:uid(),n:BANKS[k].n,cor:BANKS[k].cor,limite:$("#su-l-"+k).value,fech:fe,venc:ve});delete S.ui.setup[k];made++}else miss.push(BANKS[k].n)});
+      if(miss.length){save(true);rerender();$("#setupMsg").textContent=`${made?made+" salvo(s). ":""}Falta o dia que fecha e o que vence: ${miss.join(", ")}.`;return}
+      if(!made)return;S.ui.setup=null;flash={t:"Cartões salvos",m:`${made} cartão(ões) cadastrado(s).`};break}
+    case "impOpen":S.ui.imp={rows:[]};window.scrollTo(0,0);break;
+    case "impClose":S.ui.imp=null;break;
+    case "impPasteToggle":S.ui.imp.paste=!S.ui.imp.paste;break;
+    case "impParse":{const t=$("#imp-text").value;const rows=parseStatement(t);S.ui.imp.rows=(S.ui.imp.rows||[]).concat(rows);S.ui.imp.paste=false;S.ui.imp.err=rows.length?"":"Não achei compras nesse texto. Cada linha precisa ter um valor como R$ 45,90.";break}
+    case "impDo":{const n=importRows();S.ui.imp=null;flash={t:"Fatura importada",m:`${n} compra(s) lançada(s). Parcelas futuras já estão nas próximas faturas.`};S.ui.fym=null;break}
     case "editCard":S.ui.cardForm=S.ui.cardForm?null:"edit";break;
-    case "cancelCard":S.ui.cardForm=null;break;
+    case "cancelCard":S.ui.cardForm=null;S.ui.cfDraft=null;break;
     case "saveCard":{const n=$("#cf-n").value.trim(),fe=parseInt($("#cf-f").value),ve=parseInt($("#cf-v").value);
       if(!n||!(fe>=1&&fe<=31)||!(ve>=1&&ve<=31)){flash={t:"Faltou informação",m:"Preencha nome, dia que fecha e dia que vence (1 a 31).",bad:true};go("mes");return}
       const data={n,limite:$("#cf-l").value,fech:fe,venc:ve,cor:$("#cf-c").value};
       if(b.dataset.id){const c=card(b.dataset.id);Object.assign(c,data)}else{const id=uid();S.cards.push({id,...data});S.ui.card=id}
-      S.ui.cardForm=null;S.ui.fym=null;break}
+      S.ui.cardForm=null;S.ui.cfDraft=null;S.ui.fym=null;break}
     case "delCard":conf("card"+b.dataset.id,()=>{const id=b.dataset.id;S.cards=S.cards.filter(c=>c.id!==id);S.tx=S.tx.filter(t=>t.card!==id);S.recur.forEach(r=>{if(r.card===id)r.card=""});S.ui.cardForm=null;S.ui.card=null});break;
     case "newRec":S.ui.recForm="new-"+b.dataset.k;window.scrollTo(0,0);break;
     case "editRec":S.ui.recForm=S.ui.recForm===b.dataset.id?null:b.dataset.id;break;
