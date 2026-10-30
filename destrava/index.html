@@ -55,6 +55,8 @@ h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
 .cap input{flex:1;min-width:0;background:var(--ink2);border:2px solid var(--pink);border-radius:0;padding:12px;font-size:16px;color:var(--fg);box-shadow:3px 3px 0 var(--purple)}
 .cap input::placeholder{color:var(--dim)}
 .cap button{flex:0 0 auto;width:52px;border:2px solid var(--pink);background:var(--pink);color:var(--ink);font-family:var(--f-display);font-size:26px;line-height:1}
+.cap .mic{background:var(--purple);border-color:var(--purple);color:var(--fg);display:grid;place-items:center}
+.cap .mic svg{width:24px;height:24px}
 .parsed{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;min-height:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:16;background:var(--ink)}
 
@@ -218,7 +220,7 @@ ol.how{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
     <div class="hello" id="hello"></div>
     <div class="warn" id="storeWarn" hidden>Este navegador não está guardando dados. Use o backup (aba Mais).</div>
   </div>
-  <div class="cap"><form id="capForm" autocomplete="off"><input id="capIn" placeholder="despeja aqui: consertar chuveiro amanhã 30min" aria-label="Anotar uma coisa"><button type="submit" aria-label="Guardar">+</button></form><div class="parsed" id="parsed"></div></div>
+  <div class="cap"><form id="capForm" autocomplete="off"><input id="capIn" placeholder="despeja aqui: consertar chuveiro amanhã" aria-label="Anotar uma coisa"><button type="button" id="micBtn" class="mic" aria-label="Falar em vez de escrever"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="13" rx="4" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></button><button type="submit" aria-label="Guardar">+</button></form><div class="parsed" id="parsed"></div></div>
   <main id="view"></main>
 </div>
 <nav class="tabs" id="tabs">
@@ -304,7 +306,7 @@ const KW={consertar:/conserta|arruma[r]? o |troca[r]? (a |o )?(lampada|resistenc
 const WORK=/reuniao|relatorio|cliente|entrega|apresenta|planilha|e-?mail|projeto|proposta|call|deadline|trabalho|chefe|equipe|#trab/;
 const EVENTY=/reuniao|consulta|medic[oa]|dentista|exame|aula|call|entrevista|aniversario|encontro|jantar com|almoco com|voo|viagem/;
 function parseCap(raw){
-  let s=" "+raw+" ", t=norm(s), out={t:raw.trim(),tipo:"outro",area:"casa",min:15,date:null,time:null,event:false,prio:false};
+  let s=" "+raw+" ", t=norm(s), out={t:raw.trim(),tipo:"outro",area:"casa",min:15,date:null,due:null,time:null,event:false,prio:false};
   const cut=re=>{const m=s.match(re);if(m){s=s.replace(m[0]," ");t=norm(s)}return m};
   let m;
   if((m=cut(/\s#?(trab(alho)?)\b/i)))out.area="trab";
@@ -319,6 +321,7 @@ function parseCap(raw){
   else if((m=cut(/\s(?:na |no |dia )?(domingo|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado)(-feira)?\b/i))){const i=["domingo","segunda","terca","quarta","quinta","sexta","sabado"].indexOf(norm(m[1]));let k=(i-new Date().getDay()+7)%7||7;out.date=addDays(today(),k)}
   else if((m=cut(/\s(?:dia )?(\d{1,2})\/(\d{1,2})\b/))){const y=new Date().getFullYear();let d=`${y}-${pad(+m[2])}-${pad(+m[1])}`;if(d<today())d=`${y+1}-${pad(+m[2])}-${pad(+m[1])}`;out.date=d}
   const tn=norm(raw);
+  if(out.date&&/\bate\s+(?:a\s+|o\s+|dia\s+|na\s+|no\s+)?(hoje|amanha|depois de amanha|domingo|segunda|terca|quarta|quinta|sexta|sabado|\d{1,2}\/\d{1,2})/.test(tn)){out.due=out.date;out.date=null;s=s.replace(/\s(at[eé])(\s+(a|o|dia|na|no))?\s*$/i," ").replace(/\s(at[eé])(\s+(a|o|dia|na|no))?\s(?=\S)/i," ")}
   for(const [k,re] of Object.entries(KW)){if(re.test(" "+tn+" ")){out.tipo=k;break}}
   if(out.area!=="trab"&&WORK.test(tn))out.area="trab";
   if(out.tipo==="trabalho")out.area="trab";
@@ -330,8 +333,74 @@ function parseCap(raw){
 function addFromCap(raw){
   const p=parseCap(raw); if(!p.t) return null;
   if(p.event){const e={id:uid(),t:p.t,date:p.date||today(),start:p.time,end:toH(toMin(p.time)+Math.max(30,p.min)),area:p.area,remind:15};S.events.push(e);return {kind:"event",obj:e,p}}
-  const t={id:uid(),t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:null,steps:[],prio:p.prio,created:today(),done:null,someday:false};
+  const t={id:uid(),t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:today(),done:null,someday:false};
   S.tasks.push(t);return {kind:"task",obj:t,p};
+}
+
+/* =====================================================================
+   MODO FALAR: fala tudo de uma vez, o app separa em itens
+   ===================================================================== */
+const LEAD=/^(e\s+)?(ah\s+(e\s+)?)?(tamb[eé]m\s+)?(eu\s+)?(preciso|tenho que|tenho de|tem que|lembrar de|lembra de|n[aã]o (posso )?esquecer de|n[aã]o esquecer|quero|vou|devo|precisa|preciso de)\s+/i;
+const VERBISH=/^(e\s+)?(ah\s+)?(tamb[eé]m\s+)?(eu\s+)?(preciso|tenho que|tem que|lembrar|n[aã]o esquecer|quero|vou|devo|tenho|marcar|ligar|comprar|consertar|arrumar|limpar|lavar|pagar|mandar|enviar|responder|levar|buscar|pegar|fazer|terminar|come[cç]ar|organizar|agendar|cancelar|renovar|trocar|devolver|estudar|ler|escrever|revisar|separar|guardar|passar|ir|reuni[aã]o|consulta|dentista|m[eé]dic)|^\w+(ar|er|ir)\b/i;
+const HEAD=/^(e|ah|a[ií]|tamb[eé]m|ent[aã]o|hoje|amanh[ãa]|depois de amanh[ãa]|na|no|dia|(domingo|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado)(-feira)?|\d{1,2}\/\d{1,2})\s+/i;
+function stripHead(x){let y=x,prev;do{prev=y;y=y.replace(HEAD,"")}while(y!==prev);return y}
+function splitSpeech(text){
+  const parts=[];
+  text.replace(/\s+/g," ").split(/[.!?;\n]+|,?\s*(?:outra coisa|al[eé]m disso|e depois|depois|ah,? e|ah)\s*,?\s/i).forEach(sent=>{
+    // separa por vírgula ou " e " só quando o pedaço seguinte começa com uma ação
+    let cur="";
+    sent.split(/(,\s*|\s+e\s+|\s+e tamb[eé]m\s+|\s+tamb[eé]m\s+)/i).forEach(tok=>{
+      if(/^(,\s*|\s+e\s+|\s+e tamb[eé]m\s+|\s+tamb[eé]m\s+)$/i.test(tok)){cur+="\u0001"+tok;return}
+      if(cur.includes("\u0001")){const [before,sep]=cur.split("\u0001");if(VERBISH.test(stripHead(tok.trim()))){parts.push(before);cur=tok}else cur=before+sep+tok}
+      else cur+=tok});
+    if(cur.trim())parts.push(cur.replace("\u0001",""));
+  });
+  let lastDate=null;
+  return parts.map(x=>x.trim().replace(/^[,\s]+|[,\s]+$/g,"")).filter(x=>x.replace(/[^a-zà-ú]/gi,"").length>2).map((x,i)=>{
+    const p=parseCap(x.replace(/^(e|ah|a[ií]|tamb[eé]m|ent[aã]o)\s+/i,""));
+    let t2=p.t,prev;do{prev=t2;t2=t2.replace(/^(e|ah|a[ií]|tamb[eé]m|ent[aã]o)\s+/i,"").replace(LEAD,"").replace(/^(eu\s+)?tenho\s+(?=(uma\s+|um\s+)?(reuni|consulta|dentista|m[eé]dic|aula|exame|call|entrevista))/i,"")}while(t2!==prev);
+    p.t=(t2||p.t).replace(/[,\s]+$/,"");p.t=p.t.charAt(0).toUpperCase()+p.t.slice(1);
+    if(p.date)lastDate=p.date;else if(lastDate&&i>0&&!p.time&&!p.due)p.date=lastDate; // "amanhã preciso X e Y": Y também é amanhã
+    return {...p,on:true,raw:x};
+  });
+}
+let rec=null;
+function speechOK(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition)}
+function startRec(){
+  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!R){S.ui.talk.err="Seu iPhone não liberou a gravação dentro do app. Toque no campo de texto e use o microfone do teclado.";rerender();return}
+  try{rec=new R();rec.lang="pt-BR";rec.continuous=true;rec.interimResults=true;
+    const base=($("#talkTxt")||{}).value||"";let fin="";
+    rec.onresult=ev=>{let inter="";for(let i=ev.resultIndex;i<ev.results.length;i++){const r=ev.results[i];if(r.isFinal)fin+=r[0].transcript+". ";else inter+=r[0].transcript}
+      const t=(base?base.trim()+" ":"")+fin+inter;S.ui.talk.text=t;const el=$("#talkTxt");if(el)el.value=t};
+    rec.onerror=ev=>{S.ui.talk.err=ev.error==="not-allowed"||ev.error==="service-not-allowed"?"O iPhone bloqueou o microfone para este app. Use o microfone do teclado (toque no campo de texto).":"A gravação parou ("+ev.error+"). Tente de novo ou use o microfone do teclado.";S.ui.talk.rec=false;rerender()};
+    rec.onend=()=>{if(S.ui.talk&&S.ui.talk.rec){S.ui.talk.rec=false;rerender()}};
+    rec.start();S.ui.talk.rec=true;S.ui.talk.err="";rerender();
+  }catch(e){S.ui.talk.err="Não consegui gravar aqui. Use o microfone do teclado.";S.ui.talk.rec=false;rerender()}
+}
+function stopRec(){try{rec&&rec.stop()}catch(e){}S.ui.talk.rec=false}
+function vTalk(){
+  const T=S.ui.talk, items=T.items||[];
+  return `<section><article class="box p"><div class="chk"></div><h3>Fala que eu anoto</h3>
+    <p class="sub" style="margin-block:6px 10px">Fala tudo de uma vez, do jeito que vier. Ex.: "amanhã preciso ligar pro banco e comprar lâmpada, ah e consertar o chuveiro, e sexta tenho reunião às 15h".</p>
+    <div class="row" style="margin-bottom:10px">${T.rec?`<button class="bigbtn" type="button" data-a="recStop" style="font-size:22px">■ Parar</button>`:`<button class="bigbtn" type="button" data-a="recStart" style="font-size:22px">● Gravar</button>`}</div>
+    ${T.rec?`<p class="pep">ouvindo… pode falar</p>`:""}
+    ${T.err?`<div class="warn">${esc(T.err)}</div>`:""}
+    <textarea id="talkTxt" class="dk" style="min-height:140px;font-family:var(--f-body);font-size:16px" placeholder="Ou toque aqui e use o microfone do teclado do iPhone (embaixo, à direita do espaço)">${esc(T.text||"")}</textarea>
+    <div class="row" style="margin-top:10px"><button class="ghost pk" type="button" data-a="talkParse">Organizar em itens</button><button class="ghost" type="button" data-a="talkClose">Fechar</button></div>
+    ${items.length?`<p class="sub" style="margin-top:12px">Achei ${items.length}. Confira, corrija o texto se quiser e desmarque o que não for:</p>
+    <div class="tasks" style="margin-top:8px">${items.map((p,i)=>`<div class="task ${p.on?"":"done"}"><button class="ck ${p.on?"on":""}" type="button" data-a="talkOn" data-i="${i}" aria-label="Incluir item ${i+1}">${p.on?CHECK:""}</button>
+      <div><input class="dk" id="ti-${i}" data-ti="${i}" value="${esc(p.t)}" aria-label="Item ${i+1}"><div class="meta">${p.event?`<span class="tag trab">compromisso</span>`:`<span class="tag">${TIPOS[p.tipo]}</span>`}<span class="tag ${p.area}">${p.area==="trab"?"trabalho":"casa"}</span>${p.date?`<span class="tag">${dayLabel(p.date)}</span>`:""}${p.due?`<span class="tag late">prazo ${dayLabel(p.due)}</span>`:""}${p.time?`<span class="tag">${p.time}</span>`:""}<span class="tag">${durTxt(p.min)}</span>${p.prio?`<span class="tag pr">importante</span>`:""}
+        <button class="mini" type="button" data-a="talkArea" data-i="${i}">${p.area==="trab"?"→ casa":"→ trabalho"}</button></div></div></div>`).join("")}</div>
+    <button class="bigbtn alt" type="button" data-a="talkSave" style="margin-top:12px">Guardar ${items.filter(x=>x.on).length}</button>`:""}
+  </article></section>`;
+}
+function saveTalk(){
+  let n=0;(S.ui.talk.items||[]).filter(p=>p.on&&p.t.trim()).forEach(p=>{
+    if(p.event&&p.time){S.events.push({id:uid(),t:p.t,date:p.date||today(),start:p.time,end:toH(Math.min(1439,toMin(p.time)+Math.max(30,p.min))),area:p.area,remind:15})}
+    else S.tasks.push({id:uid(),t:p.t,tipo:p.tipo,area:p.area,min:p.min,energy:p.min>=60?3:p.min<=5?1:2,when:p.date,time:p.time,due:p.due||null,steps:[],prio:p.prio,created:today(),done:null,someday:false});
+    n++});
+  return n;
 }
 
 /* =====================================================================
@@ -613,14 +682,15 @@ function vMais(){
 function render(){
   hello();
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.tab===S.ui.tab)));
-  $("#view").innerHTML=({hoje:vHoje,agenda:vAgenda,tudo:vTudo,foco:vFoco,mais:vMais}[S.ui.tab]||vHoje)();
+  $("#view").innerHTML=S.ui.talk?vTalk():({hoje:vHoje,agenda:vAgenda,tudo:vTudo,foco:vFoco,mais:vMais}[S.ui.tab]||vHoje)();
   document.getElementById("storeWarn").hidden=storeOk;
 }
 function rerender(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function go(tab){S.ui.tab=tab;S.ui.confirm=null;save();render();window.scrollTo(0,0)}
 setInterval(()=>{if(S.ui.tab==="foco")ftick()},500);
 setInterval(()=>{if(S.ui.tab==="hoje"&&!document.activeElement.matches("input,textarea,select"))rerender()},60000);
-$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.tab)});
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b){if(S.ui.talk){stopRec();S.ui.talk=null}go(b.dataset.tab)}});
+$("#micBtn").addEventListener("click",()=>{S.ui.talk=S.ui.talk||{text:$("#capIn").value,items:[]};$("#capIn").value="";$("#parsed").innerHTML="";render();window.scrollTo(0,0);setTimeout(()=>{const t=$("#talkTxt");if(t)t.focus()},50)});
 
 /* captura */
 $("#capIn").addEventListener("input",e=>{const v=e.target.value.trim();if(!v){$("#parsed").innerHTML="";return}const p=parseCap(v);
@@ -629,6 +699,8 @@ $("#capForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#capIn
   toast(r.kind==="event"?`Compromisso: ${r.obj.t} · ${dayLabel(r.obj.date)} ${r.obj.start}`:`Guardado: ${r.obj.t}${r.obj.when?" · "+dayLabel(r.obj.when):""}`);rerender()});
 
 $("#view").addEventListener("input",e=>{const t=e.target;
+  if(t.id==="talkTxt"){S.ui.talk.text=t.value;save();return}
+  if(t.dataset.ti!=null){S.ui.talk.items[+t.dataset.ti].t=t.value;save();return}
   if(t.dataset.ui){S.ui[t.dataset.ui]=t.value;clearTimeout(t._d);t._d=setTimeout(()=>{rerender();const n=document.getElementById(t.id);if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length)}catch(x){}}},300);return}
   if(t.dataset.te&&t.type!=="checkbox"&&t.tagName==="INPUT"&&t.type==="text"){const [id,k]=t.dataset.te.split(".");task(id)[k]=t.value;save();return}
   if(t.dataset.set){S.settings[t.dataset.set]=t.value;save();return}
@@ -646,6 +718,13 @@ $("#view").addEventListener("click",e=>{
   if(!["delT","delEv"].includes(a))S.ui.confirm=null;
   const conf=(k,fn)=>{if(S.ui.confirm===k){fn();S.ui.confirm=null}else S.ui.confirm=k};
   switch(a){
+    case "recStart":startRec();return;
+    case "recStop":stopRec();break;
+    case "talkParse":{stopRec();const txt=($("#talkTxt").value||"").trim();S.ui.talk.text=txt;S.ui.talk.items=txt?splitSpeech(txt):[];S.ui.talk.err=txt&&!S.ui.talk.items.length?"Não achei nada para anotar nesse texto.":"";break}
+    case "talkOn":{const p=S.ui.talk.items[+b.dataset.i];p.on=!p.on;break}
+    case "talkArea":{const p=S.ui.talk.items[+b.dataset.i];p.area=p.area==="trab"?"casa":"trab";break}
+    case "talkSave":{const n=saveTalk();S.ui.talk=null;save(true);toast(`${n} ${n===1?"coisa anotada":"coisas anotadas"}. Tirou da cabeça!`);go("tudo");return}
+    case "talkClose":stopRec();S.ui.talk=null;break;
     case "energy":S.energy=+b.dataset.v;break;
     case "pick":{const p=pickOne(Math.min(freeNow(),180));if(!p){toast("Lista vazia. Despeja alguma coisa no topo.");return}S.ui.focus=p.id;go("foco");return}
     case "pick3":S.ui.pick3=b.dataset.i===""?null:+b.dataset.i;break;
