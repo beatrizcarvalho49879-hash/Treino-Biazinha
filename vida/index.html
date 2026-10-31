@@ -21,7 +21,7 @@
   --ink:#0d0c10; --ink2:#1a1820; --line:#363240;
   --paper:#eef0e6; --paper2:#d8ddcc; --text-on-paper:#121016; --muted-on-paper:#575462;
   --pink:#ff2d7a; --green:#36e08a; --sky:#7fd4ff; --fg:#f2f1ec; --dim:#958fa0;
-  --over:#ff8a4c; --alarm:#ff3b30;
+  --over:#ff8a4c; --alarm:#ff3b30; --fat:#ffd23e;
   --f-display:"Anton","HelveticaNeue-CondensedBlack","Futura-CondensedExtraBold",Impact,"Arial Narrow",sans-serif;
   --f-type:"Special Elite","American Typewriter","Courier New",monospace;
   --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -83,6 +83,31 @@ section{display:flex;flex-direction:column;gap:18px;padding-block:10px}
 .big b{font-family:var(--f-display);font-weight:400;font-size:46px;line-height:1;color:var(--green);font-variant-numeric:tabular-nums}
 .big b.over{color:var(--over)}
 .big span{font-family:var(--f-type);color:var(--dim);font-size:14px}
+/* painel de macros */
+.kcal{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.kcal .num{font-family:var(--f-display);font-size:54px;line-height:.9}
+.kcal .num.over{color:var(--over)}
+.kcal small{display:block;font-family:var(--f-type);font-size:12.5px;color:var(--dim)}
+.kbar{position:relative;height:18px;border:2px solid var(--fg);background:var(--ink);margin-top:6px}
+.kbar i{position:absolute;inset:0 auto 0 0;background:var(--green)} .kbar i.over{background:var(--over)}
+.kbar u{position:absolute;top:-5px;bottom:-5px;width:3px;background:var(--fg)}
+.kbar s{position:absolute;inset:0 auto 0 0;background:repeating-linear-gradient(45deg,rgba(242,241,236,.22) 0 4px,transparent 4px 8px)}
+.macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mac{border:2px solid var(--line);padding:10px 6px 8px;display:grid;justify-items:center;gap:2px;text-align:center;background:var(--ink)}
+.mac svg{width:74px;height:74px;transform:rotate(-90deg)}
+.mac .ring{position:relative;width:74px;height:74px}
+.mac .ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:400;font-size:20px}
+.mac .nm{font-weight:800;text-transform:uppercase;font-size:11.5px;letter-spacing:.06em}
+.mac .v{font-family:var(--f-type);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.mac .left{font-size:12px;font-weight:700}
+.split{display:flex;height:12px;border:2px solid var(--fg);background:var(--ink)}
+.split i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-family:var(--f-type);font-size:12px;color:var(--dim)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+.mp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mp span{font-size:11.5px;font-weight:800;padding:2px 7px;color:var(--text-on-paper);border:2px solid var(--text-on-paper);background:var(--c)}
+.meal.next{outline:4px solid var(--green);outline-offset:3px}
+.nowtag{display:inline-block;background:var(--green);color:var(--text-on-paper);font-family:var(--f-display);font-size:13px;letter-spacing:.08em;padding:1px 8px;margin-left:6px;vertical-align:3px}
 .mrow{display:grid;grid-template-columns:86px 1fr 92px;gap:8px;align-items:center;font-size:13px}
 .mrow .nm{font-weight:700;text-transform:uppercase;font-size:11.5px;letter-spacing:.05em}
 .mrow .v{font-family:var(--f-type);text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px}
@@ -288,6 +313,9 @@ const FOODS_RAW = [
  ["vagem","Vagem cozida",25,1.8,5.3,0.2,"Legumes"],
  ["espinafre","Espinafre cozido",23,2.9,3.8,0.3,"Legumes"],
  ["alface","Alface",11,1.3,1.7,0.2,"Legumes"],
+ ["champignon","Champignon em conserva",25,2.2,3.3,0.3,"Legumes",["1 col. sopa",15]],
+ ["molho_tomate","Molho de tomate pronto",38,1.4,7,0.4,"Temperos e bebidas",["1 col. sopa",20]],
+ ["creme_leite_light","Creme de leite light",133,3,4,12,"Laticínios",["1 col. sopa",15]],
  ["tomate","Tomate",15,1.1,3.1,0.2,"Legumes",["1 un.",100]],
  ["pepino","Pepino",10,0.9,2,0,"Legumes"],
  ["pimentao","Pimentão",21,1.1,4.9,0.2,"Legumes"],
@@ -338,13 +366,15 @@ const PLAN_PDF = {
       B:{n:"Tapioca com frango",tip:"Use nos dias de musculação: o carboidrato da tapioca sustenta o treino e o cardio.",items:[I("tapioca",40,[["rap10",40],["cuscuz",50],["pao_integral",50]]),I("frango_desfiado",70,[["patinho",70],["atum",90]]),I("cottage",30,[["creme_ricota",20],["requeijao_light",20]]),I("cafe",150,[["cha",200]])]},
       C:{n:"Iogurte com whey e aveia",tip:"Ideal nos dias de pilates. Misture tudo numa tigela. Sem fruta cai uns 50 kcal.",items:[I("iogurte",200,[["iog_molico",200],["iog_grego",150]]),I("whey",20,[["frango_desfiado",30]]),I("aveia",20,[["granola",20],["biscoito_arroz",20]]),I("canela",1),I("banana",50,[["morango",100],["maca",65],["mamao",100],["goiaba",100]])]}}},
     {id:"almoco",n:"Almoço",h:"12:00",opts:{
-      A:{n:"Prato do almoço",tip:"Os 200 g de legumes não são opcionais: garantem saciedade sem passar da meta. Arroz + feijão se complementam em proteína.",items:[I("frango_grelhado",120,[["patinho",120],["tilapia",170],["salmao",110],["camarao",140],["bisteca",110]]),I("arroz",60,[["macarrao",90],["batata",180],["mandioca",90],["cuscuz",45]]),I("feijao",60,[["lentilha",60],["grao_bico",50]]),I("legumes",200,[["brocolis",200],["abobrinha",200],["cenoura",150],["vagem",200]]),I("azeite",5),I("maca",130,[["abacaxi",150],["uva",100],["tangerina",135],["melao",200]],"fruta de sobremesa")]}}},
+      A:{n:"Sanduíche de patinho",tip:"Patinho em bife fino ou moído bem temperado (alho, cebola, páprica), no pão com requeijão light, alface e tomate. Faça a carne de 2 dias de uma vez.",items:[I("pao_frances",50,[["pao_integral",50],["rap10",40]]),I("patinho",100,[["frango_grelhado",110],["frango_desfiado",110]]),I("requeijao_light",15,[["creme_ricota",15],["queijo_light",20]]),I("alface",20,[],"alface à vontade"),I("tomate",50),I("maca",130,[["abacaxi",150],["tangerina",135],["melao",200]],"fruta de sobremesa")]},
+      B:{n:"Estrogonofe rápido",tip:"15 minutos: doure o patinho em cubos, junte cebola, champignon e molho de tomate; desligue o fogo e misture o creme de leite light (não ferver). Com arroz e salada.",items:[I("patinho",110,[["frango_grelhado",120]]),I("creme_leite_light",30),I("molho_tomate",40),I("champignon",40),I("arroz",60,[["batata",150],["batata_doce",80]]),I("legumes",150,[["alface",80],["brocolis",150]],"salada à vontade")]},
+      C:{n:"Prato do almoço",tip:"Os 200 g de legumes não são opcionais: garantem saciedade sem passar da meta. Arroz + feijão se complementam em proteína.",items:[I("frango_grelhado",120,[["patinho",120],["tilapia",170],["salmao",110],["camarao",140],["bisteca",110]]),I("arroz",60,[["macarrao",90],["batata",180],["mandioca",90],["cuscuz",45]]),I("feijao",60,[["lentilha",60],["grao_bico",50]]),I("legumes",200,[["brocolis",200],["abobrinha",200],["cenoura",150],["vagem",200]]),I("azeite",5),I("maca",130,[["abacaxi",150],["uva",100],["tangerina",135],["melao",200]],"fruta de sobremesa")]}}},
     {id:"lanche",n:"Lanche da tarde",h:"15:30",opts:{
       A:{n:"Iogurte proteico",tip:"Parece sobremesa e tem quase 30 g de proteína: a melhor arma contra a vontade de doce à tarde.",items:[I("whey",20,[["iogurte",100]]),I("iogurte",200,[["iog_molico",200],["cottage",80]]),I("banana",50,[["maca",130],["goiaba",130],["mamao",150],["morango",100]]),I("canela",1)]},
       B:{n:"Cuscuz com patê de frango",tip:"Para quando a fome estiver grande, ou 1h30 antes de treinar à noite. Patê: 300 g de frango cozido desfiado + 2 col. sopa de cottage + 1 col. chá de azeite + temperos, batido no processador (dura 4 dias).",items:[I("cuscuz",50,[["pao_integral",50],["rap10",40],["tapioca",40]]),I("pate_frango",60,[["frango_desfiado",60],["atum",90]]),I("cottage",20,[["creme_ricota",20],["queijo_branco",25]]),I("maca",130,[["uva",100],["tangerina",135]],"fruta à escolha")]}}},
     {id:"jantar",n:"Jantar",h:"20:00",opts:{
-      A:{n:"Salada com proteína (sem carbo)",tip:"Pelo menos 4× por semana. Quanto mais legumes, melhor: é o jantar que mais acelera o resultado.",items:[I("frango_grelhado",120,[["patinho",120],["tilapia",170],["salmao",110],["camarao",140]]),I("legumes",250,[["brocolis",250],["couve_flor",250],["abobrinha",250],["espinafre",250]]),I("azeite",5),I("maca",130,[["laranja",140],["tangerina",135],["melao",200]],"fruta à escolha")]},
-      B:{n:"Cuscuz com proteína",tip:"No máximo 3× por semana: dias de fome intensa ou treino mais pesado.",items:[I("frango_grelhado",120,[["patinho",120],["tilapia",170]]),I("cuscuz",70,[["arroz",150],["batata_doce",120],["pao_integral",50]]),I("cottage",20,[["ricota",20],["queijo_branco",25]]),I("legumes",200),I("azeite",5)]}}},
+      A:{n:"Cuscuz com carne ou frango",tip:"Cuscuz no vapor (50 g de flocos rende um prato), com carne ou frango desfiado por cima, requeijão light e um café. Toque em ⇄ na carne para trocar por frango.",items:[I("cuscuz",50,[["tapioca",40],["pao_integral",50]]),I("patinho",80,[["frango_desfiado",80],["carne_moida",80]]),I("requeijao_light",20,[["creme_ricota",20],["queijo_light",25]]),I("cafe",150,[["cha",200],["leite_desn",150]])]},
+      B:{n:"Salada com proteína (sem carbo)",tip:"Opção leve para quando o almoço foi maior ou bateu pouca fome.",items:[I("frango_grelhado",120,[["patinho",120],["tilapia",170],["salmao",110],["camarao",140]]),I("legumes",250,[["brocolis",250],["couve_flor",250],["abobrinha",250],["espinafre",250]]),I("azeite",5),I("maca",130,[["laranja",140],["tangerina",135],["melao",200]],"fruta à escolha")]}}},
     {id:"ceia",n:"Ceia",h:"22:00",optional:true,opts:{
       A:{n:"Leite com canela",tip:"Opcional. A caseína do leite ajuda durante o sono. Se jantou o B, pode pular.",items:[I("leite_desn",200,[["leite_zero",200],["iogurte",150]]),I("canela",1),I("cacau",3,[],"cacau 100% opcional")]}}}
   ],
@@ -352,7 +382,7 @@ const PLAN_PDF = {
     musc:{n:"Musculação",d:"seg, qua, sex e sáb",pick:{cafe:"B",almoco:"A",lanche:"A",jantar:"A",ceia:"A"}},
     pilates:{n:"Pilates",d:"ter e qui",pick:{cafe:"C",almoco:"A",lanche:"A",jantar:"A",ceia:"A"}},
     desc:{n:"Descanso",d:"domingo: plano padrão",pick:{cafe:"B",almoco:"A",lanche:"A",jantar:"A",ceia:"A"}},
-    fome:{n:"Dia de mais fome",d:"liberado 2–3× por semana",pick:{cafe:"A",almoco:"A",lanche:"B",jantar:"B",ceia:null}}
+    fome:{n:"Dia de mais fome",d:"liberado 2–3× por semana",pick:{cafe:"A",almoco:"B",lanche:"B",jantar:"A",ceia:null}}
   },
   week:["musc","pilates","musc","pilates","musc","musc","desc"],
   emerg:[["laranja",140],["iog_molico",170],["biscoito_arroz",12],["chocolate70",5],["cottage",30]]
@@ -363,11 +393,11 @@ const SUPS = [
   {id:"vitd",n:"Vitamina D",dose:"2.000 UI",h:"só se o exame der baixo",on:false}
 ];
 const SHOP = [
-  ["Proteínas",[["Peito de frango sem pele","1,2 kg","2,4 kg","~5 kg"],["Patinho moído ou em bife","400 g","800 g","~1,8 kg"],["Whey protein concentrado","~140 g","~280 g","~600 g (1 pote 1 kg)"],["Iogurte natural desnatado","1,4 kg","2,8 kg","~11 kg"],["Cottage ou queijo branco","200 g","400 g","~800 g"],["Patê de ricota ou requeijão light","100 g","200 g","~400 g"],["Tilápia ou salmão (opcional)","300 g","600 g","~1,2 kg"],["Atum em água (lata)","2 latas","4 latas","~8 latas"]]],
-  ["Carboidratos",[["Tapioca (massa pronta ou goma)","300 g","600 g","1,2 kg"],["Rap10 tortilha integral","1 pacote","2 pacotes","4 pacotes"],["Cuscuz de milho (flocos)","500 g","1 kg","2 kg"],["Arroz branco","~150 g cru","~300 g cru","~1 kg cru"],["Feijão preto ou carioca","~150 g cru","~300 g cru","~1 kg cru"],["Aveia em flocos finos","60 g","120 g","~250 g"],["Pão integral","1 pacote","2 pacotes","4 pacotes"],["Batata-doce","500 g","1 kg","~2 kg"]]],
+  ["Proteínas",[["Peito de frango sem pele","1,2 kg","2,4 kg","~5 kg"],["Patinho (bife, moído ou em cubos)","1,3 kg","2,6 kg","~5,5 kg"],["Whey protein concentrado","~140 g","~280 g","~600 g (1 pote 1 kg)"],["Iogurte natural desnatado","1,4 kg","2,8 kg","~11 kg"],["Cottage ou queijo branco","200 g","400 g","~800 g"],["Requeijão light","1 pote 200 g","2 potes","~5 potes"],["Tilápia ou salmão (opcional)","300 g","600 g","~1,2 kg"],["Atum em água (lata)","2 latas","4 latas","~8 latas"]]],
+  ["Carboidratos",[["Pão francês ou integral (sanduíche)","5 un.","10 un.","~22 un."],["Tapioca (massa pronta ou goma)","300 g","600 g","1,2 kg"],["Rap10 tortilha integral","1 pacote","2 pacotes","4 pacotes"],["Cuscuz de milho (flocos)","500 g","1 kg","2 kg"],["Arroz branco","~150 g cru","~300 g cru","~1 kg cru"],["Feijão preto ou carioca","~150 g cru","~300 g cru","~1 kg cru"],["Aveia em flocos finos","60 g","120 g","~250 g"],["Pão integral","1 pacote","2 pacotes","4 pacotes"],["Batata-doce","500 g","1 kg","~2 kg"]]],
   ["Frutas",[["Banana prata","4 un.","8 un.","~16 un."],["Maçã","5–7 un.","10–14 un.","~24 un."],["Laranja ou tangerina","5–7 un.","10–14 un.","~24 un."],["Abacaxi","1 un.","2 un.","4 un."],["Uva ou morango","1 cx 300 g","2 cx","4–5 cx"],["Mamão ou goiaba","1 un.","2 un.","4 un."]]],
   ["Legumes e verduras",[["Alface, rúcula ou espinafre","2–3 pés","4–6 un.","compre 2×/semana"],["Tomate","8 un.","16 un.","~32 un."],["Pepino","3–4 un.","6–8 un.","~14 un."],["Pimentão (variar cores)","3 un.","6 un.","~12 un."],["Brócolis ou couve-flor","1 maço","2 un.","4 un."],["Repolho","1/2 un.","1 un.","2 un."],["Cenoura","500 g","1 kg","2 kg"],["Abobrinha ou chuchu","3 un.","6 un.","~12 un."],["Cebola e alho","3 un. cebola","6 un.","~12 un."]]],
-  ["Outros",[["Leite desnatado","2 L","4 L","8 L"],["Manjericão fresco","1 maço","2 maços","4 maços"],["Canela em pó","1 pote","1 pote","1 pote (dura meses)"],["Chocolate 70% ou mais","1 barra","2 barras","4–5 barras"],["Biscoito de arroz","1 pacote","2 pacotes","4 pacotes"],["Geleia de frutas zero","1 pote","1 pote","2–3 potes"],["Azeite extravirgem","1 garrafa pequena","1 média","1 grande"],["Limão","4 un.","8 un.","~15 un."],["Cacau em pó 100% (opcional)","—","1 pacote","1 pacote"]]]
+  ["Outros",[["Creme de leite light (caixinha)","1 un.","2 un.","4 un."],["Molho de tomate pronto","1 sachê","2 sachês","4 sachês"],["Champignon em conserva","1 vidro pequeno","1 vidro","2 vidros"],["Leite desnatado","2 L","4 L","8 L"],["Manjericão fresco","1 maço","2 maços","4 maços"],["Canela em pó","1 pote","1 pote","1 pote (dura meses)"],["Chocolate 70% ou mais","1 barra","2 barras","4–5 barras"],["Biscoito de arroz","1 pacote","2 pacotes","4 pacotes"],["Geleia de frutas zero","1 pote","1 pote","2–3 potes"],["Azeite extravirgem","1 garrafa pequena","1 média","1 grande"],["Limão","4 un.","8 un.","~15 un."],["Cacau em pó 100% (opcional)","—","1 pacote","1 pacote"]]]
 ];
 const DOW = ["SEG","TER","QUA","QUI","SEX","SÁB","DOM"];
 
@@ -388,8 +418,20 @@ function fresh(){
     start:today(),shop:{per:"semanal",got:{}},ui:{tab:"hoje",date:null}};
 }
 function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);const n=Object.assign(fresh(),s);n.ui=Object.assign(fresh().ui,s.ui||{});return n}}catch(e){storeOk=false}return fresh()}
+const hadData=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
 let S=load();
 Object.assign(FOODS,S.customFoods||{});
+if(!hadData)S.planV=2;
+// v2 (31/10): almoço = sanduíche de patinho / estrogonofe; jantar = cuscuz com carne ou frango; desafio começa em 31/10
+if((S.planV||1)<2){
+  const P=clone(PLAN_PDF);
+  ["almoco","jantar"].forEach(id=>{const i=S.plan.meals.findIndex(m=>m.id===id),np=P.meals.find(m=>m.id===id);if(i>=0)S.plan.meals[i]=np;else S.plan.meals.push(np)});
+  Object.entries(P.combos).forEach(([k,c])=>{if(S.plan.combos[k])Object.assign(S.plan.combos[k].pick,{almoco:c.pick.almoco,jantar:c.pick.jantar});else S.plan.combos[k]=c});
+  S.start="2026-10-31";
+  Object.entries(S.days).forEach(([dt,d])=>{if(dt<"2026-10-31")return;["almoco","jantar"].forEach(id=>{const dm=d.meals[id];if(dm&&dm.items.some(x=>x.ok))return;
+    const m=S.plan.meals.find(x=>x.id===id),k=(S.plan.combos[d.type]||S.plan.combos.musc).pick[id];d.meals[id]=k&&m.opts[k]?{opt:k,items:m.opts[k].items.map(it=>({f:it.f,g:it.g,ok:false,label:it.label||""}))}:{opt:null,items:[]}})});
+  S.planV=2;
+}
 let saveT=null;
 function save(now){clearTimeout(saveT);const go=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));storeOk=true}catch(e){storeOk=false}const w=document.getElementById("storeWarn");if(w)w.hidden=storeOk};now?go():saveT=setTimeout(go,150)}
 window.addEventListener("pagehide",()=>save(true));
@@ -463,10 +505,8 @@ function vHoje(){
   const dn=diffDays(S.start,date)+1;
   let h=`<div class="navd"><button type="button" data-a="dprev" aria-label="Dia anterior">‹</button><b>${date===today()?"Hoje":DOW[dowIdx(date)]+" "+dmy(date)}<small>${dn>=1&&dn<=30?`dia ${dn} de 30 · `:""}${esc(S.plan.combos[d.type].n)}</small></b><button type="button" data-a="dnext" aria-label="Próximo dia" ${date>=today()?"disabled style='opacity:.3'":""}>›</button></div>`;
   if(flash) h+=`<div class="done-card"><h3>${esc(flash.t)}</h3><p>${esc(flash.m)}</p><div class="row"><button class="ghost" type="button" data-a="closeFlash">Fechar</button></div></div>`;
-  h+=`<div class="dash"><div class="big"><b class="${left<0?"over":""}">${left>=0?fmt(left):"+"+fmt(-left)}</b><span>${left>=0?"kcal restantes":"kcal acima da meta"} · comeu ${fmt(T.eaten.k)} de ${G.kcal} · planejado ${fmt(T.plan.k)}</span></div>
-    ${bar("k",T.eaten.k,G.kcal,"Calorias"," kcal")}${bar("p",T.eaten.p,G.p,"Proteína"," g")}${bar("",T.eaten.c,G.c,"Carbo"," g")}${bar("",T.eaten.g,G.g,"Gordura"," g")}</div>`;
+  h+=macroDash(T,G);
   h+=`<div class="chips" role="group" aria-label="Tipo do dia">${Object.entries(S.plan.combos).map(([k,c])=>`<button class="daybtn" type="button" data-a="dtype" data-k="${k}" aria-pressed="${d.type===k}">${esc(c.n)}<small>${esc(c.d)}</small></button>`).join("")}</div>`;
-  if(d.type==="fome"){const n=weekCount(date,"jantar","B");if(n>=3)h+=`<div class="empty">Você já usou o jantar B ${n}× nesta semana; o plano libera no máximo 3.</div>`}
   meals().forEach(m=>h+=mealCard(date,d,m));
   h+=extrasCard(date,d);
   h+=waterCard(date,d);
@@ -474,6 +514,27 @@ function vHoje(){
   h+=`<div class="form"><label class="full">Como foi o dia (fome, vontade de doce, sono)<input id="nota-${date}" data-dbind="nota" value="${esc(d.nota)}" placeholder="opcional"></label></div>`;
   return `<section>${h}</section>`;
 }
+/* painel: calorias + 3 anéis (proteína, carbo, gordura) + de onde vêm as calorias */
+const MC={p:["Proteína","var(--pink)"],c:["Carbo","var(--sky)"],g:["Gordura","var(--fat)"]};
+function macroDash(T,G){
+  const e=T.eaten,pl=T.plan,left=G.kcal-e.k,pk=Math.min(100,e.k/G.kcal*100),pp=Math.min(100,pl.k/G.kcal*100);
+  const ring=(k)=>{const v=e[k],goal=G[k],r=30,c=2*Math.PI*r,p=Math.min(1,v/goal),ov=v>goal*1.1,rest=goal-v;
+    return `<div class="mac"><div class="ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="${r}" fill="none" stroke="var(--line)" stroke-width="9"/><circle cx="37" cy="37" r="${r}" fill="none" stroke="${ov?"var(--over)":MC[k][1]}" stroke-width="9" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}"/></svg><b>${Math.round(v/goal*100)}%</b></div>
+      <span class="nm" style="color:${MC[k][1]}">${MC[k][0]}</span><span class="v">${fmt(v)} / ${goal} g</span><span class="left">${rest>0.5?`faltam ${fmt(rest)} g`:ov?`+${fmt(-rest)} g`:"meta ✓"}</span><span class="v">plano: ${fmt(pl[k])} g</span></div>`};
+  const kc={p:e.p*4,c:e.c*4,g:e.g*9},tk=kc.p+kc.c+kc.g;
+  return `<div class="dash">
+    <div class="kcal"><b class="num ${left<0?"over":""}">${left>=0?fmt(left):"+"+fmt(-left)}</b><div><b>${left>=0?"kcal restantes":"kcal acima da meta"}</b><small>comeu ${fmt(e.k)} de ${G.kcal} · o plano de hoje soma ${fmt(pl.k)}</small>
+      <div class="kbar" role="img" aria-label="Calorias: ${fmt(e.k)} de ${G.kcal}"><s style="width:${pp}%"></s><i class="${e.k>G.kcal*1.08?"over":""}" style="width:${pk}%"></i></div></div></div>
+    <div class="macros">${["p","c","g"].map(ring).join("")}</div>
+    ${tk>0?`<div><div class="split" role="img" aria-label="De onde vêm as calorias">${["p","c","g"].map(k=>`<i style="width:${kc[k]/tk*100}%;background:${MC[k][1]}"></i>`).join("")}</div>
+      <div class="legend" style="margin-top:6px">${["p","c","g"].map(k=>`<span style="--c:${MC[k][1]}">${MC[k][0]} ${Math.round(kc[k]/tk*100)}%</span>`).join("")}</div></div>`
+    :`<p class="sub" style="margin:0">Marque o que comeu (✓) e os números enchem. As listras na barra são o que está planejado para hoje.</p>`}
+  </div>`;
+}
+function nextMeal(date){if(date!==today())return null;const n=new Date(),m=n.getHours()*60+n.getMinutes(),d=day(date);
+  const L=meals().filter(x=>{const dm=d.meals[x.id];return dm&&dm.items.length&&!dm.items.every(i=>i.ok)});
+  const toM=h=>{const [a,b]=h.split(":").map(Number);return a*60+b};
+  return (L.find(x=>toM(x.h)+90>=m)||L[L.length-1]||{}).id||null}
 function itemRow(date,mid,i,it,isExtra){
   const f=food(it.f), x=macro(it.f,it.g), path=isExtra?`extras.${i}`:`meals.${mid}.items.${i}`, ok=isExtra?it.ok!==false:it.ok;
   const panel=S.ui.swap===`${mid}:${i}`;
@@ -514,11 +575,12 @@ function addBox(date,target){
 function mealCard(date,d,m){
   const dm=d.meals[m.id]||{opt:null,items:[]}, keys=Object.keys(m.opts), o=m.opts[dm.opt];
   const t=sum(dm.items.map(it=>macro(it.f,it.g))), allOk=dm.items.length&&dm.items.every(x=>x.ok);
-  const adding=S.ui.add===`${m.id}`;
-  return `<article class="paper meal ${allOk?"done":""}" id="meal-${m.id}"><header><div><h3>${esc(m.n)}</h3><span class="when">${esc(m.h)}${o?` · ${esc(o.n)}`:dm.opt===null?" · pulada hoje":""}${m.optional?" · opcional":""}</span></div><span class="kc">${fmt(t.k)} kcal</span></header>
+  const adding=S.ui.add===`${m.id}`, nx=nextMeal(date)===m.id;
+  return `<article class="paper meal ${allOk?"done":""} ${nx?"next":""}" id="meal-${m.id}"><header><div><h3>${esc(m.n)}${nx?`<span class="nowtag">AGORA</span>`:""}</h3><span class="when">${esc(m.h)}${o?` · ${esc(o.n)}`:dm.opt===null?" · pulada hoje":""}${m.optional?" · opcional":""}</span>
+    ${dm.items.length?`<div class="mp"><span style="--c:var(--pink)">P ${fmt(t.p)} g</span><span style="--c:var(--sky)">C ${fmt(t.c)} g</span><span style="--c:var(--fat)">G ${fmt(t.g)} g</span></div>`:""}</div><span class="kc">${fmt(t.k)} kcal</span></header>
     <div class="opts">${keys.map(k=>`<button type="button" data-a="opt" data-m="${m.id}" data-k="${k}" aria-pressed="${dm.opt===k}">${keys.length>1?k+" · ":""}${esc(m.opts[k].n)}</button>`).join("")}<button type="button" data-a="opt" data-m="${m.id}" data-k="" aria-pressed="${dm.opt===null}">Pular</button></div>
     ${dm.items.length?`<div class="items">${dm.items.map((it,i)=>itemRow(date,m.id,i,it,false)).join("")}</div>`:""}
-    <div class="row">${dm.items.length?`<button class="mini ${allOk?"on":""}" type="button" data-a="eatAll" data-m="${m.id}">${allOk?"Comi tudo ✓":"Comi tudo"}</button>`:""}<button class="mini ${adding?"on":""}" type="button" data-a="add" data-m="${m.id}">+ Incluir alimento</button><span class="sub">${fmt(t.p)} g prot · ${fmt(t.c)} g carbo · ${fmt(t.g)} g gord.</span></div>
+    <div class="row">${dm.items.length?`<button class="mini ${allOk?"on":""}" type="button" data-a="eatAll" data-m="${m.id}">${allOk?"Comi tudo ✓":"Comi tudo"}</button>`:""}<button class="mini ${adding?"on":""}" type="button" data-a="add" data-m="${m.id}">+ Incluir alimento</button></div>
     ${adding?addBox(date,m.id):""}
     ${o&&o.tip?`<p class="tip">${esc(o.tip)}</p>`:""}
   </article>`;
@@ -605,6 +667,7 @@ function weightAdvice(W,w0){
 /* =====================================================================
    ABA PLANO (editar)
    ===================================================================== */
+function comboTotals(c){return sum(meals().filter(m=>!m.optional).flatMap(m=>{const o=m.opts[c.pick[m.id]];return o?o.items.map(it=>macro(it.f,it.g)):[]}))}
 function vPlano(){
   const G=S.plan.goals, mid=S.ui.pm||"cafe", m=mealById(mid)||meals()[0], ok=S.ui.po&&m.opts[S.ui.po]?S.ui.po:Object.keys(m.opts)[0], o=m.opts[ok];
   const tot=sum(o.items.map(it=>macro(it.f,it.g)));
@@ -614,6 +677,10 @@ function vPlano(){
       <label>Carboidrato (g)<input id="gc" inputmode="numeric" data-pbind="goals.c" value="${G.c}"></label><label>Gordura (g)<input id="gg" inputmode="numeric" data-pbind="goals.g" value="${G.g}"></label>
       <label class="full">Água (ml)<input id="gw" inputmode="numeric" data-pbind="goals.water" value="${G.water}"></label></div>
     <p class="sub">Do seu plano: ~1.300 kcal, ~120 g de proteína (2 g/kg), 3 L de água, sem ovo.</p>
+    <h2 class="label">Dia típico × meta</h2>
+    <div class="tbl" style="display:grid;gap:6px">${Object.entries(S.plan.combos).map(([k,c])=>{const t=comboTotals(c);const cell=(v,g,u)=>`<span style="color:${Math.abs(v-g)/g<=.1?"var(--green)":v>g?"var(--over)":"var(--sky)"}">${fmt(v)}${u}</span>`;
+      return `<div class="mrow" style="grid-template-columns:1fr repeat(4,auto);gap:10px"><span class="nm">${esc(c.n)}</span>${cell(t.k,G.kcal," kcal")}${cell(t.p,G.p,"P")}${cell(t.c,G.c,"C")}${cell(t.g,G.g,"G")}</div>`}).join("")}</div>
+    <p class="sub">Soma das opções escolhidas para cada tipo de dia (sem a ceia opcional). Verde = até 10% da meta; azul = abaixo; laranja = acima.</p>
 
     <h2 class="label">Semana</h2>
     <div class="form">${DOW.map((d,i)=>`<label>${d}<select id="wk-${i}" data-pbind="week.${i}">${Object.entries(S.plan.combos).map(([k,c])=>`<option value="${k}" ${S.plan.week[i]===k?"selected":""}>${esc(c.n)}</option>`).join("")}</select></label>`).join("")}</div>
