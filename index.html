@@ -261,6 +261,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 /* dicas / assistente */
 .tip{display:grid;gap:6px}
+.paper.alt.tip{grid-template-columns:minmax(0,1fr);border-top:0;padding-top:18px;align-items:stretch;gap:6px}
 .tag{justify-self:start;font-family:var(--f-display);font-size:13px;letter-spacing:.08em;padding:2px 8px;background:var(--text-on-paper);color:var(--paper)}
 .tag.pri{background:var(--pink);color:var(--ink)}
 .tag.ok{background:var(--tape);color:var(--ink)}
@@ -275,6 +276,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 .hist{display:grid;gap:8px}
 .hi{border:2px solid var(--line);padding:10px;display:grid;gap:4px;font-size:13px}
+.hdate{background:transparent;border:1.5px solid currentColor;color:inherit;font:inherit;font-size:12px;padding:2px 4px;margin-left:6px;max-width:150px}
 .hi .h{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .hi .h b{font-family:var(--f-display);font-weight:400;font-size:18px;letter-spacing:.04em}
 .hi .d{font-family:var(--f-type);color:var(--dim);font-size:12px;overflow-wrap:anywhere}
@@ -473,13 +475,13 @@ const SLOT_SHORT = {A:"A",B:"B",C:"C",D:"D",pilates:"Pilat.",cardio:"Cardio",rec
 const GYM = ["A","B","C","D"];
 const DOW = ["SEG","TER","QUA","QUI","SEX","SÁB","DOM"];
 const WARM = [["bike5","5 min de bike ou caminhada leve"],["ponte","Ponte de glúteo 1×12"],["birddog","Bird dog 1×6 por lado"],["abdel","Abdução com elástico 1×15"],["leve","1–2 séries leves do 1º exercício"]];
-const WARM_MIN = 8, RESIST_MIN = 42, CARDIO_MIN = 10;
+const WARM_MIN = 8, RESIST_MIN = 52, CARDIO_MIN = 20;
 
 const P = (id,s,lo,hi,prio)=>({id,s,lo,hi,prio:prio||"e"});
 const PLAN_V2 = {
-  A:{nome:"Quadríceps & glúteos",ex:[P("legpress",4,8,12),P("bulgaro",3,10,12),P("extensora",3,12,15),P("abducao",3,12,20),P("hip_thrust_maq",3,10,12,"c"),P("adutora",2,12,15,"c"),P("pant_legpress",3,12,15,"c")]},
-  B:{nome:"Superiores & core",ex:[P("puxada",4,10,12),P("remada_apoio",3,10,12),P("supino_maq",3,10,12),P("desenvolvimento",3,8,12),P("elev_lateral",3,12,15),P("face_pull",2,15,20,"c"),P("triceps_corda",2,10,15,"c"),P("rosca_martelo",2,10,12,"c"),P("dead_bug",2,8,10,"c")]},
-  C:{nome:"Glúteos & posteriores",ex:[P("hip_thrust_maq",4,8,12),P("flexora",3,10,12),P("coice",3,12,15),P("abducao",3,15,20),P("ponte_unil",2,12,15,"c"),P("panturrilha_sent",3,12,15,"c"),P("prancha_lat",2,8,12,"c")]},
+  A:{nome:"Quadríceps & glúteos",ex:[P("legpress",4,8,12),P("bulgaro",3,10,12),P("extensora",3,12,15),P("abducao",3,12,20),P("hip_thrust_maq",3,10,12,"c"),P("adutora",2,12,15,"c"),P("pant_legpress",3,12,15,"c"),P("elev_lat_cabo",3,12,15,"c"),P("dead_bug",2,8,10,"c")]},
+  B:{nome:"Superiores & core",ex:[P("puxada",4,10,12),P("remada_apoio",3,10,12),P("supino_maq",4,10,12),P("desenvolvimento",3,8,12),P("elev_lateral",4,12,15),P("face_pull",3,15,20,"c"),P("triceps_corda",2,10,15,"c"),P("rosca_martelo",2,10,12,"c"),P("dead_bug",2,8,10,"c")]},
+  C:{nome:"Glúteos & posteriores",ex:[P("hip_thrust_maq",4,8,12),P("flexora",3,10,12),P("coice",3,12,15),P("abducao",3,15,20),P("remada_unil",3,10,12,"c"),P("panturrilha_sent",3,12,15,"c"),P("prancha_lat",2,8,12,"c")]},
   D:{nome:"Superiores extra (opcional)",ex:[P("remada_unil",3,10,12),P("elev_lat_cabo",3,12,15),P("crucifixo_maq",2,12,15),P("rosca_martelo",3,10,12),P("triceps_testa",3,10,12),P("dead_bug",2,8,10,"c")]}
 };
 const WEEK_V2 = ["A","pilates","B","recup","C","livre","descanso"];
@@ -505,15 +507,24 @@ const today = ()=>iso(new Date());
 function fresh(){
   const gym={}; Object.keys(EQ).forEach(k=>gym[k]=GYM_SEEN.includes(k)?"sim":"?");
   const targets={}; Object.entries(SUB).forEach(([k,v])=>targets[k]={lo:v.lo,hi:v.hi});
-  return {v:2,
+  return {v:2,balV:1,
     profile:{nome:"",idade:"",altura:"",peso:"",objetivo:"recomp",restr:{axial:false,flexao:false,hiperext:false,impacto:false,rotacao:false},recs:[]},
     targets, plan:clone(PLAN_V2), week:WEEK_V2.slice(), history:[], acts:[], checkins:[], measures:[],
     gym, customEq:{}, customEx:{}, drafts:{}, settings:{sound:false,wake:false},
     notices:[], ui:{tab:"treino",day:null,planDay:"A"}};
 }
+/* equilíbrio (nov/26): parte de cima e core estavam abaixo do mínimo de séries por semana; glúteo máximo acima */
+function balance(plan){
+  const has=(d,id)=>plan[d]&&plan[d].ex.some(x=>x.id===id);
+  if(plan.A){if(!has("A","elev_lat_cabo")&&!has("A","elev_lateral"))plan.A.ex.push(P("elev_lat_cabo",3,12,15,"c"));if(!has("A","dead_bug"))plan.A.ex.push(P("dead_bug",2,8,10,"c"))}
+  if(plan.B){const el=plan.B.ex.find(x=>x.id==="elev_lateral");if(el&&el.s<4)el.s=4;const fp=plan.B.ex.find(x=>x.id==="face_pull");if(fp&&fp.s<3)fp.s=3;const sp=plan.B.ex.find(x=>x.id==="supino_maq");if(sp&&sp.s<4)sp.s=4}
+  if(plan.C&&!has("C","remada_unil")){const i=plan.C.ex.findIndex(x=>x.id==="ponte_unil");if(i>=0)plan.C.ex[i]=P("remada_unil",3,10,12,"c");else plan.C.ex.push(P("remada_unil",3,10,12,"c"))}
+}
 function migrate(s){
   if(!s || typeof s!=="object") return fresh();
-  if((s.v||1)>=2){const n=Object.assign(fresh(),s);n.ui=Object.assign(fresh().ui,s.ui||{});return n}
+  if((s.v||1)>=2){const n=Object.assign(fresh(),s);n.ui=Object.assign(fresh().ui,s.ui||{});
+    if(!s.balV){balance(n.plan);n.balV=1;n.notices=(n.notices||[]).concat(["Treino revisado e equilibrado: mais costas, ombro lateral e abdômen (core), um pouco menos de glúteo isolado. O cardio agora é separado do treino e a musculação ganhou os 10 min que ele ocupava. Detalhes na aba Plano."])}
+    return n}
   // v1 → v2. Nada é apagado: uma cópia da versão anterior fica guardada.
   try{localStorage.setItem(KEY+"-backup-v1",JSON.stringify(s))}catch(e){}
   const n=fresh(), notes=[];
@@ -668,7 +679,7 @@ function budget(day){
   const L=S.plan[day]?S.plan[day].ex:[]; let t=0; const fit=new Set(), over=[];
   ["e","c"].forEach(p=>L.forEach((it,i)=>{if((it.prio||"e")!==p)return;const s=estSec(it);if(t+s<=RESIST_MIN*60){t+=s;fit.add(i)}else over.push(i)}));
   const all=L.reduce((a,it)=>a+estSec(it),0);
-  return {fit,over,resist:t/60,all:all/60,total:WARM_MIN+t/60+CARDIO_MIN};
+  return {fit,over,resist:t/60,all:all/60,total:WARM_MIN+t/60};
 }
 
 /* ---------- volume ---------- */
@@ -758,6 +769,8 @@ function defaultDay(){
 function blankDraft(){return {date:today(),start:null,pausedMs:0,pauseAt:null,sets:{},rir:{},notes:{},sym:{},swap:{},inc:{},skip:{},warm:{},cardio:{eq:"",int:"leve",min:"10",dist:"",rpe:"",adapt:false,nota:"",ok:false}}}
 function draft(day){
   const d=S.drafts[day]=Object.assign(blankDraft(),S.drafts[day]||{});
+  // rascunho de outro dia sem nada feito passa a ser de hoje (era o motivo das datas erradas)
+  if(d.date!==today()&&!d.start&&!Object.values(d.sets).some(a=>a.some(x=>x.ok))) d.date=today();
   items(day).forEach(it=>{
     if(!d.sets[it.id]){const sg=suggest(it);d.sets[it.id]=Array.from({length:it.s},()=>({kg:sg.kg!=null?fmt(sg.kg):"",r:"",ok:false}))}
   });
@@ -774,11 +787,12 @@ function exState(d,it){const s=d.sets[it.id]||[];if(d.skip[it.orig])return "skip
 function vTreino(){
   const day=S.ui.day||defaultDay();
   const btns=GYM.map(d=>`<button class="daybtn" type="button" data-a="day" data-day="${d}" aria-pressed="${day===d}">${d}<small>${esc(S.plan[d].nome)}</small></button>`).join("")
-    +`<button class="daybtn" type="button" data-a="day" data-day="extra" aria-pressed="${day==="extra"}">+<small>pilates / cardio / recup.</small></button>`;
+    +`<button class="daybtn" type="button" data-a="day" data-day="cardio" aria-pressed="${day==="cardio"}">Cardio<small>separado do treino</small></button>`
+    +`<button class="daybtn" type="button" data-a="day" data-day="extra" aria-pressed="${day==="extra"}">+<small>pilates / recup.</small></button>`;
   let body="";
   if(S.notices&&S.notices.length) body+=`<div class="done-card"><h3>App atualizado</h3>${S.notices.map(n=>`<p>${esc(n)}</p>`).join("")}<div class="row"><button class="ghost" type="button" data-a="closeNotice">Entendi</button></div></div>`;
   if(finished) body+=`<div class="done-card"><h3>${finished.t}</h3><p>${esc(finished.m)}</p><div class="row"><button class="ghost" type="button" data-a="closeDone">Fechar</button></div></div>`;
-  body+= day==="extra"?vExtra():vSession(day);
+  body+= day==="extra"?vExtra():day==="cardio"?vCardio():vSession(day);
   return `<section><div class="chips" role="group" aria-label="Escolha o treino">${btns}</div>${body}</section>`;
 }
 function vSession(day){
@@ -802,7 +816,7 @@ function vSession(day){
   h+=list.map((it,i)=>card(day,it,i,d)).join("");
   const out=plan.ex.filter((it,i)=>b.over.includes(i)&&!d.inc[it.id]);
   if(out.length) h+=`<div class="empty">Não couberam nos ${RESIST_MIN} min sem encurtar o descanso: ${out.map(it=>`<b>${esc(ex(it.id).n)}</b> <button class="mini" type="button" data-a="inc" data-day="${day}" data-id="${it.id}">incluir hoje</button>`).join(" ")}${day!=="D"?" Eles podem ir para o Treino D ou outro dia (aba Plano).":""}</div>`;
-  h+=cardioCard(day,d,lb);
+  h+=`<p class="sub">Cardio não faz parte do treino: conclua quando terminar a musculação e registre o cardio no botão <b>Cardio</b>, se fizer.</p>`;
   h+=`<button class="big" type="button" data-a="finish" data-day="${day}">Concluir treino ${day}</button>
     <div class="row"><button class="ghost danger" type="button" data-a="discard" data-day="${day}">${S.ui.confirm==="discard"?"Toque de novo para apagar":"Descartar o que anotei"}</button></div>`;
   return h;
@@ -863,24 +877,28 @@ function symBox(day,id,d){
     ${s.saved?`<p style="margin:0"><b>Interrompa o movimento que provocou o sintoma.</b> ${s.irr?"Dor irradiada que piora precisa de avaliação profissional. ":""}Veja uma alternativa no botão acima. A carga deste exercício não vai subir enquanto o sintoma for recente.</p>`:""}
   </div>`;
 }
-function cardioCard(day,d,lb){
-  const c=d.cardio, opts=Object.entries(CARDIO).map(([k,v])=>({k,v,av:S.gym[CARDIO_EQ[k]]||"?",rx:restrictedBy(null,v.tags)}))
-    .sort((a,b)=>(a.rx.length-b.rx.length)||((a.av==="nao")-(b.av==="nao")));
+function vCardio(){
+  const lb=lumbar(),c=S.ui.cf||(S.ui.cf={eq:"",int:"leve",min:String(CARDIO_MIN),dist:"",rpe:"",adapt:false,nota:"",date:today()});
+  const opts=Object.entries(CARDIO).map(([k,v])=>({k,v,av:S.gym[CARDIO_EQ[k]]||"?",rx:restrictedBy(null,v.tags)})).sort((a,b)=>(a.rx.length-b.rx.length)||((a.av==="nao")-(b.av==="nao")));
   if(!c.eq) c.eq=(lb.lv>=1?(opts.find(o=>o.k==="bike_rec"&&o.av!=="nao")||opts.find(o=>o.k==="esteira")):(opts.find(o=>o.av==="sim"&&!o.rx.length)||opts[0])).k;
-  const cur=CARDIO[c.eq]||CARDIO.esteira;
-  return `<article class="paper alt flat tip" id="cardio"><span class="tag">cardio pós-treino · ${CARDIO_MIN} min</span><h3>${c.ok?"Cardio feito ✕":"Para fechar"}</h3>
+  const cur=CARDIO[c.eq]||CARDIO.esteira, isC=a=>["cardio","cardio-z2","hiit","caminhada"].includes(a.type), recent=S.acts.filter(isC).slice(-8).reverse();
+  const wk=S.acts.filter(a=>a.date>=weekStart()&&isC(a)).reduce((x,a)=>x+(num(a.min)||0),0)+S.history.filter(h=>h.date>=weekStart()&&h.cardio).reduce((x,h)=>x+(num(h.cardio.min)||0),0);
+  return `<article class="paper alt flat tip" id="cardio"><span class="tag">cardio · separado do treino</span><h3>Registrar cardio</h3>
+    <p class="sub">Faça antes, depois, em outro horário ou em outro dia: não interfere no treino. Nesta semana: <b>${Math.round(wk)} min</b> (referência: 150 min leve a moderado por semana, somando tudo).</p>
     <div class="form">
-      <label class="full">Equipamento<select id="ca-eq-${day}" data-bind="drafts.${day}.cardio.eq" data-rr="1">${opts.map(o=>`<option value="${o.k}" ${c.eq===o.k?"selected":""}>${esc(o.v.n)}${o.av==="nao"?" (não tem)":o.av==="?"?" (confira)":""}${o.rx.length?" — restrição":""}</option>`).join("")}</select></label>
-      <label>Intensidade<select id="ca-int-${day}" data-bind="drafts.${day}.cardio.int"><option value="leve" ${c.int==="leve"?"selected":""}>Leve</option><option value="moderada" ${c.int==="moderada"?"selected":""}>Moderada</option></select></label>
-      <label>Minutos<input id="ca-min-${day}" inputmode="numeric" data-bind="drafts.${day}.cardio.min" value="${esc(c.min)}"></label>
-      <label>Distância (km)<input id="ca-dist-${day}" inputmode="decimal" data-bind="drafts.${day}.cardio.dist" value="${esc(c.dist)}"></label>
-      <label>Esforço (1–10)<input id="ca-rpe-${day}" inputmode="numeric" data-bind="drafts.${day}.cardio.rpe" value="${esc(c.rpe)}"></label>
+      <label class="full">Equipamento<select id="cf-eq" data-bind="ui.cf.eq" data-rr="1">${opts.map(o=>`<option value="${o.k}" ${c.eq===o.k?"selected":""}>${esc(o.v.n)}${o.av==="nao"?" (não tem)":o.av==="?"?" (confira)":""}${o.rx.length?" — restrição":""}</option>`).join("")}</select></label>
+      <label>Intensidade<select id="cf-int" data-bind="ui.cf.int"><option value="leve" ${c.int==="leve"?"selected":""}>Leve</option><option value="moderada" ${c.int==="moderada"?"selected":""}>Moderada</option><option value="intensa" ${c.int==="intensa"?"selected":""}>Intensa</option></select></label>
+      <label>Minutos<input id="cf-min" inputmode="numeric" data-bind="ui.cf.min" value="${esc(c.min)}"></label>
+      <label>Distância (km)<input id="cf-dist" inputmode="decimal" data-bind="ui.cf.dist" value="${esc(c.dist)}"></label>
+      <label>Esforço (1–10)<input id="cf-rpe" inputmode="numeric" data-bind="ui.cf.rpe" value="${esc(c.rpe)}"></label>
+      <label class="full">Dia<input type="date" id="cf-date" data-bind="ui.cf.date" value="${esc(c.date||today())}" max="${today()}"></label>
     </div>
     <p class="sub">Leve = conversa fácil; moderada = frases curtas. ${esc(cur.ln)}${lb.lv>=1?" Com sintomas hoje: comece leve e observe. Se a dor irradiada aparecer ou piorar, encerre.":""}</p>
-    <label class="tog"><input type="checkbox" id="ca-ad-${day}" data-bind="drafts.${day}.cardio.adapt" data-rr="1" ${c.adapt?"checked":""}> Encerrei ou adaptei por causa de sintomas</label>
-    ${c.adapt?`<input class="note" id="ca-n-${day}" data-bind="drafts.${day}.cardio.nota" value="${esc(c.nota)}" placeholder="O que sentiu, quanto tempo fez">`:""}
-    <div class="row"><button class="mini ${c.ok?"on":""}" type="button" data-a="cardioOk" data-day="${day}">${c.ok?"Feito ✕":"Marcar cardio feito"}</button></div>
-  </article>`;
+    <label class="tog"><input type="checkbox" id="cf-ad" data-bind="ui.cf.adapt" data-rr="1" ${c.adapt?"checked":""}> Encerrei ou adaptei por causa de sintomas</label>
+    ${c.adapt?`<input class="note" id="cf-n" data-bind="ui.cf.nota" value="${esc(c.nota)}" placeholder="O que sentiu, quanto tempo fez">`:""}
+    <div class="row"><button class="mini on" type="button" data-a="cardioSave">Salvar cardio</button></div>
+  </article>
+  ${recent.length?`<div class="hist">${recent.map(a=>`<div class="hi"><div class="h"><b>${esc(actName(a.type,a))}</b><span class="d">${dmy(a.date)} · ${a.min} min${a.dist?` · ${esc(a.dist)} km`:""}${a.rpe?` · esforço ${esc(a.rpe)}`:""}</span></div></div>`).join("")}</div>`:`<div class="empty">Nenhum cardio registrado ainda.</div>`}`;
 }
 
 /* ---------- check-in lombar ---------- */
@@ -924,7 +942,7 @@ function vExtra(){
     <p>Cardio leve é no ritmo em que dá para conversar. ${lb.lv>=1?"Com sintomas lombares, prefira o que seu fisio orientou e observe a resposta durante e no dia seguinte.":"Pilates com orientação profissional combina bem com o dia seguinte ao treino A."}</p></div>
     ${recent.length?`<div class="hist">${recent.map(a=>`<div class="hi"><div class="h"><b>${esc(actName(a.type))}</b><span class="d">${dmy(a.date)} · ${a.min} min${a.rpe?` · esforço ${esc(a.rpe)}`:""}</span></div></div>`).join("")}</div>`:`<div class="empty">Nenhuma atividade extra registrada ainda.</div>`}`;
 }
-const actName=t=>({pilates:"Pilates","cardio-z2":"Cardio leve",caminhada:"Caminhada",hiit:"Cardio intenso",recup:"Recuperação"}[t]||t);
+const actName=(t,a)=>t==="cardio"&&a?`Cardio ${a.int||""} · ${(CARDIO[a.eq]||{n:""}).n}`:({pilates:"Pilates","cardio-z2":"Cardio leve",caminhada:"Caminhada",hiit:"Cardio intenso",recup:"Recuperação",cardio:"Cardio"}[t]||t);
 
 function finish(day){
   const d=S.drafts[day]; if(!d) return;
@@ -940,10 +958,12 @@ function finish(day){
     if(d.notes[id]) notes[id]=d.notes[id];
   });
   Object.entries(d.sym).forEach(([id,s])=>{if(s.saved)sym[id]={dor:num(s.dor)||0,irr:!!s.irr,nota:s.nota||""}});
-  if(!n&&!d.cardio.ok){finished={t:"Nada para salvar",m:"Nenhuma série com repetições anotadas. Preencha as reps e marque ✕ nas séries feitas."};return}
+  if(!n){finished={t:"Nada para salvar",m:"Nenhuma série com repetições anotadas. Preencha as reps e marque ✕ nas séries feitas."};return}
   const dur=Math.round(elapsed(d)/60000);
-  const cardio=(d.cardio.ok||d.cardio.adapt)?Object.assign({},d.cardio):null;
-  S.history.push({id:Date.now(),date:d.date,day,sets,rir,notes,sym,swap:d.swap,skip:Object.keys(d.skip).filter(k=>d.skip[k]),warm:WARM.filter(([k])=>d.warm[k]).length,cardio,dur:dur||null});
+  const cardio=null;
+  const when=d.start?iso(new Date(d.start)):today();
+  if(d.cardio&&d.cardio.ok&&num(d.cardio.min)) S.acts.push({date:when,type:"cardio",eq:d.cardio.eq,int:d.cardio.int,min:num(d.cardio.min),dist:d.cardio.dist,rpe:d.cardio.rpe});
+  S.history.push({id:Date.now(),date:when,day,sets,rir,notes,sym,swap:d.swap,skip:Object.keys(d.skip).filter(k=>d.skip[k]),warm:WARM.filter(([k])=>d.warm[k]).length,cardio,dur:dur||null});
   delete S.drafts[day];
   finished={t:"Treino salvo!",m:`${n} séries · ${Math.round(vol).toLocaleString("pt-BR")} kg levantados${dur?` · ${dur} min`:""}.${prs.length?` Recorde: ${prs.join(", ")}.`:""}${Object.keys(sym).length?" Os sintomas registrados ficam no histórico do exercício.":""}`};
   save(true); reWake(); window.scrollTo(0,0);
@@ -966,8 +986,8 @@ function vPlano(){
     <div class="chips">${GYM.map(d=>`<button class="daybtn" type="button" data-a="pday" data-day="${d}" aria-pressed="${pd===d}">${d}<small>${esc(S.plan[d].nome)}</small></button>`).join("")}</div>
     <div class="paper flat">
       <div class="form"><label class="full">Nome do treino<input id="pname-${pd}" data-bind="plan.${pd}.nome" value="${esc(plan.nome)}"></label></div>
-      <p class="sub" style="margin-block:12px 6px">Sessão de 60 min: ${WARM_MIN} aquecimento + ${RESIST_MIN} musculação + ${CARDIO_MIN} cardio</p>
-      <div class="budget" role="img" aria-label="Musculação ${Math.round(b.all)} de ${RESIST_MIN} minutos"><div class="w" style="flex:${WARM_MIN}">AQ ${WARM_MIN}</div><div class="r ${overMin>0?"over":""}" style="flex:${RESIST_MIN}">MUSCULAÇÃO ${Math.round(b.all)}/${RESIST_MIN}</div><div class="c" style="flex:${CARDIO_MIN}">CARDIO</div></div>
+      <p class="sub" style="margin-block:12px 6px">Sessão de 60 min: ${WARM_MIN} aquecimento + ${RESIST_MIN} musculação. O cardio é separado (botão Cardio).</p>
+      <div class="budget" role="img" aria-label="Musculação ${Math.round(b.all)} de ${RESIST_MIN} minutos"><div class="w" style="flex:${WARM_MIN}">AQ ${WARM_MIN}</div><div class="r ${overMin>0?"over":""}" style="flex:${RESIST_MIN}">MUSCULAÇÃO ${Math.round(b.all)}/${RESIST_MIN}</div></div>
       <p class="sub" style="margin-top:6px">${overMin>0?`Passa ${Math.round(overMin)} min do limite. Os exercícios riscados não cabem e ficam fora da sessão, sem encurtar descanso.`:`Cabe tudo: sobram ${Math.round(RESIST_MIN-b.all)} min.`} A estimativa conta séries, descanso e ~75 s de troca de aparelho por exercício. Essenciais entram primeiro.</p>
       <div class="plist" style="margin-top:12px">${plan.ex.map((it,i)=>{const e=ex(it.id),ov=b.over.includes(i);return `<div class="pi ${ov?"ov":""}">
         <div class="t">${ov?"<s>":""}${esc(e.n)}${ov?"</s>":""}<small>${esc(primSubs(it.id).map(g=>SUB[g].n).join(", "))} · ${fmt(estSec(it)/60)} min · ${LOMB[e.lomb]}${restrictedBy(it.id).length?" · RESTRIÇÃO":""}</small></div>
@@ -1229,7 +1249,7 @@ function photosView(){
 }
 function historyView(){
   const hist=[...S.history].sort((a,b)=>a.date<b.date?1:-1).slice(0,20);
-  return `<div class="hist">${hist.length?hist.map(h=>`<div class="hi"><div class="h"><b>${GYM.includes(h.day)?"Treino "+h.day:esc(h.day)} · ${dmy(h.date)}${h.dur?` · ${h.dur} min`:""}</b><button class="mini" type="button" data-a="delHist" data-id="${h.id}" style="color:var(--down)">${S.ui.confirm==="h"+h.id?"Confirmar":"Apagar"}</button></div>
+  return `<div class="hist">${hist.length?hist.map(h=>`<div class="hi"><div class="h"><b>${GYM.includes(h.day)?"Treino "+h.day:esc(h.day)} · ${dmy(h.date)}${h.dur?` · ${h.dur} min`:""}</b><input type="date" class="hdate" value="${h.date}" data-hdate="${h.id}" aria-label="Corrigir data do treino" max="${today()}"><button class="mini" type="button" data-a="delHist" data-id="${h.id}" style="color:var(--down)">${S.ui.confirm==="h"+h.id?"Confirmar":"Apagar"}</button></div>
       <div class="d">${Object.entries(h.sets||{}).map(([id,s])=>`${esc(ex(id).n)}: ${s.map(x=>(num(x.kg)?fmt(num(x.kg))+"×":"")+x.r+unit(id)).join(", ")}`).join(" · ")}${h.cardio?` · cardio ${esc((CARDIO[h.cardio.eq]||{}).n||"")} ${esc(h.cardio.min)} min${h.cardio.adapt?" (adaptado por sintomas)":""}`:""}${h.nota?` — ${esc(h.nota)}`:""}</div></div>`).join(""):`<div class="empty">Nenhum treino salvo ainda.</div>`}</div>`;
 }
 
@@ -1327,7 +1347,7 @@ function tips(){
   if(c) out.push(card2("comida","",`${Math.round(c.kcal)} kcal · ${Math.round(c.prot[0])}–${Math.round(c.prot[1])} g de proteína`,`<ul><li>Divida a proteína em 3–5 refeições de 25–40 g.</li><li>Carboidrato antes do treino para render nas séries.</li><li>${fmt(c.agua/1000)} L de água por dia.</li><li>${p.objetivo==="definir"?"Perda de 0,3–0,7 kg por semana protege o músculo.":p.objetivo==="ganhar"?"Ganho de 0,2–0,4 kg por mês evita acumular gordura.":"Na recomposição o peso muda pouco: acompanhe medidas e fotos."}</li></ul>`));
   else out.push(card2("perfil","pri","Falta a altura",`<p>Em Mais → Perfil, coloque sua altura para calcular calorias, proteína e água.</p>`));
   out.push(card2("estética","","Físico proporcional",`<ul><li><b>Prioridades:</b> glúteo máximo e médio, ombro lateral, costas e posteriores desenham a silhueta.</li><li><b>Intensidade:</b> termine as séries com 1–2 reps sobrando. Marque o RIR para o app decidir melhor quando subir carga.</li><li><b>Semana leve</b> a cada 6–8 semanas (metade das séries).</li><li><b>Sono:</b> 7–9 h.</li><li><b>Fotos</b> e medidas a cada 4 semanas valem mais que o espelho.</li></ul>`));
-  out.push(card2("seu plano","","Por que o plano mudou",`<ul><li>Sessões de 60 min: 8 aquecimento + 42 musculação + 10 cardio. O que não cabe vai para o D.</li><li>Saíram do padrão: stiff com barra, hiperextensão, elevação de pernas e agachamento livre (alta exigência lombar). Continuam na biblioteca se seu profissional liberar.</li><li>Remada com apoio no peito e desenvolvimento sentado com encosto no lugar das versões sem apoio.</li><li>Glúteo em A e C; costas e ombros no B.</li></ul>`));
+  out.push(card2("seu plano","","Por que o plano mudou",`<ul><li>Sessões de 60 min: 8 aquecimento + 52 musculação. O cardio é registrado à parte, quando e quanto você quiser. O que não cabe vai para o D.</li><li>Saíram do padrão: stiff com barra, hiperextensão, elevação de pernas e agachamento livre (alta exigência lombar). Continuam na biblioteca se seu profissional liberar.</li><li>Remada com apoio no peito e desenvolvimento sentado com encosto no lugar das versões sem apoio.</li><li>Glúteo em A e C; costas e ombros no B.</li></ul>`));
   return out.join("");
 }
 function calc(){
@@ -1441,6 +1461,7 @@ $("#view").addEventListener("input",e=>{
 });
 $("#view").addEventListener("change",async e=>{
   const t=e.target;
+  if(t.dataset.hdate){const h=S.history.find(x=>String(x.id)===t.dataset.hdate),v=t.value;if(h&&v&&v<=today()){h.date=v;save(true);rerender()}return}
   if(t.dataset.bind){const v=bindVal(t);if(v===null){rerender();return}if(!(t.dataset.int&&v===""&&!t.dataset.bind.endsWith(".rest")))setPath(S,t.dataset.bind,v);save(true);
     if(t.dataset.bind==="settings.wake")reWake();
     if(t.dataset.rr||t.dataset.bind.startsWith("plan.")||t.dataset.bind.startsWith("targets."))rerender();return}
@@ -1487,7 +1508,9 @@ $("#view").addEventListener("click",e=>{
     case "symIrr":{const d=draft(day);d.sym[b.dataset.ex]=d.sym[b.dataset.ex]||{dor:0};d.sym[b.dataset.ex].irr=b.dataset.v==="1";break}
     case "symSave":{const d=draft(day);d.sym[b.dataset.ex]=d.sym[b.dataset.ex]||{dor:0};d.sym[b.dataset.ex].saved=true;break}
     case "symDel":delete draft(day).sym[b.dataset.ex];break;
-    case "cardioOk":{const d=draft(day);d.cardio.ok=!d.cardio.ok;break}
+    case "cardioSave":{const c=S.ui.cf,m=num(c.min);if(!m){alert("Coloque os minutos.");return}
+      S.acts.push({date:c.date||today(),type:"cardio",eq:c.eq,int:c.int,min:m,dist:c.dist,rpe:c.rpe,adapt:!!c.adapt,nota:c.nota||""});
+      S.ui.cf=null;finished={t:"Cardio salvo!",m:`${m} min · ${(CARDIO[c.eq]||{n:"cardio"}).n}.`};break}
     case "finish":finish(day);break;
     case "discard":conf("discard",()=>{delete S.drafts[day];reWake()});break;
     case "ck":S.ui.ck[b.dataset.k]=b.dataset.v==="1";break;
