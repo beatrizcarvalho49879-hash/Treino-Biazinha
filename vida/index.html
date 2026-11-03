@@ -110,6 +110,13 @@ section{display:flex;flex-direction:column;gap:18px;padding-block:10px}
 .tn button{border:3px solid var(--text-on-paper);background:transparent;color:var(--text-on-paper);padding:12px 6px;font-family:var(--f-display);font-size:20px;letter-spacing:.04em;text-transform:uppercase}
 .tn button.on{background:var(--green)} .tn button.no{background:var(--text-on-paper);color:var(--paper)}
 .comp{margin:0;font-size:13px;font-weight:700;background:var(--sky);color:var(--text-on-paper);padding:6px 8px;border:2px solid var(--text-on-paper)}
+details.pa{padding:12px 14px}
+details.pa summary{cursor:pointer;list-style:none;font-size:15px}
+details.pa summary::-webkit-details-marker{display:none}
+details.pa summary b{font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.pab{font-weight:700;font-size:13.5px}
+.pahint{margin:6px 0 0;font-size:13px;color:var(--muted-on-paper)}
+.pahint .lnk,.lnk{all:unset;cursor:pointer;text-decoration:underline;font-weight:700}
 .meal.next{outline:4px solid var(--green);outline-offset:3px}
 .nowtag{display:inline-block;background:var(--green);color:var(--text-on-paper);font-family:var(--f-display);font-size:13px;letter-spacing:.08em;padding:1px 8px;margin-left:6px;vertical-align:3px}
 .mrow{display:grid;grid-template-columns:86px 1fr 92px;gap:8px;align-items:center;font-size:13px}
@@ -741,6 +748,7 @@ function mealCard(date,d,m){
   const mk=k=>sum(m.opts[k].items.map(it=>macro(it.f,it.g))).k;
   return `<article class="paper meal ${dm.items.length?"done":""} ${nx?"next":""}" id="meal-${m.id}"><header><div><h3>${esc(m.n)}${nx?`<span class="nowtag">AGORA</span>`:""}</h3><span class="when">${esc(m.h)}${dm.items.length?"":" · nada anotado"}</span>
     ${dm.items.length?`<div class="mp"><span style="--c:var(--pink)">P ${fmt(t.p)} g</span><span style="--c:var(--sky)">C ${fmt(t.c)} g</span><span style="--c:var(--fat)">G ${fmt(t.g)} g</span></div>`:""}</div><span class="kc">${fmt(t.k)} kcal</span></header>
+    ${paMeal(m.id)?`<p class="pahint">Plano: ${esc(blocksTxt(paMeal(m.id)))} · <button type="button" class="lnk" data-a="seePlan" data-m="${m.id}">ver o que posso comer</button>${dm.items.length?"":` · <button type="button" class="lnk" data-a="paEx" data-m="${m.id}">anotar o exemplo</button>`}</p>`:""}
     ${dm.items.length?`<div class="items">${dm.items.map((it,i)=>itemRow(date,m.id,i,it,false)).join("")}</div>`:""}
     <div class="row"><button class="mini ${adding?"on":""}" type="button" data-a="add" data-m="${m.id}">+ Adicionar alimento</button>
       ${ym&&!dm.items.length?`<button class="mini" type="button" data-a="repeat" data-m="${m.id}">Repetir ontem · ${fmt(sum(ym.map(it=>macro(it.f,it.g))).k)} kcal</button>`:""}
@@ -834,6 +842,7 @@ function vPlano(){
   const G=S.plan.goals, mid=S.ui.pm||"cafe", m=mealById(mid)||meals()[0], ok=S.ui.po&&m.opts[S.ui.po]?S.ui.po:Object.keys(m.opts)[0], o=m.opts[ok]||{n:"",items:[]};
   const tot=sum(o.items.map(it=>macro(it.f,it.g)));
   return `<section>
+    ${vPlanoAlim()}
     <h2 class="label">Metas do dia</h2>
     <div class="form"><label>Calorias (kcal)<input id="gk" inputmode="numeric" data-pbind="goals.kcal" value="${G.kcal}"></label><label>Proteína (g)<input id="gp" inputmode="numeric" data-pbind="goals.p" value="${G.p}"></label>
       <label>Carboidrato (g)<input id="gc" inputmode="numeric" data-pbind="goals.c" value="${G.c}"></label><label>Gordura (g)<input id="gg" inputmode="numeric" data-pbind="goals.g" value="${G.g}"></label>
@@ -976,6 +985,62 @@ function rerender(){const y=window.scrollY;render();window.scrollTo(0,y)}
 const curDate=()=>S.ui.date||today();
 function itemAt(path){const d=touch(curDate()),k=path.split(".");let t=d;for(const x of k)t=t[x];return t}
 function listAt(path){const d=touch(curDate()),k=path.split(".");k.pop();let t=d;for(const x of k)t=t[x];return t}
+/* =====================================================================
+   MEU PLANO ALIMENTAR: metas, porções por refeição e listas de substituição.
+   Montado para ~57 kg, 1,58 m, musculação 3×/semana + pilates, sem ovo.
+   Gasto estimado ~1.800 kcal/dia → 1.450 kcal = déficit de ~350–400 kcal (−0,3 a −0,5 kg/semana).
+   ===================================================================== */
+const PA_GOALS={kcal:1450,p:125,c:145,g:40};
+const PA_GROUPS={
+ P:{n:"Proteína",d:"1 porção ≈ 25 g de proteína",c:"var(--pink)",L:[["frango_grelhado",80],["frango_desfiado",80],["patinho",70],["coxao_mole",80],["alcatra",80],["maminha",80],["carne_sol",75],["musculo",80],["tilapia",95],["merluza",95],["atum",95],["camarao",130],["salmao",105,"tem gordura boa"],["sardinha",100,"tem gordura boa"],["lombo_porco",70],["pate_frango",90],["soja_pts",50,"pesada seca"],["whey",33]]},
+ L:{n:"Laticínio",d:"1 porção ≈ 7 a 15 g de proteína",c:"var(--sky)",L:[["leite_desn",250],["iog_molico",170],["iogurte",200],["iog_grego",100],["iog_proteico",160],["queijo_coalho",30],["queijo_light",40],["cottage",80],["ricota",60],["mussarela",30]]},
+ C:{n:"Carboidrato",d:"1 porção ≈ 30 g de carbo",c:"var(--green)",L:[["arroz",105],["arroz_int",115],["cuscuz",40,"pesado em flocos"],["cuscuz_pronto",130],["pao_frances",50],["pao_integral",60],["tapioca",50],["rap10",60],["batata_doce",160],["batata",250],["mandioca",100],["inhame",130],["macarrao",100],["macarrao_int",100],["aveia",45],["milho",170]]},
+ F:{n:"Fruta",d:"1 porção ≈ 15 g de carbo",c:"var(--fat)",L:[["banana",60],["maca",100],["mamao",150],["morango",220],["melancia",190],["melao",200],["abacaxi",120],["laranja",140],["tangerina",135],["goiaba",115],["manga",80],["caju",150],["uva",110],["kiwi",130],["acerola",190]]},
+ G:{n:"Gordura boa",d:"1 porção ≈ 5 g de gordura",c:"var(--over)",L:[["azeite",5],["castanha",8],["castanha_caju",11],["amendoim",9],["pasta_amendoim",10],["nozes",8],["abacate",60],["chia",15],["linhaca",15]]},
+ V:{n:"Vegetais",d:"à vontade: pelo menos metade do prato no almoço e no jantar",c:"var(--green)",L:[["alface",50],["rucula",50],["tomate",100],["pepino",100],["brocolis",100],["abobrinha",100],["cenoura",50],["chuchu",100],["couve_flor",100],["repolho",100],["beterraba",50],["vagem",100],["espinafre",100],["legumes",150]]}};
+const PA_MEALS=[
+ {id:"cafe",h:"7h–9h",b:[["C",1],["P",1]],plus:"café ou chá à vontade",ex:[["cuscuz",40],["frango_desfiado",80],["requeijao_light",15],["cafe",150]],alt:"Sem tempo: whey com leite (30 g + 200 ml) vale 1 proteína + 1 laticínio."},
+ {id:"almoco",h:"12h–13h",b:[["P",1.5],["C",1],["V",1],["G",1],["F",1]],plus:"+ feijão: 1 concha (80 g); pode trocar por lentilha, grão-de-bico ou feijão-verde",ex:[["patinho",100],["arroz",80],["feijao",80],["legumes",150],["azeite",5],["maca",120]],alt:"Sanduíche: pão francês + 100 g de patinho + requeijão light + salada também fecha o almoço."},
+ {id:"lanche",h:"15h–17h",b:[["P",1],["L",1]],ex:[["whey",30],["leite_desn",200]],alt:"Ou: iogurte proteico + 1 fruta. Ou: pão francês com 30 g de queijo coalho e 1 fruta."},
+ {id:"jantar",h:"19h–20h30",b:[["P",1.25],["C",1],["V",1],["G",1]],ex:[["cuscuz",40],["frango_desfiado",100],["requeijao_light",15],["legumes",100],["azeite",5]],alt:"Estrogonofe rápido: 100 g de patinho + 2 col. de creme de leite light + 4 col. de arroz + salada."},
+ {id:"ceia",h:"opcional",b:[["G",1]],ex:[["castanha",8]],alt:"Fome à noite? Troque por 1 laticínio (iogurte ou leite)."}];
+const PA_RULES=[
+ ["Proteína em todas as refeições","É o que segura a fome e protege o músculo enquanto você emagrece."],
+ ["Metade do prato de vegetais","No almoço e no jantar. Enchem o prato com quase nenhuma caloria e dão as fibras (meta: 25 g por dia)."],
+ ["Pulou o café ou o lanche?","Coloque +1 porção de proteína no almoço ou no jantar, ou faça a ceia com whey e leite. Não precisa compensar o carbo."],
+ ["Doce cabe","Até ~100 kcal por dia: 2 quadradinhos de chocolate 70% (10 g), 1 col. de achocolatado zero no leite, ou 1 gelatina zero + 1 bola pequena de sorvete."],
+ ["1 refeição livre por semana","Sem culpa e sem jejum depois. Na refeição seguinte, volte ao plano normal."],
+ ["Água: 2,5 a 3 L","Sede e fome se confundem. Café, chá e água com gás contam."],
+ ["Ajuste a cada 2 semanas","Pese-se 1 a 2× por semana, de manhã, em jejum. Meta: −0,3 a −0,5 kg/semana. Duas semanas sem cair: tire ½ porção de carbo do jantar. Caindo mais de 1 kg/semana ou com muita fome e cansaço: volte essa ½ porção."],
+ ["Óleo de cozinha conta","Use 1 col. de chá por refeição quente e meça. É a caloria escondida mais comum."]];
+const frac=n=>({1:"1",1.5:"1½",1.25:"1¼",0.5:"½",2:"2"}[n]||String(n).replace(".",","));
+const paMeal=id=>PA_MEALS.find(x=>x.id===id);
+const blocksTxt=pm=>pm.b.map(([g,n])=>g==="V"?"vegetais à vontade":`${frac(n)} ${PA_GROUPS[g].n.toLowerCase()}`).join(" + ");
+function paTotals(){return sum(PA_MEALS.flatMap(m=>m.ex.map(([f,g])=>macro(f,g))))}
+function vPlanoAlim(){
+  const G=S.plan.goals,T=paTotals(),same=["kcal","p","c","g"].every(k=>+G[k]===PA_GOALS[k]),open=S.ui.paOpen;
+  const pill=(v,goal,l)=>`<span style="--c:${Math.abs(v-goal)/goal<=.08?"var(--green)":"var(--sky)"}">${l} ${fmt(v)}</span>`;
+  return `<h2 class="label">Meu plano alimentar</h2>
+    <div class="paper flat tipc"><span class="tag g">metas para emagrecer com saúde</span>
+      <div class="mp" style="margin-top:8px"><span style="--c:var(--green)">${PA_GOALS.kcal} kcal</span><span style="--c:var(--pink)">P ${PA_GOALS.p} g</span><span style="--c:var(--sky)">C ${PA_GOALS.c} g</span><span style="--c:var(--fat)">G ${PA_GOALS.g} g</span><span style="--c:var(--paper2)">fibras 25 g</span><span style="--c:var(--paper2)">água 2,5–3 L</span></div>
+      <p style="margin-top:8px">Para você: 57 kg, 1,58 m, musculação 3× por semana + pilates. Gasto estimado ~1.800 kcal por dia; com 1.450 kcal o corpo usa ~350–400 kcal da reserva por dia (−0,3 a −0,5 kg por semana) sem perder músculo. Proteína de 2,2 g/kg protege o músculo; 40 g de gordura protege os hormônios.</p>
+      ${same?`<p class="sub" style="margin-top:6px">✓ São as metas que o app está usando.</p>`:`<p class="sub" style="margin-top:6px">O app hoje usa ${G.kcal} kcal · P ${G.p} · C ${G.c} · G ${G.g}.</p><div class="row"><button class="mini on" type="button" data-a="paGoals">Usar as metas do plano</button></div>`}</div>
+    ${PA_MEALS.map(pm=>{const m=mealById(pm.id);if(!m)return "";const t=sum(pm.ex.map(([f,g])=>macro(f,g)));
+      return `<details class="paper flat pa" id="pa-${pm.id}" ${open===pm.id?"open":""}><summary><b>${esc(m.n)}</b> <small class="sub">${esc(pm.h)}</small><br><span class="pab">${esc(blocksTxt(pm))}</span></summary>
+        ${pm.plus?`<p class="sub" style="margin:6px 0 0">${esc(pm.plus)}</p>`:""}
+        <p style="margin:10px 0 4px"><b>Exemplo</b> · ${fmt(t.k)} kcal · ${fmt(t.p)} g prot</p>
+        ${pm.ex.map(([f,g])=>`<div class="pe"><span>${esc(food(f).n)}<br><small class="sub">${g} g${unitTxt(f,g)?" · "+unitTxt(f,g):""}</small></span><b>${fmt(macro(f,g).k)} kcal</b></div>`).join("")}
+        ${pm.alt?`<p class="sub" style="margin-top:8px">${esc(pm.alt)}</p>`:""}
+        <div class="row" style="margin-top:8px"><button class="mini" type="button" data-a="paEx" data-m="${pm.id}">Anotar este exemplo hoje</button></div></details>`}).join("")}
+    <div class="mp">${pill(T.k,PA_GOALS.kcal,"dia de exemplo:")}${pill(T.p,PA_GOALS.p,"P")}${pill(T.c,PA_GOALS.c,"C")}${pill(T.g,PA_GOALS.g,"G")}</div>
+    <h2 class="label">O que posso comer</h2>
+    <p class="sub">Troque à vontade dentro do mesmo grupo: cada linha é 1 porção, com as mesmas calorias mais ou menos.</p>
+    ${Object.entries(PA_GROUPS).map(([k,gr])=>`<details class="paper flat pa" ${S.ui.paG===k?"open":""}><summary><b style="color:${gr.c}">${esc(gr.n)}</b><br><small class="sub">${esc(gr.d)}</small></summary>
+      ${gr.L.map(([f,g,obs])=>{const x=macro(f,g);return `<div class="pe"><span>${esc(food(f).n)}${obs?` <small class="sub">(${esc(obs)})</small>`:""}<br><small class="sub">${g} g${unitTxt(f,g)?" · "+unitTxt(f,g):""} · P ${fmt(x.p)} · C ${fmt(x.c)} · G ${fmt(x.g)}</small></span><b>${fmt(x.k)} kcal</b></div>`}).join("")}</details>`).join("")}
+    <h2 class="label">Regras de ouro</h2>
+    <div class="paper flat">${PA_RULES.map(([t,d])=>`<p style="margin:0 0 10px"><b>${esc(t)}.</b> ${esc(d)}</p>`).join("")}
+      <p class="sub" style="margin:0">Plano baseado em diretrizes gerais de nutrição. Um(a) nutricionista pode ajustar com seus exames e rotina.</p></div>`;
+}
 function curOpt(){const m=mealById(S.ui.pm||"cafe")||meals()[0];const k=S.ui.po&&m.opts[S.ui.po]?S.ui.po:Object.keys(m.opts)[0];return {m,k,o:m.opts[k]}}
 
 $("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.ui.tab=b.dataset.tab;S.ui.confirm=null;S.ui.add=null;S.ui.swap=null;S.ui.q="";flash=null;if(b.dataset.tab==="hoje")S.ui.date=null;save();render();window.scrollTo(0,0)});
@@ -1015,6 +1080,9 @@ $("#view").addEventListener("click",e=>{
     case "closeFlash":flash=null;break;
     case "dtype":{const k=b.dataset.k,d=touch(date);d.type=k;const c=S.plan.combos[k];
       meals().forEach(m=>{const dm=d.meals[m.id];if(dm&&dm.items.some(x=>x.ok))return;const o=c.pick[m.id];d.meals[m.id]=o&&m.opts[o]?buildMeal(m,o):{opt:null,items:[]}});break}
+    case "paGoals":Object.assign(S.plan.goals,PA_GOALS);break;
+    case "paEx":{const pm=paMeal(b.dataset.m),dm=touch(date).meals[b.dataset.m];if(!pm||!dm)break;pm.ex.forEach(([f,g])=>dm.items.push({f,g,ok:true,label:""}));break}
+    case "seePlan":S.ui.tab="plano";S.ui.paOpen=b.dataset.m;save();render();{const el=document.getElementById("pa-"+b.dataset.m);if(el)el.scrollIntoView();else window.scrollTo(0,0)}return;
     case "useModel":{const m=mealById(b.dataset.m),o=m.opts[b.dataset.k];if(!o)break;const dm=touch(date).meals[m.id];o.items.forEach(it=>dm.items.push({f:it.f,g:it.g,ok:true,label:it.label||""}));break}
     case "repeat":{const yd=S.days[addDays(date,-1)],src=yd&&yd.meals[b.dataset.m];if(!src)break;const dm=touch(date).meals[b.dataset.m];src.items.forEach(it=>dm.items.push({f:it.f,g:it.g,ok:true,label:it.label||""}));break}
     case "saveModel":S.ui.saveModel=S.ui.saveModel===b.dataset.m?null:b.dataset.m;break;
