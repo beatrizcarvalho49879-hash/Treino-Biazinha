@@ -123,6 +123,9 @@ details.pa summary b{font-family:var(--f-display);font-weight:400;font-size:20px
 .pab{font-weight:700;font-size:13.5px}
 .pahint{margin:6px 0 0;font-size:13px;color:var(--muted-on-paper)}
 .pahint .lnk,.lnk{all:unset;cursor:pointer;text-decoration:underline;font-weight:700}
+.supg{display:grid;gap:4px;padding:8px 0;border-bottom:1.5px dashed var(--muted-on-paper)}
+.supg:last-of-type{border-bottom:0}
+.supm{font-family:var(--f-display);font-weight:400;font-size:17px;letter-spacing:.05em;text-transform:uppercase}
 .meal.next{outline:4px solid var(--green);outline-offset:3px}
 .nowtag{display:inline-block;background:var(--green);color:var(--text-on-paper);font-family:var(--f-display);font-size:13px;letter-spacing:.08em;padding:1px 8px;margin-left:6px;vertical-align:3px}
 .mrow{display:grid;grid-template-columns:86px 1fr 92px;gap:8px;align-items:center;font-size:13px}
@@ -545,10 +548,15 @@ const PLAN_PDF = {
 const PDF_OPTS=new Set(["Rap10 com frango","Tapioca com frango","Iogurte com whey e aveia","Prato do almoço","Iogurte proteico","Cuscuz com patê de frango","Salada com proteína (sem carbo)","Cuscuz com proteína","Leite com canela"]);
 function onlyMine(plan){plan.meals.forEach(m=>{Object.keys(m.opts).forEach(k=>{if(PDF_OPTS.has(m.opts[k].n))delete m.opts[k]})})}
 onlyMine(PLAN_PDF);
+/* suplementos em 2 momentos: ao acordar e no almoço (a refeição que você menos pula e que tem gordura) */
+const SUP_MOM={manha:["Ao acordar","em jejum ou com o café da manhã","07:30"],almoco:["No almoço","junto da comida: vitaminas e ômega 3 precisam de gordura","12:30"],outro:["Outros","",""]};
 const SUPS = [
-  {id:"creatina",n:"Creatina monohidratada",dose:"3 g",h:"qualquer horário, todo dia",on:true},
-  {id:"whey",n:"Whey protein",dose:"20–30 g",h:"já está no lanche ou no café",on:true,auto:"whey"},
-  {id:"vitd",n:"Vitamina D",dose:"2.000 UI",h:"só se o exame der baixo",on:false}
+  {id:"simfort",n:"Simfort Ultra (saúde intestinal)",dose:"1 dose do rótulo",h:"em água fria, nunca em bebida quente",m:"manha",on:true},
+  {id:"centrum",n:"Centrum Woman (multivitamínico)",dose:"1 comprimido",h:"com a comida evita enjoo",m:"almoco",on:true},
+  {id:"vitd",n:"Vitamina D3",dose:"a dose prescrita",h:"precisa de gordura para absorver",m:"almoco",on:true},
+  {id:"omega3",n:"Ômega 3",dose:"3 cápsulas",h:"se der refluxo de peixe, divida: 2 no almoço e 1 no jantar",m:"almoco",on:true},
+  {id:"creatina",n:"Creatina",dose:"6 g",h:"em água ou suco, todo dia, com ou sem treino",m:"almoco",on:true},
+  {id:"whey",n:"Whey protein",dose:"30 g",h:"marca sozinho quando o whey entra no dia",m:"outro",on:true,auto:"whey"}
 ];
 const SHOP = [
   ["Proteínas",[["Peito de frango sem pele","1,2 kg","2,4 kg","~5 kg"],["Patinho (bife, moído ou em cubos)","1,3 kg","2,6 kg","~5,5 kg"],["Coxão mole (quando não tiver patinho)","—","—","—"],["Whey protein concentrado","~140 g","~280 g","~600 g (1 pote 1 kg)"],["Iogurte natural desnatado","1,4 kg","2,8 kg","~11 kg"],["Cottage ou queijo branco","200 g","400 g","~800 g"],["Requeijão light","1 pote 200 g","2 potes","~5 potes"],["Tilápia ou salmão (opcional)","300 g","600 g","~1,2 kg"],["Atum em água (lata)","2 latas","4 latas","~8 latas"]]],
@@ -579,7 +587,7 @@ function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r
 const hadData=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
 let S=load();
 Object.assign(FOODS,S.customFoods||{});
-if(!hadData)S.planV=4;
+if(!hadData)S.planV=5;
 // v2 (31/10): almoço = sanduíche de patinho / estrogonofe; jantar = cuscuz com carne ou frango; desafio começa em 31/10
 if((S.planV||1)<2){
   const P=clone(PLAN_PDF);
@@ -607,6 +615,12 @@ if((S.planV||1)<4){
   Object.entries(S.days).forEach(([dt,d])=>{if(dt<t0)return;Object.values(d.meals).forEach(dm=>{dm.items=dm.items.filter(x=>x.ok);dm.opt=null;delete dm.skipped;delete dm.comp});delete d.ceiaPrev;
     Object.values(d.meals).forEach(dm=>dm.items.forEach(it=>{if(it.add){it.g=Math.max(0,(parseFloat(String(it.g).replace(",","."))||0)-it.add);delete it.add;delete it.why}}))});
   S.planV=4;
+}
+// v5 (03/11): seus suplementos (Simfort, Centrum, D3, ômega 3, creatina 6 g), em 2 momentos do dia
+if((S.planV||1)<5){
+  const mine=S.sups.filter(x=>x.custom&&!/[oô]mega|centrum|simfort|vitamina d|creatina/i.test(x.n));
+  S.sups=clone(SUPS).concat(mine.map(x=>Object.assign({m:"outro"},x)));
+  S.planV=5;
 }
 let saveT=null;
 function save(now){clearTimeout(saveT);const go=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));storeOk=true}catch(e){storeOk=false}const w=document.getElementById("storeWarn");if(w)w.hidden=storeOk};now?go():saveT=setTimeout(go,150)}
@@ -782,10 +796,11 @@ function waterCard(date,d){
     <p class="tip">Café, chá e água com gás são liberados à vontade. Reduza o sal: a retenção de líquido esconde a perda de gordura.</p></article>`;
 }
 function supCard(date,d){
-  const list=S.sups.filter(s=>s.on);
+  const list=S.sups.filter(x=>x.on),groups=Object.keys(SUP_MOM).map(k=>[k,list.filter(x=>(x.m||"outro")===k)]).filter(([,L])=>L.length);
+  const row=x=>{const ok=supDone(d,x),auto=x.auto&&ok&&!d.sup[x.id];return `<div class="sup ${ok?"ok":""}"><button class="ck" type="button" data-a="sup" data-k="${x.id}" aria-label="Marcar ${esc(x.n)}">${ok?"✓":""}</button><div><b>${esc(x.n)} · ${esc(x.dose)}</b><small>${esc(x.h)}${auto?" · marcado pelo whey do dia":""}</small></div></div>`};
   return `<article class="paper flat"><header class="meal"><h3 style="font-family:var(--f-display);font-size:24px;text-transform:uppercase">Suplementos</h3></header>
-    ${list.map(s=>{const ok=supDone(d,s),auto=s.auto&&ok&&!d.sup[s.id];return `<div class="sup ${ok?"ok":""}"><button class="ck" type="button" data-a="sup" data-k="${s.id}" aria-label="Marcar ${esc(s.n)}">${ok?"✓":""}</button><div><b>${esc(s.n)} · ${esc(s.dose)}</b><small>${esc(s.h)}${auto?" · marcado pelo lanche/café":""}</small></div></div>`}).join("")||`<div class="empty">Nenhum suplemento ativo. Configure em Mais.</div>`}
-    <p class="tip">Valide qualquer suplemento com seu nutricionista ou médico.</p></article>`;
+    ${groups.map(([k,L])=>{const all=L.every(x=>supDone(d,x));return `<div class="supg"><div class="row" style="justify-content:space-between"><b class="supm">${esc(SUP_MOM[k][0])}</b>${k!=="outro"&&L.length>1?`<button class="mini ${all?"on":""}" type="button" data-a="supGroup" data-k="${k}">${all?"Tomei tudo ✓":"Tomei tudo"}</button>`:""}</div>${SUP_MOM[k][1]?`<small class="sub">${esc(SUP_MOM[k][1])}</small>`:""}${L.map(row).join("")}</div>`}).join("")}
+    <p class="tip">Doses e horários conforme quem prescreveu. Na dúvida, pergunte ao seu médico ou nutricionista.</p></article>`;
 }
 
 /* =====================================================================
@@ -955,11 +970,15 @@ function vMais(){
   let b="";
   if(sec==="compras") b=vCompras();
   if(sec==="suplementos") b=`<p class="sub">Os ativos aparecem na aba Hoje. O whey se marca sozinho quando você marca o whey do café ou do lanche.</p>
+    <div class="paper flat"><h3 style="font-family:var(--f-display);font-weight:400;font-size:20px;text-transform:uppercase">Sua rotina</h3>
+      ${Object.entries(SUP_MOM).filter(([k])=>k!=="outro").map(([k,v])=>`<p style="margin:8px 0 0"><b>${v[2]} · ${esc(v[0])}:</b> ${S.sups.filter(x=>x.on&&x.m===k).map(x=>esc(x.n.split(" (")[0])+" "+esc(x.dose)).join(" + ")||"nada"}</p>`).join("")}
+      <div class="row" style="margin-top:10px"><button class="mini on" type="button" data-a="supIcs">Lembrete no iPhone (todo dia)</button></div>
+      <p class="sub" style="margin-top:6px">Cria 2 alarmes diários no Calendário. Para mudar o horário, edite no próprio Calendário.</p></div>
     ${S.sups.map((s,i)=>`<div class="paper flat"><label class="tog"><input type="checkbox" id="su-on-${i}" data-sbind="${i}.on" ${s.on?"checked":""}> <b>${esc(s.n)}</b></label>
-      <div class="form" style="margin-top:8px"><label>Dose<input id="su-d-${i}" data-sbind="${i}.dose" value="${esc(s.dose)}"></label><label>Quando<input id="su-h-${i}" data-sbind="${i}.h" value="${esc(s.h)}"></label></div>
+      <div class="form" style="margin-top:8px"><label>Dose<input id="su-d-${i}" data-sbind="${i}.dose" value="${esc(s.dose)}"></label><label>Quando<select id="su-m-${i}" data-sbind="${i}.m">${Object.entries(SUP_MOM).map(([k,v])=>`<option value="${k}" ${(s.m||"outro")===k?"selected":""}>${esc(v[0])}</option>`).join("")}</select></label><label class="full">Observação<input id="su-h-${i}" data-sbind="${i}.h" value="${esc(s.h)}"></label></div>
       ${s.custom?`<div class="row"><button class="mini" type="button" data-a="supDel" data-i="${i}">Excluir</button></div>`:""}</div>`).join("")}
     <div class="inline"><input class="dk" id="ns-n" placeholder="Novo suplemento (ex.: ômega 3)"><input class="dk" id="ns-d" placeholder="dose"><button class="ghost" type="button" data-a="supAdd">Incluir</button></div>
-    <p class="sub">Do seu plano: whey 20–30 g/dia; creatina 3 g todos os dias, sem ciclo; vitamina D só se o exame der baixo. Valide com seu nutricionista ou médico.</p>`;
+    <p class="sub">Creatina: todo dia, sem ciclo; nas primeiras semanas pode subir 0,5 a 1 kg na balança. É água dentro do músculo, não gordura. Vitamina D: o Centrum também tem um pouco, então confira a dose total com quem prescreveu e refaça o exame (25-OH vitamina D) a cada 6 meses.</p>`;
   if(sec==="dicas") b=[
     ["g","Hidratação e pré-treino","<p>3 L por dia: 5 garrafas de 600 ml. Treine pelo menos 1h30 depois do almoço ou 1h depois do lanche. Se treinar à noite, faça o lanche B 1h30 antes.</p>"],
     ["p","Controle do doce","<p>O lanche A (iogurte + whey + banana + canela) parece sobremesa e tem quase 30 g de proteína. Um quadradinho de chocolate 70% por dia não sabota. Fruta gelada com canela à noite resolve a maioria das vontades.</p>"],
@@ -1140,6 +1159,7 @@ $("#view").addEventListener("change",e=>{
   if(t.dataset.uis){S.ui[t.dataset.uis]=t.value;rerender();return}
   if(t.dataset.shop!=null){shopList();S.shop.got[t.dataset.shop]=t.checked;const r=t.closest(".srow");if(r)r.classList.toggle("got",t.checked);save(true);return}
   if(t.dataset.sbind&&t.type==="checkbox"){setPath(S.sups,t.dataset.sbind,t.checked);save(true);return}
+  if(t.dataset.sbind&&t.tagName==="SELECT"){setPath(S.sups,t.dataset.sbind,t.value);save(true);if(!rendering)setTimeout(rerender,0);return}
   if(t.dataset.prof){S.profile[t.dataset.prof]=t.value;save(true);rerender();return}
 });
 $("#view").addEventListener("click",e=>{
@@ -1175,6 +1195,12 @@ $("#view").addEventListener("click",e=>{
       else{const d=touch(date);it.ok=true;d.meals[tg].items.push(it)}
       S.ui.add=null;S.ui.q="";break}
     case "water":{const d=touch(date);d.water=Math.max(0,(d.water||0)+ +b.dataset.v);break}
+    case "supGroup":{const d=touch(date),L=S.sups.filter(x=>x.on&&x.m===b.dataset.k&&!x.auto),all=L.every(x=>supDone(d,x));L.forEach(x=>d.sup[x.id]=!all);break}
+    case "supIcs":{const ev=Object.entries(SUP_MOM).filter(([k])=>k!=="outro").map(([k,v])=>[k,v,S.sups.filter(x=>x.on&&x.m===k)]).filter(([,,L])=>L.length);
+      const st=today().replace(/-/g,""),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Vida Biazinha//PT-BR","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
+      ev.forEach(([k,v,l])=>{const t=v[2].replace(":","")+"00",txt=("Suplementos: "+l.map(x=>x.n.split(" (")[0]+" "+x.dose).join(", ")).replace(/[,;\\]/g,m=>"\\"+m);
+        L.push("BEGIN:VEVENT",`UID:sup-${k}-${Date.now()}@vida`,`DTSTAMP:${st}T000000`,`DTSTART:${st}T${t}`,`DTEND:${st}T${t.slice(0,2)}${String(+t.slice(2,4)+5).padStart(2,"0")}00`,"RRULE:FREQ=DAILY",`SUMMARY:${v[0]}: suplementos`,`DESCRIPTION:${txt}`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${txt}`,"TRIGGER:PT0M","END:VALARM","END:VEVENT")});
+      L.push("END:VCALENDAR");const url=URL.createObjectURL(new Blob([L.join("\r\n")],{type:"text/calendar"})),a=document.createElement("a");a.href=url;a.download="suplementos.ics";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);return}
     case "sup":{const d=touch(date),s=S.sups.find(x=>x.id===b.dataset.k);if(s.auto&&supDone(d,s)&&!d.sup[s.id])break;d.sup[s.id]=!d.sup[s.id];break}
     case "goDay":S.ui.date=b.dataset.d===today()?null:b.dataset.d;S.ui.tab="hoje";save();render();window.scrollTo(0,0);return;
     case "setStart":{const v=$("#startd").value;if(v)S.start=v;break}
