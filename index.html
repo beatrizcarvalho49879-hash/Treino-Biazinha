@@ -507,7 +507,7 @@ const today = ()=>iso(new Date());
 function fresh(){
   const gym={}; Object.keys(EQ).forEach(k=>gym[k]=GYM_SEEN.includes(k)?"sim":"?");
   const targets={}; Object.entries(SUB).forEach(([k,v])=>targets[k]={lo:v.lo,hi:v.hi});
-  return {v:2,balV:1,
+  return {v:2,balV:1,fixDates1:1,
     profile:{nome:"",idade:"",altura:"",peso:"",objetivo:"recomp",restr:{axial:false,flexao:false,hiperext:false,impacto:false,rotacao:false},recs:[]},
     targets, plan:clone(PLAN_V2), week:WEEK_V2.slice(), history:[], acts:[], checkins:[], measures:[],
     gym, customEq:{}, customEx:{}, drafts:{}, settings:{sound:false,wake:false},
@@ -523,6 +523,9 @@ function balance(plan){
 function migrate(s){
   if(!s || typeof s!=="object") return fresh();
   if((s.v||1)>=2){const n=Object.assign(fresh(),s);n.ui=Object.assign(fresh().ui,s.ui||{});
+    // datas salvas erradas antes da correção (03/11): B de 31/10 foi para 29/10 e C de 02/11 foi para 31/10
+    if(!s.fixDates1){const H=n.history||[];const b=H.find(h=>h.day==="B"&&h.date==="2026-10-29"&&h.dur===54),c=H.find(h=>h.day==="C"&&h.date==="2026-10-31"&&h.dur===73);
+      if(b)b.date="2026-10-31";if(c)c.date="2026-11-02";n.fixDates1=1;if(b||c)n.notices=(n.notices||[]).concat(["Datas corrigidas: Treino B → 31/10 e Treino C → 02/11, como no histórico da academia."])}
     if(!s.balV){balance(n.plan);n.balV=1;n.notices=(n.notices||[]).concat(["Treino revisado e equilibrado: mais costas, ombro lateral e abdômen (core), um pouco menos de glúteo isolado. O cardio agora é separado do treino e a musculação ganhou os 10 min que ele ocupava. Detalhes na aba Plano."])}
     return n}
   // v1 → v2. Nada é apagado: uma cópia da versão anterior fica guardada.
@@ -1452,6 +1455,7 @@ function bindVal(t){
 }
 $("#view").addEventListener("input",e=>{
   const t=e.target;
+  if(t.dataset.hdate){const h=S.history.find(x=>String(x.id)===t.dataset.hdate);if(h&&t.value&&t.value<=today()){h.date=t.value;save(true)}return}
   if(t.dataset.bind&&t.type!=="checkbox"&&t.tagName!=="SELECT"){const v=bindVal(t);if(v===null)return;if(t.dataset.int&&v===""&&!t.dataset.bind.endsWith(".rest"))return;setPath(S,t.dataset.bind,v);save();
     if(t.type==="range"){const pv=t.closest("label")&&t.closest("label").querySelector(".painv");if(pv)pv.textContent=t.value}return}
   if(t.dataset.ckf){S.ui.ck[t.dataset.ckf]=t.value;if(t.type==="range"){const pv=t.closest(".q").querySelector(".painv");if(pv)pv.textContent=t.value}return}
