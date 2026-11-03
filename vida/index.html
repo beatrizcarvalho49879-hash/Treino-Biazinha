@@ -111,6 +111,12 @@ section{display:flex;flex-direction:column;gap:18px;padding-block:10px}
 .tn button.on{background:var(--green)} .tn button.no{background:var(--text-on-paper);color:var(--paper)}
 .comp{margin:0;font-size:13px;font-weight:700;background:var(--sky);color:var(--text-on-paper);padding:6px 8px;border:2px solid var(--text-on-paper)}
 details.pa{padding:12px 14px}
+.paopt{border-top:1.5px dashed var(--muted-on-paper);padding:10px 0;display:grid;gap:4px}
+.paopt .pah{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.paopt .pah span{font-family:var(--f-type);font-size:12.5px;color:var(--muted-on-paper)}
+.paopt ul{margin:0;padding-left:18px;font-size:14px}
+.paopt ul small{color:var(--muted-on-paper)}
+.paopt .mini{justify-self:start}
 details.pa summary{cursor:pointer;list-style:none;font-size:15px}
 details.pa summary::-webkit-details-marker{display:none}
 details.pa summary b{font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
@@ -622,7 +628,9 @@ const food=id=>FOODS[id]||{n:id,k:0,p:0,c:0,g:0,cat:"?"};
 const setPath=(o,path,v)=>{const k=path.split(".");let t=o;for(let i=0;i<k.length-1;i++){if(t[k[i]]==null)t[k[i]]={};t=t[k[i]]}t[k[k.length-1]]=v};
 function macro(id,g){const f=food(id),q=(num(g)||0)/100;return {k:f.k*q,p:f.p*q,c:f.c*q,g:f.g*q}}
 function sum(list){return list.reduce((a,m)=>({k:a.k+m.k,p:a.p+m.p,c:a.c+m.c,g:a.g+m.g}),{k:0,p:0,c:0,g:0})}
-const unitTxt=(id,g)=>{const f=food(id);if(!f.u||!num(g))return "";const n=num(g)/f.u[1];if(f.u[0]==="à vontade")return "à vontade";return Math.abs(n-Math.round(n))<.15?`≈ ${Math.round(n)} × ${f.u[0]}`:`≈ ${fmt(n,1)} × ${f.u[0]}`};
+const unitTxt=(id,g)=>{const f=food(id);if(!f.u||!num(g))return "";if(f.u[0]==="à vontade")return "à vontade";
+  const n=num(g)/f.u[1],r=Math.abs(n-Math.round(n))<.15?Math.round(n):Math.round(n*10)/10,lb=f.u[0].replace(/^1 /,"");
+  const pl=r>=1.5?lb.split(" ").map((w,i)=>i===0&&/[aeiou]$/i.test(w)?w+"s":w).join(" "):lb;return `≈ ${fmt(r,1)} ${pl}`};
 const meals=()=>S.plan.meals;
 const mealById=id=>meals().find(m=>m.id===id);
 const isEgg=id=>food(id).egg&&/ovo/.test(norm(S.profile.restr||""));
@@ -1004,6 +1012,66 @@ const PA_MEALS=[
  {id:"lanche",h:"15h–17h",b:[["P",1],["L",1]],ex:[["whey",30],["leite_desn",200]],alt:"Ou: iogurte proteico + 1 fruta. Ou: pão francês com 30 g de queijo coalho e 1 fruta."},
  {id:"jantar",h:"19h–20h30",b:[["P",1.25],["C",1],["V",1],["G",1]],ex:[["cuscuz",40],["frango_desfiado",100],["requeijao_light",15],["legumes",100],["azeite",5]],alt:"Estrogonofe rápido: 100 g de patinho + 2 col. de creme de leite light + 4 col. de arroz + salada."},
  {id:"ceia",h:"opcional",b:[["G",1]],ex:[["castanha",8]],alt:"Fome à noite? Troque por 1 laticínio (iogurte ou leite)."}];
+/* opções prontas por refeição: [nome, [[alimento, gramas]...], observação]. Todas da mesma refeição têm calorias parecidas. */
+const PA_OPTS={
+ cafe:[
+  ["Cuscuz com frango",[["cuscuz",40],["frango_desfiado",80],["requeijao_light",15],["cafe",150]]],
+  ["Cuscuz com carne moída",[["cuscuz",40],["patinho",70],["tomate",30],["cafe",150]]],
+  ["Cuscuz com queijo coalho e café com leite",[["cuscuz",35],["queijo_coalho",30],["peito_peru",30],["leite_desn",150]]],
+  ["Tapioca com frango",[["tapioca",50],["frango_desfiado",70],["requeijao_light",15],["cafe",150]]],
+  ["Pão francês com peru e queijo + café com leite",[["pao_frances",50],["peito_peru",40],["queijo_light",30],["leite_desn",150]]],
+  ["Sanduíche de atum",[["pao_integral",60],["atum",80],["requeijao_light",20],["tomate",30],["cafe",150]]],
+  ["Rap10 com frango",[["rap10",40],["frango_desfiado",70],["creme_ricota",15],["tomate",50],["mamao",100],["cafe",150]]],
+  ["Iogurte proteico com aveia e morango",[["iog_proteico",160],["whey",15],["aveia",20],["morango",100]]],
+  ["Whey com leite e banana",[["whey",30],["leite_desn",200],["banana",100]],"o mais rápido"],
+  ["Aveia com iogurte e whey (overnight)",[["aveia",30],["iogurte",170],["whey",20],["morango",100]],"monte de noite, come gelado"],
+ ],
+ almoco:[
+  ["Prato feito (arroz, feijão e carne)",[["patinho",100],["arroz",80],["feijao",80],["legumes",150],["azeite",5],["maca",120]]],
+  ["Frango grelhado com batata-doce",[["frango_grelhado",120],["batata_doce",150],["feijao",80],["legumes",150],["azeite",5],["laranja",140]]],
+  ["Sanduíche de patinho",[["pao_frances",50],["patinho",100],["requeijao_light",15],["alface",20],["tomate",50],["maca",120]]],
+  ["Estrogonofe rápido",[["patinho",110],["creme_leite_light",30],["molho_tomate",40],["champignon",40],["arroz",100],["legumes",150]]],
+  ["Peixe com macaxeira",[["tilapia",150],["mandioca",120],["legumes",150],["azeite",5],["laranja",140]]],
+  ["Macarrão à bolonhesa",[["macarrao",120],["patinho",100],["molho_tomate",60],["parmesao",5],["legumes",100]]],
+  ["Carne de sol, macaxeira e feijão-verde",[["carne_sol",90],["mandioca",70],["feijao_verde",80],["legumes",120],["abacaxi",120]]],
+  ["Coxão mole com arroz integral e feijão",[["coxao_mole",100],["arroz_int",90],["feijao",80],["legumes",150],["azeite",5]]],
+  ["Baião de dois com frango",[["baiao",130],["frango_grelhado",100],["legumes",150],["tangerina",135]]],
+  ["Camarão com arroz",[["camarao",180],["arroz",120],["legumes",150],["azeite",5],["abacaxi",150]]],
+  ["Salmão com purê de batata",[["salmao",110],["batata",250],["brocolis",150],["melao",200]]],
+  ["Wrap de frango",[["rap10",60],["frango_desfiado",120],["requeijao_light",15],["alface",30],["tomate",50],["maca",120]]],
+ ],
+ lanche:[
+  ["Whey com leite",[["whey",30],["leite_desn",200]]],
+  ["Iogurte proteico com fruta",[["iog_proteico",160],["banana",60]]],
+  ["Iogurte com whey e morango",[["iogurte",170],["whey",20],["morango",100]]],
+  ["Pão com queijo coalho e peru",[["pao_integral",25],["queijo_coalho",30],["peito_peru",30]]],
+  ["Tapioca pequena com frango",[["tapioca",30],["frango_desfiado",50]]],
+  ["Cottage com mamão",[["cottage",100],["mamao",150]]],
+  ["Atum com biscoito de arroz",[["atum",60],["biscoito_arroz",20]]],
+  ["Fruta com castanhas",[["maca",120],["castanha",8]],"quando a proteína do dia já está boa"],
+  ["Shake pré-treino",[["whey",30],["leite_desn",200],["banana",60],["aveia",15]],"dias de treino: fica no lugar do lanche e da fruta do almoço"],
+ ],
+ jantar:[
+  ["Cuscuz com frango",[["cuscuz",40],["frango_desfiado",100],["requeijao_light",15],["legumes",100],["azeite",5]]],
+  ["Cuscuz com carne",[["cuscuz",40],["patinho",90],["requeijao_light",15],["legumes",100]]],
+  ["Salada completa com frango",[["frango_grelhado",130],["legumes",250],["feijao",80],["azeite",5],["tangerina",135]]],
+  ["Tapioca recheada",[["tapioca",60],["frango_desfiado",100],["queijo_light",20],["tomate",50]]],
+  ["Sopa de legumes com frango",[["sopa_legumes",300],["frango_desfiado",100],["pao_integral",25]]],
+  ["Wrap de carne",[["rap10",60],["patinho",90],["requeijao_light",15],["alface",30],["tomate",50]]],
+  ["Peixe com batata-doce",[["tilapia",140],["batata_doce",120],["legumes",150],["azeite",5]]],
+  ["Hambúrguer caseiro",[["pao_hamb",50],["patinho",90],["queijo_light",20],["alface",20],["tomate",50]],"carne de patinho moída, sem gordura"],
+  ["Escondidinho de carne de sol",[["carne_sol",80],["mandioca",100],["queijo_light",20],["legumes",100]]],
+  ["Sanduíche natural de frango",[["pao_integral",60],["frango_desfiado",100],["requeijao_light",20],["cenoura",30],["alface",20]]],
+ ],
+ ceia:[
+  ["Castanhas",[["castanha",8]],"2 unidades"],
+  ["Iogurte natural",[["iogurte",170]]],
+  ["Leite com achocolatado zero",[["leite_desn",200],["achocolatado_zero",10]]],
+  ["Gelatina zero com castanha",[["gelatina_zero",110],["castanha",4]]],
+  ["Cottage com canela",[["cottage",80],["canela",1]]],
+  ["Chá + 1 quadradinho de chocolate 70%",[["cha",200],["chocolate70",10]]],
+ ],
+};
 const PA_RULES=[
  ["Proteína em todas as refeições","É o que segura a fome e protege o músculo enquanto você emagrece."],
  ["Metade do prato de vegetais","No almoço e no jantar. Enchem o prato com quase nenhuma caloria e dão as fibras (meta: 25 g por dia)."],
@@ -1016,22 +1084,27 @@ const PA_RULES=[
 const frac=n=>({1:"1",1.5:"1½",1.25:"1¼",0.5:"½",2:"2"}[n]||String(n).replace(".",","));
 const paMeal=id=>PA_MEALS.find(x=>x.id===id);
 const blocksTxt=pm=>pm.b.map(([g,n])=>g==="V"?"vegetais à vontade":`${frac(n)} ${PA_GROUPS[g].n.toLowerCase()}`).join(" + ");
-function paTotals(){return sum(PA_MEALS.flatMap(m=>m.ex.map(([f,g])=>macro(f,g))))}
+function paTotals(){return sum(PA_MEALS.flatMap(m=>((PA_OPTS[m.id]||[])[0]||[0,m.ex])[1].map(([f,g])=>macro(f,g))))}
 function vPlanoAlim(){
   const G=S.plan.goals,T=paTotals(),same=["kcal","p","c","g"].every(k=>+G[k]===PA_GOALS[k]),open=S.ui.paOpen;
   const pill=(v,goal,l)=>`<span style="--c:${Math.abs(v-goal)/goal<=.08?"var(--green)":"var(--sky)"}">${l} ${fmt(v)}</span>`;
-  return `<h2 class="label">Meu plano alimentar</h2>
+  const msg=S.ui.paMsg;S.ui.paMsg=null;
+  return `${msg?`<div class="done-card"><h3>Anotado!</h3><p>${esc(msg)}</p></div>`:""}<h2 class="label">Meu plano alimentar</h2>
+    <p class="sub">Toque em cada refeição para ver todas as opções, com as quantidades.</p>
     <div class="paper flat tipc"><span class="tag g">metas para emagrecer com saúde</span>
       <div class="mp" style="margin-top:8px"><span style="--c:var(--green)">${PA_GOALS.kcal} kcal</span><span style="--c:var(--pink)">P ${PA_GOALS.p} g</span><span style="--c:var(--sky)">C ${PA_GOALS.c} g</span><span style="--c:var(--fat)">G ${PA_GOALS.g} g</span><span style="--c:var(--paper2)">fibras 25 g</span><span style="--c:var(--paper2)">água 2,5–3 L</span></div>
       <p style="margin-top:8px">Para você: 57 kg, 1,58 m, musculação 3× por semana + pilates. Gasto estimado ~1.800 kcal por dia; com 1.450 kcal o corpo usa ~350–400 kcal da reserva por dia (−0,3 a −0,5 kg por semana) sem perder músculo. Proteína de 2,2 g/kg protege o músculo; 40 g de gordura protege os hormônios.</p>
       ${same?`<p class="sub" style="margin-top:6px">✓ São as metas que o app está usando.</p>`:`<p class="sub" style="margin-top:6px">O app hoje usa ${G.kcal} kcal · P ${G.p} · C ${G.c} · G ${G.g}.</p><div class="row"><button class="mini on" type="button" data-a="paGoals">Usar as metas do plano</button></div>`}</div>
     ${PA_MEALS.map(pm=>{const m=mealById(pm.id);if(!m)return "";const t=sum(pm.ex.map(([f,g])=>macro(f,g)));
-      return `<details class="paper flat pa" id="pa-${pm.id}" ${open===pm.id?"open":""}><summary><b>${esc(m.n)}</b> <small class="sub">${esc(pm.h)}</small><br><span class="pab">${esc(blocksTxt(pm))}</span></summary>
+      return `<details class="paper flat pa" id="pa-${pm.id}" ${open===pm.id?"open":""}><summary><b>${esc(m.n)}</b> <small class="sub">${esc(pm.h)} · ${(PA_OPTS[pm.id]||[]).length} opções</small><br><span class="pab">${esc(blocksTxt(pm))}</span></summary>
         ${pm.plus?`<p class="sub" style="margin:6px 0 0">${esc(pm.plus)}</p>`:""}
-        <p style="margin:10px 0 4px"><b>Exemplo</b> · ${fmt(t.k)} kcal · ${fmt(t.p)} g prot</p>
-        ${pm.ex.map(([f,g])=>`<div class="pe"><span>${esc(food(f).n)}<br><small class="sub">${g} g${unitTxt(f,g)?" · "+unitTxt(f,g):""}</small></span><b>${fmt(macro(f,g).k)} kcal</b></div>`).join("")}
-        ${pm.alt?`<p class="sub" style="margin-top:8px">${esc(pm.alt)}</p>`:""}
-        <div class="row" style="margin-top:8px"><button class="mini" type="button" data-a="paEx" data-m="${pm.id}">Anotar este exemplo hoje</button></div></details>`}).join("")}
+        <p class="sub" style="margin:10px 0 6px">Escolha <b>uma</b> opção. Todas têm calorias e proteína parecidas:</p>
+        ${(PA_OPTS[pm.id]||[]).map((o,i)=>{const x=sum(o[1].map(([f,g])=>macro(f,g)));return `<div class="paopt"><div class="pah"><b>${i+1}. ${esc(o[0])}</b><span>${fmt(x.k)} kcal · ${fmt(x.p)} g prot</span></div>
+          <ul>${o[1].map(([f,g])=>`<li>${esc(food(f).n)} · <b>${g} g</b>${unitTxt(f,g)?` <small>(${esc(unitTxt(f,g))})</small>`:""}</li>`).join("")}</ul>
+          ${o[2]?`<small class="sub">${esc(o[2])}</small>`:""}<button class="mini" type="button" data-a="paOpt" data-m="${pm.id}" data-i="${i}">Anotar hoje</button></div>`}).join("")}
+        <p class="sub" style="margin-top:8px">Quer montar a sua? A conta é: <b>${esc(blocksTxt(pm))}</b>. Escolha os alimentos nas listas de "O que posso comer", mais abaixo.</p>
+        ${pm.alt?`<p class="sub" style="margin-top:6px">${esc(pm.alt)}</p>`:""}
+      </details>`}).join("")}
     <div class="mp">${pill(T.k,PA_GOALS.kcal,"dia de exemplo:")}${pill(T.p,PA_GOALS.p,"P")}${pill(T.c,PA_GOALS.c,"C")}${pill(T.g,PA_GOALS.g,"G")}</div>
     <h2 class="label">O que posso comer</h2>
     <p class="sub">Troque à vontade dentro do mesmo grupo: cada linha é 1 porção, com as mesmas calorias mais ou menos.</p>
@@ -1081,6 +1154,7 @@ $("#view").addEventListener("click",e=>{
     case "dtype":{const k=b.dataset.k,d=touch(date);d.type=k;const c=S.plan.combos[k];
       meals().forEach(m=>{const dm=d.meals[m.id];if(dm&&dm.items.some(x=>x.ok))return;const o=c.pick[m.id];d.meals[m.id]=o&&m.opts[o]?buildMeal(m,o):{opt:null,items:[]}});break}
     case "paGoals":Object.assign(S.plan.goals,PA_GOALS);break;
+    case "paOpt":{const o=(PA_OPTS[b.dataset.m]||[])[+b.dataset.i],dm=touch(today()).meals[b.dataset.m];if(!o||!dm)break;o[1].forEach(([f,g])=>dm.items.push({f,g,ok:true,label:""}));S.ui.paMsg=`${o[0]} anotado no ${(mealById(b.dataset.m)||{n:""}).n.toLowerCase()} de hoje.`;break}
     case "paEx":{const pm=paMeal(b.dataset.m),dm=touch(date).meals[b.dataset.m];if(!pm||!dm)break;pm.ex.forEach(([f,g])=>dm.items.push({f,g,ok:true,label:""}));break}
     case "seePlan":S.ui.tab="plano";S.ui.paOpen=b.dataset.m;save();render();{const el=document.getElementById("pa-"+b.dataset.m);if(el)el.scrollIntoView();else window.scrollTo(0,0)}return;
     case "useModel":{const m=mealById(b.dataset.m),o=m.opts[b.dataset.k];if(!o)break;const dm=touch(date).meals[m.id];o.items.forEach(it=>dm.items.push({f:it.f,g:it.g,ok:true,label:it.label||""}));break}
