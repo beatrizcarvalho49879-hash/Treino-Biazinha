@@ -126,6 +126,9 @@ details.pa summary b{font-family:var(--f-display);font-weight:400;font-size:20px
 .supg{display:grid;gap:4px;padding:8px 0;border-bottom:1.5px dashed var(--muted-on-paper)}
 .supg:last-of-type{border-bottom:0}
 .supm{font-family:var(--f-display);font-weight:400;font-size:17px;letter-spacing:.05em;text-transform:uppercase}
+.box.cal{margin-top:10px}
+.caltag{margin:6px 0 0;font-weight:800;color:#0a7a45}
+.opts button.calok{border-color:#0a7a45}
 .meal.next{outline:4px solid var(--green);outline-offset:3px}
 .nowtag{display:inline-block;background:var(--green);color:var(--text-on-paper);font-family:var(--f-display);font-size:13px;letter-spacing:.08em;padding:1px 8px;margin-left:6px;vertical-align:3px}
 .mrow{display:grid;grid-template-columns:86px 1fr 92px;gap:8px;align-items:center;font-size:13px}
@@ -507,6 +510,7 @@ const FOODS_RAW = [
 ];
 const FOODS = {};
 FOODS_RAW.forEach(([id,n,k,p,c,g,cat,u,egg])=>FOODS[id]={n,k,p,c,g,cat,u,egg:!!egg});
+const FOODS_BASE=JSON.parse(JSON.stringify(FOODS)); // valores padrão, para voltar depois de calibrar
 
 /* =====================================================================
    PLANO DO PDF (Plano Alimentar Bia v4)
@@ -658,7 +662,7 @@ function day(date){
   meals().forEach(m=>{d.meals[m.id]={opt:null,items:[]}});
   return d; // só passa a existir quando algo for marcado
 }
-function touch(date){if(!S.days[date])S.days[date]=day(date);return S.days[date]}
+function touch(date){if(!S.days[date])S.days[date]=day(date);const d=S.days[date];meals().forEach(m=>{if(!d.meals[m.id])d.meals[m.id]={opt:null,items:[]}});if(!d.extras)d.extras=[];return d}
 function dayTotals(d){
   const all=[],eaten=[];
   Object.values(d.meals).forEach(m=>m.items.forEach(it=>{const x=macro(it.f,it.g);all.push(x);if(it.ok)eaten.push(x)}));
@@ -904,7 +908,9 @@ function vAlimentos(){
     <p class="sub">${Object.keys(FOODS).length} alimentos com calorias médias por 100 g (Tabela TACO/Unicamp e rótulos comuns). Funciona sem internet. Para industrializados, o rótulo é sempre mais exato.</p>
     <div class="inline"><input class="dk" id="lq" data-ui="lq" value="${esc(q)}" placeholder="Pesquisar alimento" aria-label="Pesquisar alimento"><select class="dk" id="lc" data-uis="lc" aria-label="Categoria"><option value="">Todas as categorias</option>${cats.map(c=>`<option ${c===cat?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
     ${sel?foodDetail(sel):""}
-    <div class="lib">${list.map(id=>{const f=food(id);return `<button class="li" type="button" data-a="lsel" data-k="${id}"><span><b>${esc(f.n)}</b>${isEgg(id)?` <span style="color:var(--alarm);font-size:11px;font-weight:700">TEM OVO</span>`:""}<small>${fmt(f.p,1)} g prot · ${fmt(f.c,1)} g carbo · ${fmt(f.g,1)} g gord · por 100 g${f.u?` · ${esc(f.u[0])} ≈ ${f.u[1]} g`:""}${S.customFoods[id]?" · seu":""}</small></span><b class="k">${f.k} kcal</b></button>`}).join("")||`<div class="empty">Nada encontrado. Cadastre abaixo com os dados do rótulo.</div>`}</div>
+    ${!sel&&!q?(()=>{const T=topEaten(12);return T.length?`<div class="paper flat"><h3 style="font-family:var(--f-display);font-weight:400;font-size:20px;text-transform:uppercase">O que você mais come</h3><p class="sub" style="margin:2px 0 8px">Calibre pelo rótulo do produto que você compra. Começar pelos industrializados (iogurte, pão, whey, requeijão) é o que mais acerta as contas.</p>
+      <div class="opts">${T.map(([id,n])=>`<button type="button" data-a="lsel" data-k="${id}" class="${isCal(id)?"calok":""}">${isCal(id)?"✓ ":""}${esc(food(id).n)} <small>· ${n}×</small></button>`).join("")}</div></div>`:""})():""}
+    <div class="lib">${list.map(id=>{const f=food(id);return `<button class="li" type="button" data-a="lsel" data-k="${id}"><span><b>${esc(f.n)}</b>${isEgg(id)?` <span style="color:var(--alarm);font-size:11px;font-weight:700">TEM OVO</span>`:""}<small>${isCal(id)?"✓ rótulo · ":""}${fmt(f.p,1)} g prot · ${fmt(f.c,1)} g carbo · ${fmt(f.g,1)} g gord · por 100 g${f.u?` · ${esc(f.u[0])} ≈ ${f.u[1]} g`:""}${S.customFoods[id]?" · seu":""}</small></span><b class="k">${f.k} kcal</b></button>`}).join("")||`<div class="empty">Nada encontrado. Cadastre abaixo com os dados do rótulo.</div>`}</div>
     <details class="fold" ${S.ui.newOpen?"open":""}><summary>Cadastrar alimento</summary><div>
       <div class="form"><label class="full">Nome<input id="nf-n" value="${esc(S.ui.nfn||q)}"></label>
         <label>kcal por 100 g<input id="nf-k" inputmode="decimal"></label><label>Proteína (g/100 g)<input id="nf-p" inputmode="decimal"></label>
@@ -916,13 +922,27 @@ function vAlimentos(){
       <button class="ghost" type="button" data-a="newFood">Salvar alimento</button></div></details>
   </section>`;
 }
+/* calibrar pelo rótulo: o que você digita é "por porção", como vem no rótulo; o app converte para 100 g */
+function topEaten(n){const c={};Object.values(S.days).forEach(d=>{Object.values(d.meals).forEach(m=>m.items.forEach(it=>{if(it.ok!==false)c[it.f]=(c[it.f]||0)+1}));d.extras.forEach(it=>c[it.f]=(c[it.f]||0)+1)});
+  return Object.entries(c).filter(([id])=>FOODS[id]).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([id,x])=>[id,x])}
+const isCal=id=>!!(S.customFoods[id]&&S.customFoods[id].cal);
+function calibBox(id){const f=food(id),pg=f.u?f.u[1]:100,r=v=>fmt(v*pg/100,1);
+  return `<div class="box cal"><h4>Calibrar pelo rótulo</h4><p class="sub" style="margin:0">Copie da tabela nutricional da embalagem, do jeito que está lá ("porção de X g").</p>
+    <div class="form" style="margin-top:8px"><label class="full">Nome do produto (com a marca, se quiser)<input id="cb-n" value="${esc(f.n)}"></label>
+      <label>Porção do rótulo (g ou ml)<input id="cb-pg" inputmode="decimal" value="${pg}"></label><label>Medida caseira da porção<input id="cb-un" value="${esc(f.u?f.u[0]:"")}" placeholder="ex.: 1 pote, 2 fatias"></label>
+      <label>kcal na porção<input id="cb-k" inputmode="decimal" value="${r(f.k)}"></label><label>Proteína na porção (g)<input id="cb-p" inputmode="decimal" value="${r(f.p)}"></label>
+      <label>Carboidratos na porção (g)<input id="cb-c" inputmode="decimal" value="${r(f.c)}"></label><label>Gorduras totais na porção (g)<input id="cb-g" inputmode="decimal" value="${r(f.g)}"></label></div>
+    <div class="row" style="margin-top:8px"><button class="mini on" type="button" data-a="calSave" data-k="${id}">Salvar valores do rótulo</button><button class="mini" type="button" data-a="calOpen" data-k="">Cancelar</button></div>
+    <p class="sub" style="margin:6px 0 0">Vale para todos os dias em que você comeu esse produto, inclusive os anteriores.</p></div>`}
 function foodDetail(id){
   const f=food(id), mm=meals();
   return `<div class="paper flat tipc"><span class="tag s">${esc(f.cat)}</span><h3>${esc(f.n)}</h3>
     <p>Por 100 g: <b>${f.k} kcal</b> · ${fmt(f.p,1)} g proteína · ${fmt(f.c,1)} g carboidrato · ${fmt(f.g,1)} g gordura${f.u?`. ${esc(f.u[0])} ≈ ${f.u[1]} g = ${fmt(macro(id,f.u[1]).k)} kcal`:""}.</p>
     ${isEgg(id)?`<p style="color:var(--alarm);font-weight:700">Contém ovo: está na sua restrição.</p>`:""}
+    ${isCal(id)?`<p class="caltag">✓ Calibrado pelo seu rótulo${FOODS_BASE[id]?` · padrão era ${FOODS_BASE[id].k} kcal/100 g`:""}</p>`:""}
+    ${S.ui.calOpen===id?calibBox(id):`<div class="row"><button class="mini on" type="button" data-a="calOpen" data-k="${id}">${isCal(id)?"Recalibrar pelo rótulo":"Calibrar pelo rótulo"}</button>${isCal(id)&&FOODS_BASE[id]?`<button class="mini" type="button" data-a="calReset" data-k="${id}">${S.ui.confirm==="cr"+id?"Confirmar":"Voltar ao padrão"}</button>`:""}</div>`}
     <div class="inline"><select class="dk" id="ld-m" aria-label="Refeição">${mm.map(m=>`<option value="${m.id}">${esc(m.n)}</option>`).join("")}<option value="extras">Beliscos e extras</option></select><input class="dk" id="ld-g" inputmode="decimal" value="${f.u?f.u[1]:100}" aria-label="Gramas"><button class="mini" type="button" data-a="lAdd" data-k="${id}">Incluir hoje</button></div>
-    <div class="row">${S.customFoods[id]?`<button class="mini" type="button" data-a="delFood" data-k="${id}">${S.ui.confirm==="f"+id?"Confirmar":"Apagar alimento"}</button>`:""}<button class="mini" type="button" data-a="lsel" data-k="">Fechar</button></div></div>`;
+    <div class="row">${S.customFoods[id]&&!FOODS_BASE[id]?`<button class="mini" type="button" data-a="delFood" data-k="${id}">${S.ui.confirm==="f"+id?"Confirmar":"Apagar alimento"}</button>`:""}<button class="mini" type="button" data-a="lsel" data-k="">Fechar</button></div></div>`;
 }
 
 /* =====================================================================
@@ -960,7 +980,7 @@ function vCompras(){
     <h2 class="label">Quanto gastou</h2>
     <div class="bars6">${months.map(([k,v])=>`<div><small>${v?brl(v).replace("R$ ",""):""}</small><i style="height:${Math.max(3,v/mx*90)}px"></i><small>${MES[+k.slice(5)-1]}</small></div>`).join("")}</div>
     ${["semanal","quinzenal","mensal"].filter(p=>avgPer(p)!=null).map(p=>`<p class="sub" style="margin:0">Compra ${p}: média ${brl(avgPer(p))} (${T.filter(t=>t.per===p).length}×)</p>`).join("")}
-    ${T.length?`<div class="trips">${T.slice().reverse().slice(0,12).map(t=>`<details class="paper flat"><summary><b>${dmy(t.date)}/${t.date.slice(2,4)}</b> · ${esc(t.per)}${t.loja?" · "+esc(t.loja):""} · <b>${brl(t.total)}</b> <small class="sub">${t.items.length} itens</small></summary>
+    ${T.length?`<div class="trips">${T.slice().reverse().slice(0,12).map(t=>`<details class="paper flat" ${S.ui.confirm==="trip"+t.id?"open":""}><summary><b>${dmy(t.date)}/${t.date.slice(2,4)}</b> · ${esc(t.per)}${t.loja?" · "+esc(t.loja):""} · <b>${brl(t.total)}</b> <small class="sub">${t.items.length} itens</small></summary>
       ${t.items.map(x=>`<div class="pe"><span>${esc(x.n)}${x.qty&&x.qty!==1?` · ${fmt(x.qty,2)}`:""}</span><b>${brl(x.price*(x.qty||1))}</b></div>`).join("")}
       <div class="row" style="margin-top:8px"><button class="mini" type="button" data-a="tripDel" data-id="${t.id}">${S.ui.confirm==="trip"+t.id?"Confirmar":"Apagar compra"}</button></div></details>`).join("")}</div>`:`<div class="empty">Nenhuma compra finalizada ainda. Preencha os preços e toque em Finalizar compra.</div>`}`;
 }
@@ -1165,7 +1185,7 @@ $("#view").addEventListener("change",e=>{
 $("#view").addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a, date=curDate();
-  if(!["delW","resetPlan","delOpt","delFood"].includes(a))S.ui.confirm=null;
+  if(!["delW","resetPlan","delOpt","delFood","clearMeal","shopRm","tripDel","calReset"].includes(a))S.ui.confirm=null;
   const conf=(k,fn)=>{if(S.ui.confirm===k){fn();S.ui.confirm=null}else S.ui.confirm=k};
   switch(a){
     case "dprev":S.ui.date=addDays(date,-1);S.ui.add=null;S.ui.swap=null;break;
@@ -1215,6 +1235,12 @@ $("#view").addEventListener("click",e=>{
     case "lsel":S.ui.lsel=b.dataset.k||null;if(b.dataset.k){save();render();window.scrollTo(0,0);return}break;
     case "lAdd":{const id=b.dataset.k,mid=$("#ld-m").value,g=num($("#ld-g").value)||100,d=touch(today()),it={f:id,g,ok:true,label:""};
       if(mid==="extras")d.extras.push(it);else d.meals[mid].items.push(it);flash={t:"Incluído",m:`${food(id).n} (${g} g) em ${mid==="extras"?"Fora do plano":mealById(mid).n} de hoje.`};S.ui.tab="hoje";S.ui.date=null;S.ui.lsel=null;save(true);render();window.scrollTo(0,0);return}
+    case "calOpen":S.ui.calOpen=b.dataset.k||null;break;
+    case "calSave":{const id=b.dataset.k,pg=num($("#cb-pg").value),k=num($("#cb-k").value);if(!(pg>0)||k==null){alert("Preencha a porção (g) e as kcal da porção.");return}
+      const per=v=>Math.round((num(v)||0)/pg*100*10)/10,base=food(id),un=$("#cb-un").value.trim();
+      const f=Object.assign({},base,{n:$("#cb-n").value.trim()||base.n,k:Math.round(k/pg*1000)/10,p:per($("#cb-p").value),c:per($("#cb-c").value),g:per($("#cb-g").value),u:un?[un,pg]:base.u,cal:true});
+      S.customFoods[id]=f;FOODS[id]=f;S.ui.calOpen=null;break}
+    case "calReset":{const id=b.dataset.k;conf("cr"+id,()=>{delete S.customFoods[id];FOODS[id]=JSON.parse(JSON.stringify(FOODS_BASE[id]))})}break;
     case "newFood":{const n=$("#nf-n").value.trim(),k=num($("#nf-k").value);if(!n||k==null){alertMsg("Preencha pelo menos nome e kcal por 100 g.");return}
       const id="u_"+Date.now(),ug=num($("#nf-ug").value),f={n,k,p:num($("#nf-p").value)||0,c:num($("#nf-c").value)||0,g:num($("#nf-g").value)||0,cat:$("#nf-cat").value,u:ug?[$("#nf-un").value||"1 porção",ug]:null,egg:$("#nf-egg").checked};
       S.customFoods[id]=f;FOODS[id]=f;S.ui.lsel=id;S.ui.lq="";S.ui.newOpen=false;break}
