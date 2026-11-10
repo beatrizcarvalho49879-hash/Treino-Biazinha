@@ -453,6 +453,7 @@ const FOODS_RAW = [
  ["lentilha","Lentilha cozida",93,6.3,16.3,0.5,"Carboidratos"],
  ["grao_bico","Grão-de-bico cozido",164,8.9,27.4,2.6,"Carboidratos"],
  ["macarrao","Macarrão cozido",158,5.8,31,0.9,"Carboidratos"],
+ ["macarrao_cru","Macarrão seco (cru), tipo Barilla",359,12.5,71.3,2,"Carboidratos",["1 prato",80]],
  ["batata","Batata inglesa cozida",52,1.2,11.9,0,"Carboidratos"],
  ["batata_doce","Batata-doce cozida",77,0.6,18.4,0.1,"Carboidratos"],
  ["mandioca","Mandioca cozida",125,0.6,30.1,0.3,"Carboidratos"],
@@ -591,7 +592,7 @@ function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r
 const hadData=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
 let S=load();
 Object.assign(FOODS,S.customFoods||{});
-if(!hadData)S.planV=5;
+if(!hadData)S.planV=6;
 // v2 (31/10): almoço = sanduíche de patinho / estrogonofe; jantar = cuscuz com carne ou frango; desafio começa em 31/10
 if((S.planV||1)<2){
   const P=clone(PLAN_PDF);
@@ -625,6 +626,14 @@ if((S.planV||1)<5){
   const mine=S.sups.filter(x=>x.custom&&!/[oô]mega|centrum|simfort|vitamina d|creatina/i.test(x.n));
   S.sups=clone(SUPS).concat(mine.map(x=>Object.assign({m:"outro"},x)));
   S.planV=5;
+}
+// v6 (10/11): rótulos que você mandou (macarrão Barilla cozido, seu requeijão, seu creme de leite)
+if((S.planV||1)<6){
+  const L={macarrao:{n:"Macarrão Barilla cozido",k:170,p:6,c:33,g:0.9},
+    requeijao_light:{n:"Requeijão (seu rótulo)",k:164,p:11,c:0.8,g:13,u:["1 col. sopa",15]},
+    creme_leite_light:{n:"Creme de leite (seu rótulo)",k:159,p:2.1,c:3.6,g:15,u:["1¼ col. sopa",15]}};
+  Object.entries(L).forEach(([id,v])=>{if(!(S.customFoods[id]&&S.customFoods[id].cal)){S.customFoods[id]=Object.assign({},FOODS_BASE[id],v,{cal:true});FOODS[id]=S.customFoods[id]}});
+  S.planV=6;
 }
 let saveT=null;
 function save(now){clearTimeout(saveT);const go=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));storeOk=true}catch(e){storeOk=false}const w=document.getElementById("storeWarn");if(w)w.hidden=storeOk};now?go():saveT=setTimeout(go,150)}
